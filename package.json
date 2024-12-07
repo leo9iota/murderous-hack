@@ -1,0 +1,12 @@
+{
+  "name": "murderous-hack",
+  "scripts": {
+    "dev": "bun run --hot server/index.ts"
+  },
+  "dependencies": {
+    "hono": "^4.6.13"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
