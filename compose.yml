@@ -1,3 +1,20 @@
 services:
   db:
     image: postgres:17
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=murderous-hack-db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - murderous-hack-network
+    ports:
+      - "5432:5432"
+
+networks:
+  murderous-hack-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
