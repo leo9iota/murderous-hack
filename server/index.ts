@@ -1,14 +1,34 @@
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 
 import type { ErrorResponse } from '@/shared/types';
+import type { Context } from './context';
+import { lucia } from './lucia';
 
-const app = new Hono(); // Create new Hono instance
+const app = new Hono<Context>();
 
-app.get('/', (ctx) => {
-    // throw new HTTPException(404, { message: 'Post not found', cause: { form: true } });
-    // throw new Error('Unexpected error');
-    return ctx.text('Hello Hono!');
+app.use('*', cors(), async (ctx, next) => {
+    const sessionId = lucia.readSessionCookie(ctx.req.header('Cookie') ?? '');
+
+    if (!sessionId) {
+        ctx.set('user', null);
+        ctx.set('session', null);
+        return next();
+    }
+
+    const { session, user } = await lucia.validateSession(sessionId);
+    if (session && session.fresh) {
+        ctx.header('Set-Cookie', lucia.createSessionCookie(session.id).serialize(), {
+            append: true,
+        });
+    }
+    if (!session) {
+        ctx.header('Set-Cookie', lucia.createBlankSessionCookie().serialize(), { append: true });
+    }
+    ctx.set('session', session);
+    ctx.set('user', user);
+    return next();
 });
 
 // Hono error handler
