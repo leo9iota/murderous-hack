@@ -2,13 +2,21 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 
-import type { ErrorResponse } from '@/shared/types';
+import { type ErrorResponse } from '@/shared/types';
 import type { Context } from './context';
 import { lucia } from './lucia';
 
 const app = new Hono<Context>();
 
-app.get('/', (c) => c.json({ message: 'Hello from Hono!' }));
+app.get('/', (ctx) => {
+    // Purposeful exception
+    // throw new HTTPException(404, { message: 'Post not found', cause: { form: true } });
+    
+    // Unexpected exception, when some logic in the code may break something that is unexpected
+    // throw new Error("Unexpected error")
+
+    return ctx.text('Hello from Hono!');
+});
 
 app.use('*', cors(), async (ctx, next) => {
     const sessionId = lucia.readSessionCookie(ctx.req.header('Cookie') ?? '');
