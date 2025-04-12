@@ -6,4 +6,8 @@
 
 ## Tech Stack
 
-![Tech Stack](https://skillicons.dev/icons?i=ts,react,postgres,bun,vite)
+![Tech Stack](https://go-skill-icons.vercel.app/api/icons?i=ts,react,hono,drizzle,postgres,bun,vite)
+
+## Architecture
+
+![Architecture](./images/murderous-hack-architecture.png)
