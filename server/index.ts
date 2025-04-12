@@ -8,6 +8,8 @@ import { lucia } from './lucia';
 
 const app = new Hono<Context>();
 
+app.get('/', (c) => c.json({ message: 'Hello from Hono!' }));
+
 app.use('*', cors(), async (ctx, next) => {
     const sessionId = lucia.readSessionCookie(ctx.req.header('Cookie') ?? '');
 
