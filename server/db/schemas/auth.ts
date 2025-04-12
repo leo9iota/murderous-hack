@@ -3,7 +3,7 @@ import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 export const userTable = pgTable('user', {
     id: text('id').primaryKey(),
     username: text('username').notNull().unique(),
-    passwordHash: text('password_hash').notNull()
+    passwordHash: text('password_hash').notNull(),
 });
 
 export const sessionTable = pgTable('session', {
