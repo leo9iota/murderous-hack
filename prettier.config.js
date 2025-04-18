@@ -1,4 +1,5 @@
 /** @type {import('prettier').Config} */
+// FIX: Using CommonJS syntax (module.exports) instead of ES modules (export default) to avoid 'Unexpected token export' error
 module.exports = {
     tabWidth: 4,
     printWidth: 100,
