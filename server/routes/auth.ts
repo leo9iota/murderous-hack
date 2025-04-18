@@ -59,6 +59,11 @@ export const authRouter = new Hono<Context>()
             });
         }
 
-        // Check if user entered valid password
-        const validPassword = await Bun.password.verify()
+        // Check if user entered valid password using the password API from Bun
+        const validPassword = await Bun.password.verify(password, existingUser.passwordHash);
+
+        // Throw error if user didn't enter correct pw
+        if (!validPassword) {
+            throw new HTTPException(401, { message: 'Incorrect password' });
+        }
     });

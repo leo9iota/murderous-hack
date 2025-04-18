@@ -10,7 +10,7 @@ services:
     networks:
       - murderous-hack-network
     ports:
-      - "5432:5432"
+      - '5432:5432'
 
 networks:
   murderous-hack-network:
