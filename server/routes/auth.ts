@@ -44,6 +44,9 @@ export const authRouter = new Hono<Context>()
             throw new HTTPException(500, { message: 'Failed to create user' });
         }
     })
+    /**
+     * Optional: Use "Incorrect username and/or password" as an error message to avoid leaking information about existing users
+     */
     .post('/login', zValidator('form', loginSchema), async (ctx) => {
         const { username, password } = ctx.req.valid('form');
 
@@ -66,4 +69,34 @@ export const authRouter = new Hono<Context>()
         if (!validPassword) {
             throw new HTTPException(401, { message: 'Incorrect password' });
         }
+
+        // Create session for existing user
+        const session = await lucia.createSession(existingUser.id, { username });
+        const sessionCookie = lucia.createSessionCookie(session.id).serialize();
+
+        // Attach cookie to every request, so that any API calls that I make after that are authorized
+        ctx.header('Set-Cookie', sessionCookie, { append: true });
+
+        return ctx.json<SuccessResponse>(
+            {
+                success: true,
+                message: 'Logged in',
+            },
+            200,
+        );
+    })
+    .get('/logout', async (ctx) => {
+        // Check if there is a session already
+        const session = ctx.get('session'); // Session is attached by the middleware
+
+        // If no session is active then redirect user to home page
+        if (!session) {
+            return ctx.redirect('/');
+        }
+
+        // Invalidate session if user logs out
+        await lucia.invalidateSession(session.id); // Pass session ID we got from "ctx.get('session')"
+
+        // Set header with blank cookie
+        ctx.header('Set-Cookie', lucia.createBlankSessionCookie().serialize());
     });
