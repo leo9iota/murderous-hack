@@ -1,11 +1,13 @@
 {
     "name": "murderous-hack",
     "scripts": {
+        "start": "bun run scripts/dev.ts",
         "dev": "bun run --hot server/index.ts",
         "format:write": "prettier . --write",
         "format:check": "prettier . --check",
         "db:push": "drizzle-kit push",
         "db:check": "drizzle-kit check"
+
     },
     "dependencies": {
         "@hono/zod-validator": "^0.4.2",
