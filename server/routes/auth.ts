@@ -6,6 +6,7 @@ import { db } from '@/adapter';
 import { type Context } from '@/context';
 import { userTable } from '@/db/schemas/auth';
 import { lucia } from '@/lucia';
+import { loggedIn } from '@/middleware/loggedIn';
 import { zValidator } from '@hono/zod-validator';
 import { generateId } from 'lucia';
 import postgres from 'postgres';
@@ -99,4 +100,15 @@ export const authRouter = new Hono<Context>()
 
         // Set header with blank cookie
         ctx.header('Set-Cookie', lucia.createBlankSessionCookie().serialize());
+
+        return ctx.redirect('/');
+    })
+    .get('/user', loggedIn, async (ctx) => {
+        const user = ctx.get('user')!;
+
+        return ctx.json<SuccessResponse<{ username: string }>>({
+            success: true,
+            message: 'User fetched',
+            data: { username: user.username },
+        });
     });
