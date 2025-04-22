@@ -1,14 +1,35 @@
 import { $ } from 'bun';
 
-// Start database
-await $`docker-compose up -d`;
+async function main() {
+    try {
+        // Stop any existing containers first
+        console.log('Stopping existing containers...');
+        await $`docker-compose down`;
 
-// Wait for database to be ready
-console.log('Waiting for database to start...');
-await new Promise((resolve) => setTimeout(resolve, 3000));
+        // Start database
+        console.log('Starting database container...');
+        await $`docker-compose up -d`;
 
-// Push schema
-await $`bun db:push`;
+        // More explicit waiting with longer timeout
+        console.log('Waiting for database to be fully ready...');
+        await new Promise((resolve) => setTimeout(resolve, 5000));
 
-// Start dev server
-await $`bun dev`;
+        // Try to push schema
+        console.log('Pushing database schema...');
+        try {
+            await $`bun db:push`;
+        } catch (error) {
+            console.error('Failed to push schema:', error);
+            throw error;
+        }
+
+        // Start dev server
+        console.log('Starting development server...');
+        await $`bun dev`;
+    } catch (error) {
+        console.error('Script failed:', error);
+        process.exit(1);
+    }
+}
+
+main();
