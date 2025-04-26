@@ -2,7 +2,8 @@
 
 **Murderous Hack** is a forum for discussing tech related topics.
 
-> **Quote**: "Mörderischer Häck" ~J. Vogel (https://jvogel.ch/)
+> **Quote**: A teacher once said: "Das ist ein mörderischer Häck"
+> ~J. Vogel (https://jvogel.ch/)
 
 ## Reminder
 
