@@ -1,6 +1,9 @@
 import { $ } from 'bun'; // Use shell API from Bun
 
 // Make use of IIFE (because I can)
+/**
+ * NOTE: Docker Desktop (Windows 11) has to be running for that script to work
+ */
 (async () => {
     try {
         // Stop any existing containers first
