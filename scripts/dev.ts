@@ -1,6 +1,7 @@
-import { $ } from 'bun';
+import { $ } from 'bun'; // Use shell API from Bun
 
-async function main() {
+// Make use of IIFE (because I can)
+(async () => {
     try {
         // Stop any existing containers first
         console.log('Stopping existing containers...');
@@ -30,6 +31,4 @@ async function main() {
         console.error('Script failed:', error);
         process.exit(1);
     }
-}
-
-main();
+})();
