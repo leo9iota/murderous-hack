@@ -7,12 +7,12 @@
         "format:check": "prettier . --check",
         "db:push": "drizzle-kit push",
         "db:check": "drizzle-kit check"
-
     },
     "dependencies": {
         "@hono/zod-validator": "^0.4.2",
         "@lucia-auth/adapter-drizzle": "^1.1.0",
         "drizzle-orm": "^0.38.0",
+        "drizzle-zod": "^0.7.1",
         "hono": "^4.6.13",
         "lucia": "^3.2.2",
         "postgres": "^3.4.5",
