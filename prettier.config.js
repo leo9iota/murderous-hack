@@ -10,24 +10,28 @@ module.exports = {
             files: '*.js',
             options: {
                 tabWidth: 4,
+                printWidth: 75,
             },
         },
         {
             files: '*.ts',
             options: {
                 tabWidth: 4,
+                printWidth: 75,
             },
         },
         {
             files: '*.jsx',
             options: {
                 tabWidth: 2,
+                printWidth: 75,
             },
         },
         {
             files: '*.tsx',
             options: {
                 tabWidth: 2,
+                printWidth: 75,
             },
         },
         {
