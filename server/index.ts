@@ -20,7 +20,9 @@ app.get('/', (ctx) => {
 });
 
 app.use('*', cors(), async (ctx, next) => {
-    const sessionId = lucia.readSessionCookie(ctx.req.header('Cookie') ?? '');
+    const sessionId = lucia.readSessionCookie(
+        ctx.req.header('Cookie') ?? '',
+    );
 
     if (!sessionId) {
         ctx.set('user', null);
@@ -32,13 +34,21 @@ app.use('*', cors(), async (ctx, next) => {
     const { session, user } = await lucia.validateSession(sessionId);
 
     if (session && session.fresh) {
-        ctx.header('Set-Cookie', lucia.createSessionCookie(session.id).serialize(), {
-            append: true,
-        });
+        ctx.header(
+            'Set-Cookie',
+            lucia.createSessionCookie(session.id).serialize(),
+            {
+                append: true,
+            },
+        );
     }
 
     if (!session) {
-        ctx.header('Set-Cookie', lucia.createBlankSessionCookie().serialize(), { append: true });
+        ctx.header(
+            'Set-Cookie',
+            lucia.createBlankSessionCookie().serialize(),
+            { append: true },
+        );
     }
 
     // If it is valid set it as context
@@ -60,7 +70,9 @@ app.onError((err, ctx) => {
                     success: false,
                     error: err.message,
                     isFormError:
-                        err.cause && typeof err.cause === 'object' && 'form' in err.cause
+                        err.cause &&
+                        typeof err.cause === 'object' &&
+                        'form' in err.cause
                             ? err.cause.form === true
                             : false,
                 },

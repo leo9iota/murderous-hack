@@ -26,8 +26,12 @@ export const authRouter = new Hono<Context>()
                 passwordHash: passwordHash,
             });
 
-            const session = await lucia.createSession(userId, { username });
-            const sessionCookie = lucia.createSessionCookie(session.id).serialize();
+            const session = await lucia.createSession(userId, {
+                username,
+            });
+            const sessionCookie = lucia
+                .createSessionCookie(session.id)
+                .serialize();
 
             ctx.header('Set-Cookie', sessionCookie, { append: true });
 
@@ -39,10 +43,17 @@ export const authRouter = new Hono<Context>()
                 201,
             );
         } catch (error) {
-            if (error instanceof postgres.PostgresError && error.code === '23505') {
-                throw new HTTPException(409, { message: 'Username already exists' });
+            if (
+                error instanceof postgres.PostgresError &&
+                error.code === '23505'
+            ) {
+                throw new HTTPException(409, {
+                    message: 'Username already exists',
+                });
             }
-            throw new HTTPException(500, { message: 'Failed to create user' });
+            throw new HTTPException(500, {
+                message: 'Failed to create user',
+            });
         }
     })
     /**
@@ -64,16 +75,25 @@ export const authRouter = new Hono<Context>()
         }
 
         // Check if user entered valid password using the password API from Bun
-        const validPassword = await Bun.password.verify(password, existingUser.passwordHash);
+        const validPassword = await Bun.password.verify(
+            password,
+            existingUser.passwordHash,
+        );
 
         // Throw error if user didn't enter correct pw
         if (!validPassword) {
-            throw new HTTPException(401, { message: 'Incorrect password' });
+            throw new HTTPException(401, {
+                message: 'Incorrect password',
+            });
         }
 
         // Create session for existing user
-        const session = await lucia.createSession(existingUser.id, { username });
-        const sessionCookie = lucia.createSessionCookie(session.id).serialize();
+        const session = await lucia.createSession(existingUser.id, {
+            username,
+        });
+        const sessionCookie = lucia
+            .createSessionCookie(session.id)
+            .serialize();
 
         // Attach cookie to every request, so that any API calls that I make after that are authorized
         ctx.header('Set-Cookie', sessionCookie, { append: true });
@@ -99,7 +119,10 @@ export const authRouter = new Hono<Context>()
         await lucia.invalidateSession(session.id); // Pass session ID we got from "ctx.get('session')"
 
         // Set header with blank cookie
-        ctx.header('Set-Cookie', lucia.createBlankSessionCookie().serialize());
+        ctx.header(
+            'Set-Cookie',
+            lucia.createBlankSessionCookie().serialize(),
+        );
 
         return ctx.redirect('/');
     })
