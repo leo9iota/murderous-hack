@@ -14,4 +14,5 @@
 
 ## Reminder
 
-After each restart run the `bun start` command to spin up the Docker container and setup Drizzle ORM.
+- **Backend Setup**: After each restart run the `bun start` command to spin up the Docker container and setup Drizzle ORM.
+- **API Testing**: First hit the `api/auth/login` endpoint with a POST request, before API testing.
