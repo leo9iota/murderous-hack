@@ -6,6 +6,7 @@ import { type ErrorResponse } from '@/shared/types';
 import type { Context } from './context';
 import { lucia } from './lucia';
 import { authRouter } from './routes/auth';
+import { postRouter } from './routes/posts';
 
 const app = new Hono<Context>();
 
@@ -58,7 +59,10 @@ app.use('*', cors(), async (ctx, next) => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const routes = app.basePath('/api').route('/auth', authRouter);
+const routes = app
+    .basePath('/api')
+    .route('/auth', authRouter)
+    .route('/posts', postRouter);
 
 // Hono error handler
 app.onError((err, ctx) => {
