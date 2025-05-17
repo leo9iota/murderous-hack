@@ -4,10 +4,6 @@
 
 > **Quote**: A teacher once said: "Das ist ein mörderischer Häck"
 
-## Reminder
-
-After each restart run the `bun start` command to spin up the Docker container and setup Drizzle ORM.
-
 ## Tech Stack
 
 ![Tech Stack](https://go-skill-icons.vercel.app/api/icons?i=ts,react,hono,drizzle,postgres,bun,vite)
@@ -15,3 +11,7 @@ After each restart run the `bun start` command to spin up the Docker container a
 ## Architecture
 
 ![Architecture](./images/murderous-hack-architecture.png)
+
+## Reminder
+
+After each restart run the `bun start` command to spin up the Docker container and setup Drizzle ORM.
