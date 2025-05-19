@@ -29,9 +29,7 @@ export const authRouter = new Hono<Context>()
             const session = await lucia.createSession(userId, {
                 username,
             });
-            const sessionCookie = lucia
-                .createSessionCookie(session.id)
-                .serialize();
+            const sessionCookie = lucia.createSessionCookie(session.id).serialize();
 
             ctx.header('Set-Cookie', sessionCookie, { append: true });
 
@@ -43,10 +41,7 @@ export const authRouter = new Hono<Context>()
                 201,
             );
         } catch (error) {
-            if (
-                error instanceof postgres.PostgresError &&
-                error.code === '23505'
-            ) {
+            if (error instanceof postgres.PostgresError && error.code === '23505') {
                 throw new HTTPException(409, {
                     message: 'Username already exists',
                 });
@@ -91,9 +86,7 @@ export const authRouter = new Hono<Context>()
         const session = await lucia.createSession(existingUser.id, {
             username,
         });
-        const sessionCookie = lucia
-            .createSessionCookie(session.id)
-            .serialize();
+        const sessionCookie = lucia.createSessionCookie(session.id).serialize();
 
         // Attach cookie to every request, so that any API calls that I make after that are authorized
         ctx.header('Set-Cookie', sessionCookie, { append: true });
@@ -119,10 +112,7 @@ export const authRouter = new Hono<Context>()
         await lucia.invalidateSession(session.id); // Pass session ID we got from "ctx.get('session')"
 
         // Set header with blank cookie
-        ctx.header(
-            'Set-Cookie',
-            lucia.createBlankSessionCookie().serialize(),
-        );
+        ctx.header('Set-Cookie', lucia.createBlankSessionCookie().serialize());
 
         return ctx.redirect('/');
     })
