@@ -31,3 +31,16 @@ export const createPostSchema = insertPostSchema
         message: 'Either URL or content must be provided',
         path: ['url', 'content'],
     });
+
+export const sortBySchema = z.enum(['points', 'recent']);
+export const orderSchema = z.enum(['asc', 'desc']);
+
+// Pagination schema
+export const paginationSchema = z.object({
+    limit: z.number({ coerce: true }).optional().default(10),
+    page: z.number({ coerce: true }).optional().default(1),
+    sortBy: sortBySchema.optional().default('points'),
+    order: orderSchema.optional().default('desc'),
+    author: z.string().optional(),
+    site: z.string().optional(),
+});
