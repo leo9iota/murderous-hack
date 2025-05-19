@@ -2,7 +2,7 @@
 // FIX: Using CommonJS syntax (module.exports) instead of ES modules (export default) to avoid 'Unexpected token export' error
 module.exports = {
     tabWidth: 4,
-    printWidth: 100,
+    printWidth: 90,
     singleQuote: true,
     jsxSingleQuote: true,
     overrides: [
@@ -10,28 +10,28 @@ module.exports = {
             files: '*.js',
             options: {
                 tabWidth: 4,
-                printWidth: 75,
+                printWidth: 85,
             },
         },
         {
             files: '*.ts',
             options: {
                 tabWidth: 4,
-                printWidth: 75,
+                printWidth: 85,
             },
         },
         {
             files: '*.jsx',
             options: {
                 tabWidth: 2,
-                printWidth: 75,
+                printWidth: 85,
             },
         },
         {
             files: '*.tsx',
             options: {
                 tabWidth: 2,
-                printWidth: 75,
+                printWidth: 85,
             },
         },
         {
