@@ -399,7 +399,7 @@ export const postRouter = new Hono<Context>()
             return ctx.json<SuccessResponse<Post>>(
                 {
                     success: true,
-                    message: 'Post Fetched',
+                    message: 'Post successfully fetched',
                     data: post as Post,
                 },
                 200,
