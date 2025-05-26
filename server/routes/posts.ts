@@ -5,6 +5,7 @@ import { and, asc, countDistinct, desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/adapter';
 import { type Context } from '@/context';
 import { userTable } from '@/db/schemas/auth';
+import { commentsTable } from '@/db/schemas/comments';
 import { postsTable } from '@/db/schemas/posts';
 import { postUpvotesTable } from '@/db/schemas/upvotes';
 import { loggedIn } from '@/middleware/loggedIn';
@@ -12,8 +13,10 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 
 import {
+    createCommentSchema,
     createPostSchema,
     paginationSchema,
+    type Comment,
     type PaginatedResponse,
     type Post,
     type SuccessResponse,
@@ -176,5 +179,67 @@ export const postRouter = new Hono<Context>()
                 },
                 200,
             );
+        },
+    )
+    .post(
+        '/:id/comment',
+        loggedIn,
+        zValidator('param', z.object({ id: z.coerce.number() })),
+        zValidator('form', createCommentSchema),
+        async (ctx) => {
+            const { id } = ctx.req.valid('param');
+            const { content } = ctx.req.valid('form');
+            const user = ctx.get('user')!;
+
+            const [comment] = await db.transaction(async (tx) => {
+                // If this transaction fails, it means the post doesn't exist
+                const [updated] = await tx
+                    .update(postsTable)
+                    .set({ commentCount: sql`${postsTable.commentCount} + 1` })
+                    .where(eq(postsTable.id, id))
+                    .returning({ commentCount: postsTable.commentCount });
+
+                // Verify if the post exists
+                if (!updated) {
+                    throw new HTTPException(404, {
+                        message: 'Post not found',
+                    });
+                }
+
+                return await tx
+                    .insert(commentsTable)
+                    .values({
+                        content,
+                        userId: user.id,
+                        postId: id,
+                    })
+                    .returning({
+                        id: commentsTable.id,
+                        userId: commentsTable.userId,
+                        postId: commentsTable.postId,
+                        content: commentsTable.content,
+                        points: commentsTable.points,
+                        depth: commentsTable.depth,
+                        parent: commentsTable.depth,
+                        parentCommentId: commentsTable.parentCommentId,
+                        createdAt: getISOFormatDateQuery(commentsTable.createdAt).as(
+                            'created_at',
+                        ),
+                        commentCount: commentsTable.commentCount,
+                    });
+            });
+            return ctx.json<SuccessResponse<Comment>>({
+                success: true,
+                message: 'Comment successfully created',
+                data: {
+                    ...comment,
+                    commentUpvotes: [],
+                    childComments: [],
+                    author: {
+                        username: user.username,
+                        id: user.id,
+                    },
+                } as Comment, // FIX: Explicitly define as 'Comment' type to mitigate issues with Hono when interacting with the frontend
+            });
         },
     );
