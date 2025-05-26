@@ -93,7 +93,7 @@ export const commentsRouter = new Hono<Context>()
             });
             return ctx.json<SuccessResponse<Comment>>({
                 success: true,
-                message: 'Comment Created',
+                message: 'Comment successfully created',
                 data: {
                     ...comment,
                     childComments: [],
@@ -160,7 +160,7 @@ export const commentsRouter = new Hono<Context>()
             >(
                 {
                     success: true,
-                    message: 'Comment updated',
+                    message: 'Comment successfully updated',
                     data: {
                         count: points,
                         commentUpvotes:
@@ -220,7 +220,7 @@ export const commentsRouter = new Hono<Context>()
 
             return ctx.json<PaginatedResponse<Comment[]>>({
                 success: true,
-                message: 'Comments fetched',
+                message: 'Comments successfully fetched',
                 data: comments as Comment[],
                 pagination: {
                     page,
