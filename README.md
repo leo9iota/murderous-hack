@@ -6,11 +6,18 @@
 
 ## Tech Stack
 
-![Tech Stack](https://go-skill-icons.vercel.app/api/icons?i=ts,react,hono,drizzle,postgres,bun,vite)
+![Tech Stack](https://go-skill-icons.vercel.app/api/icons?i=ts,react,reactquery,hono,drizzle,postgres,bun,vite,shadcn)
 
 ## Architecture
 
 ![Architecture](./images/murderous-hack-architecture.png)
+
+## Key Features
+
+- Paginated queries with [InfiniteQueries](https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries)
+- Caching and cache-control
+- Optimistic updates
+
 
 ## Reminder
 
