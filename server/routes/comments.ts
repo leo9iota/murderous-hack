@@ -26,10 +26,10 @@ export const commentsRouter = new Hono<Context>()
         loggedIn,
         zValidator('param', z.object({ id: z.coerce.number() })),
         zValidator('form', createCommentSchema),
-        async (c) => {
-            const { id } = c.req.valid('param');
-            const { content } = c.req.valid('form');
-            const user = c.get('user')!;
+        async (ctx) => {
+            const { id } = ctx.req.valid('param');
+            const { content } = ctx.req.valid('form');
+            const user = ctx.get('user')!;
 
             const [comment] = await db.transaction(async (tx) => {
                 const [parentComment] = await tx
@@ -91,7 +91,7 @@ export const commentsRouter = new Hono<Context>()
                         commentCount: commentsTable.commentCount,
                     });
             });
-            return c.json<SuccessResponse<Comment>>({
+            return ctx.json<SuccessResponse<Comment>>({
                 success: true,
                 message: 'Comment Created',
                 data: {
@@ -110,9 +110,9 @@ export const commentsRouter = new Hono<Context>()
         '/:id/upvote',
         loggedIn,
         zValidator('param', z.object({ id: z.coerce.number() })),
-        async (c) => {
-            const { id } = c.req.valid('param');
-            const user = c.get('user')!;
+        async (ctx) => {
+            const { id } = ctx.req.valid('param');
+            const user = ctx.get('user')!;
             let pointsChange: -1 | 1 = 1;
 
             const points = await db.transaction(async (tx) => {
@@ -152,7 +152,7 @@ export const commentsRouter = new Hono<Context>()
                 return updated.points;
             });
 
-            return c.json<
+            return ctx.json<
                 SuccessResponse<{
                     count: number;
                     commentUpvotes: { userId: string }[];
@@ -175,10 +175,10 @@ export const commentsRouter = new Hono<Context>()
         '/:id/comments',
         zValidator('param', z.object({ id: z.coerce.number() })),
         zValidator('query', paginationSchema),
-        async (c) => {
-            const user = c.get('user');
-            const { id } = c.req.valid('param');
-            const { limit, page, sortBy, order } = c.req.valid('query');
+        async (ctx) => {
+            const user = ctx.get('user');
+            const { id } = ctx.req.valid('param');
+            const { limit, page, sortBy, order } = ctx.req.valid('query');
             const offset = (page - 1) * limit;
 
             const sortByColumn =
@@ -218,7 +218,7 @@ export const commentsRouter = new Hono<Context>()
                 },
             });
 
-            return c.json<PaginatedResponse<Comment[]>>({
+            return ctx.json<PaginatedResponse<Comment[]>>({
                 success: true,
                 message: 'Comments fetched',
                 data: comments as Comment[],
