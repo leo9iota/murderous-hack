@@ -18,7 +18,6 @@
 - Caching and cache-control
 - Optimistic updates
 
-
 ## Reminder
 
 - **Backend Setup**: After each restart run the `bun start` command to spin up the Docker container and setup Drizzle ORM.
