@@ -32,14 +32,12 @@ export const insertPostSchema = createInsertSchema(postsTable, {
     content: z.string().optional(),
 });
 
-export const postRelations = relations(postsTable, ({ one, many }) => ({
+export const postsRelations = relations(postsTable, ({ one, many }) => ({
     author: one(userTable, {
         fields: [postsTable.userId],
         references: [userTable.id],
         relationName: 'author',
     }),
-    postUpvotesTable: many(postUpvotesTable, {
-        relationName: 'postUpvotes',
-    }),
+    postUpvotesTable: many(postUpvotesTable, { relationName: 'postUpvotes' }),
     comments: many(commentsTable),
 }));
