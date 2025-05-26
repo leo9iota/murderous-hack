@@ -6,7 +6,7 @@
 
 ## Tech Stack
 
-![Tech Stack](https://go-skill-icons.vercel.app/api/icons?i=ts,react,reactquery,hono,drizzle,postgres,bun,vite,shadcn)
+![Tech Stack](https://go-skill-icons.vercel.app/api/icons?i=ts,react,reactquery,bun,hono,drizzle,postgres,vite,shadcn)
 
 ## Architecture
 
