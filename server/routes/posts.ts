@@ -400,7 +400,7 @@ export const postRouter = new Hono<Context>()
                 {
                     success: true,
                     message: 'Post successfully fetched',
-                    data: post as Post,
+                    data: post as Post, // FIX: Use explicit type to not confuse Hono
                 },
                 200,
             );
