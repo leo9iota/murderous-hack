@@ -3,8 +3,8 @@
     "scripts": {
         "start": "bun run scripts/dev.ts",
         "dev": "bun run --hot server/index.ts",
-        "format:write": "prettier . --write",
-        "format:check": "prettier . --check",
+        "fmt": "bunx prettier --write .",
+        "checkfmt": "bunx prettier --check .",
         "db:push": "drizzle-kit push",
         "db:check": "drizzle-kit check"
     },
