@@ -4,8 +4,6 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 
 import { Toaster } from 'sonner';
 
-import Header from '@/components/Header';
-
 export const Route = createRootRoute({
   component: RootComponent,
 });
