@@ -10,27 +10,9 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <>
-      <div className='p-2 flex gap-2 bg-red-600 text-lg'>
-        <Link
-          to='/'
-          activeProps={{
-            className: 'font-bold',
-          }}
-          activeOptions={{ exact: true }}
-        >
-          Home
-        </Link>{' '}
-        <Link
-          to='/about'
-          activeProps={{
-            className: 'font-bold',
-          }}
-        >
-          About
-        </Link>
+      <div className=''>
+        <Outlet />
       </div>
-      <hr />
-      <Outlet />
       <ReactQueryDevtools />
       <TanStackRouterDevtools position='bottom-left' />
     </>
