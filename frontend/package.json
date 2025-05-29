@@ -8,8 +8,7 @@
         "dev": "vite --port=3001",
         "build": "vite build",
         "serve": "vite preview",
-        "start": "vite",
-        "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+        "start": "vite"
     },
     "devDependencies": {
         "@eslint/compat": "^1.2.9",
