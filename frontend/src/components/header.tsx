@@ -12,7 +12,7 @@ import {
   SheetTrigger,
 } from './ui/sheet';
 
-const Header = () => {
+function Header() {
   return (
     <header className='sticky top-0 z-50 w-full border-border/40 bg-primary/95 backdrop-blur supports-[backdrop-filter]:bg-primary/90'>
       <div className='container mx-auto flex items-center justify-between p-4'>
