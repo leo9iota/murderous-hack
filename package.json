@@ -6,7 +6,9 @@
         "fmt": "bunx prettier --write .",
         "checkfmt": "bunx prettier --check .",
         "db:push": "drizzle-kit push",
-        "db:check": "drizzle-kit check"
+        "db:check": "drizzle-kit check",
+        "lint:server": "cd server && eslint .",
+        "lint:frontend": "cd frontend && eslint ."
     },
     "dependencies": {
         "@hono/zod-validator": "^0.4.2",
