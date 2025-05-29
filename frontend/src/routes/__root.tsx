@@ -4,6 +4,8 @@ import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 
 import { Toaster } from 'sonner';
 
+import Navbar from '@/components/Navbar';
+
 export const Route = createRootRoute({
   component: RootComponent,
 });
@@ -12,7 +14,7 @@ function RootComponent() {
   return (
     <>
       <div className='flex min-h-screen flex-col bg-[#f5f5ed] text-foreground'>
-        <Header />
+        <Navbar />
         <main className='container mx-auto grow p-4'>
           <Outlet />
         </main>
