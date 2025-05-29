@@ -30,12 +30,6 @@ export default [
     ...tailwind.configs['flat/recommended'],
     eslintConfigPrettier,
     {
-        settings: {
-            tailwindcss: {
-                config: 'tailwind.config.js',
-                callees: ['cn', 'cva'],
-            },
-        },
         rules: {
             'react/no-unknown-property': 'off',
             'react/react-in-jsx-scope': 'off',
