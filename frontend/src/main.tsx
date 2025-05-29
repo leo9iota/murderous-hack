@@ -8,7 +8,7 @@ import './globals.css';
 import { Loader2Icon } from 'lucide-react';
 
 // import ErrorDisplay from './components/ErrorDisplay';
-// import NotFound from './components/NotFound';
+import { NotFound } from './components/NotFound';
 import { routeTree } from './routeTree.gen';
 
 const queryClient = new QueryClient();
@@ -25,7 +25,7 @@ const router = createRouter({
       <p className='mt-2 text-sm text-muted-foreground'>Loading...</p>
     </div>
   ),
-  // defaultNotFoundComponent: NotFound,
+  defaultNotFoundComponent: NotFound,
   // defaultErrorComponent: ({ error }) => <ErrorDisplay error={error} />,
 });
 
