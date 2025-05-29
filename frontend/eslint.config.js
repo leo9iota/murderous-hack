@@ -8,7 +8,6 @@ import pluginJs from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import pluginReact from 'eslint-plugin-react';
-import tailwind from 'eslint-plugin-tailwindcss';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -27,7 +26,6 @@ export default [
     jsxA11y.flatConfigs.recommended,
     ...pluginRouter.configs['flat/recommended'],
     ...pluginQuery.configs['flat/recommended'],
-    ...tailwind.configs['flat/recommended'],
     eslintConfigPrettier,
     {
         rules: {
@@ -53,8 +51,7 @@ export default [
                     allowFunctions: true,
                 },
             ],
-            'tailwindcss/no-custom-classname': 'off',
-            'tailwindcss/classnames-order': 'error',
+
         },
     },
 ];
