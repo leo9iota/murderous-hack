@@ -5,9 +5,11 @@ import ReactDOM from 'react-dom/client';
 
 import './globals.css';
 
-import { routeTree } from './routeTree.gen';
 import { Loader2Icon } from 'lucide-react';
-import NotFound from './components/NotFound';
+
+// import ErrorDisplay from './components/ErrorDisplay';
+// import NotFound from './components/NotFound';
+import { routeTree } from './routeTree.gen';
 
 const queryClient = new QueryClient();
 
@@ -23,8 +25,8 @@ const router = createRouter({
       <p className='mt-2 text-sm text-muted-foreground'>Loading...</p>
     </div>
   ),
-  defaultNotFoundComponent: NotFound,
-  defaultErrorComponent: ({ error }) => <ErrorDisplay error={error} />,
+  // defaultNotFoundComponent: NotFound,
+  // defaultErrorComponent: ({ error }) => <ErrorDisplay error={error} />,
 });
 
 // Register things for typesafety
