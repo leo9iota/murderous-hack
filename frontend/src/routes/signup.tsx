@@ -7,8 +7,8 @@ import {
 } from '@tanstack/react-router';
 import { useForm } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
-import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
-import { zodValidator } from '@tanstack/zod-form-adapter';
+import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapte r';
+import { zodValidator } from '@tanstack/zod-form-adapter'; // TODO: Reimplement without deprecated fn
 
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -78,9 +78,9 @@ function Signup() {
     <div className='w-full'>
       <Card className='mx-auto mt-12 max-w-sm border-border/25'>
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
             form.handleSubmit();
           }}
         >
@@ -102,7 +102,7 @@ function Signup() {
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                     />
                     <Info field={field} />
                   </div>
@@ -119,7 +119,7 @@ function Signup() {
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                     />
                     <Info field={field} />
                   </div>
