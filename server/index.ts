@@ -11,16 +11,6 @@ import { postRouter } from './routes/posts';
 
 const app = new Hono<Context>();
 
-app.get('/', (ctx) => {
-    // Purposeful exception
-    // throw new HTTPException(404, { message: 'Post not found', cause: { form: true } });
-
-    // Unexpected exception, when some logic in the code may break something that is unexpected
-    // throw new Error("Unexpected error")
-
-    return ctx.text('Hello from Hono!');
-});
-
 app.use('*', cors(), async (ctx, next) => {
     const sessionId = lucia.readSessionCookie(ctx.req.header('Cookie') ?? '');
 
