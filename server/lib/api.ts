@@ -32,10 +32,10 @@ export const postSignup = async (username: string, password: string) => {
         }
         const data = (await res.json()) as unknown as ErrorResponse;
         return data;
-    } catch (e) {
+    } catch (err) {
         return {
             success: false,
-            error: String(e),
+            error: String(err),
             isFormError: false,
         } as ErrorResponse;
     }
@@ -55,10 +55,10 @@ export const postLogin = async (username: string, password: string) => {
         }
         const data = (await res.json()) as unknown as ErrorResponse;
         return data;
-    } catch (e) {
+    } catch (err) {
         return {
             success: false,
-            error: String(e),
+            error: String(err),
             isFormError: false,
         } as ErrorResponse;
     }
@@ -138,10 +138,10 @@ export const postSubmit = async (title: string, url: string, content: string) =>
         }
         const data = (await res.json()) as unknown as ErrorResponse;
         return data;
-    } catch (e) {
+    } catch (err) {
         return {
             success: false,
-            error: String(e),
+            error: String(err),
             isFormError: false,
         } as ErrorResponse;
     }
@@ -257,10 +257,10 @@ export async function postComment(id: number, content: string, isNested?: boolea
         }
         const data = (await res.json()) as unknown as ErrorResponse;
         return data;
-    } catch (e) {
+    } catch (err) {
         return {
             success: false,
-            error: String(e),
+            error: String(err),
             isFormError: false,
         } as ErrorResponse;
     }
