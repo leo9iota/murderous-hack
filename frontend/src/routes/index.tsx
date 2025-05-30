@@ -5,6 +5,11 @@ export const Route = createFileRoute('/')({
 });
 
 function HomeComponent() {
-  throw new Error();
-  return <></>;
+  return (
+    <>
+      <div>
+        Hello World!
+      </div>
+    </>
+  );
 }
