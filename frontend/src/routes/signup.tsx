@@ -5,7 +5,6 @@ import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { z } from 'zod';
 
 import { loginSchema } from '@/shared/types';
-// import { postSignup, userQueryOptions } from '@/lib/api';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const signupSearchSchema = z.object({
