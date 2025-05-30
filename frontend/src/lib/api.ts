@@ -2,6 +2,7 @@ import { hc } from 'hono/client';
 
 import { ErrorResponse, SuccessResponse, type ApiRoutes } from '@/shared/types';
 
+// @ts-expect-error - Hono client type constraint issue with Context type
 const client = hc<ApiRoutes>('/', {
     fetch: (input: RequestInfo | URL, init?: RequestInit) =>
         fetch(input, {
