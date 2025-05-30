@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 import { loginSchema } from '@/shared/types';
 // import { postSignup, userQueryOptions } from '@/lib/api';
-import { Card } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const signupSearchSchema = z.object({
   redirect: fallback(z.string(), '/').default('/'),
@@ -42,7 +42,14 @@ function Signup() {
             event.stopPropagation();
             form.handleSubmit();
           }}
-        ></form>
+        >
+          <CardHeader>
+            <CardTitle className='text-center text-2xl'>Signup</CardTitle>
+            <CardDescription>
+              Enter your details below to create an account
+            </CardDescription>
+          </CardHeader>
+        </form>
       </Card>
     </div>
   );
