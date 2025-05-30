@@ -28,7 +28,7 @@ function ErrorDisplay({ error }: { error: Error }) {
       <div className='w-full max-w-md'>
         <Alert variant='destructive'>
           <AlertTriangleIcon className='size-4' />
-          <AlertTitle>Oops! Something went wrong.</AlertTitle>
+          <AlertTitle className='font-bold'>Oops! Something went wrong.</AlertTitle>
           <AlertDescription>
             We&apos;re sorry, but we encountered an unexpected error.
           </AlertDescription>
@@ -52,7 +52,7 @@ function ErrorDisplay({ error }: { error: Error }) {
                 <AccordionTrigger>View error details</AccordionTrigger>
                 <AccordionContent>
                   <div className='rounded-md bg-muted p-4'>
-                    <h3 className='mb-2 font-semibold'>Error Message:</h3>
+                    <h3 className='mb-2 font-bold'>Error Message</h3>
                     <p className='mb-4 text-sm'>{error.message}</p>
                     <h3 className='mb-2 font-semibold'>Stack Trace:</h3>
                     <pre className='overflow-x-auto whitespace-pre-wrap text-xs'>
