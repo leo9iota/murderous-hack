@@ -7,7 +7,7 @@ import './globals.css';
 
 import { Loader2Icon } from 'lucide-react';
 
-// import ErrorDisplay from './components/ErrorDisplay';
+import ErrorDisplay from './components/ErrorDisplay';
 import { NotFound } from './components/NotFound';
 import { routeTree } from './routeTree.gen';
 
@@ -26,7 +26,7 @@ const router = createRouter({
     </div>
   ),
   defaultNotFoundComponent: NotFound,
-  // defaultErrorComponent: ({ error }) => <ErrorDisplay error={error} />,
+  defaultErrorComponent: ({ error }) => <ErrorDisplay error={error} />,
 });
 
 // Register things for typesafety
