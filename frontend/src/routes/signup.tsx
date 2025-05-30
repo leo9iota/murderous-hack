@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { loginSchema } from '@/shared/types';
-import { postSignup, userQueryOptions } from '@/lib/api';
+// import { postSignup, userQueryOptions } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import {
   Card,
