@@ -34,12 +34,12 @@ const signupSearchSchema = z.object({
 export const Route = createFileRoute('/signup')({
   component: Signup,
   validateSearch: zodSearchValidator(signupSearchSchema),
-  beforeLoad: async ({ context, search }) => {
-    const user = await context.queryClient.ensureQueryData(userQueryOptions());
-    if (user) {
-      throw redirect({ to: search.redirect });
-    }
-  },
+  // beforeLoad: async ({ context, search }) => {
+  //   const user = await context.queryClient.ensureQueryData(userQueryOptions());
+  //   if (user) {
+  //     throw redirect({ to: search.redirect });
+  //   }
+  // },
 });
 
 function Signup() {
