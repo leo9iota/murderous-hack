@@ -2,16 +2,16 @@ import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { eq } from 'drizzle-orm';
 
-import { db } from '@/adapter';
-import { type Context } from '@/context';
-import { userTable } from '@/db/schemas/auth';
-import { lucia } from '@/lucia';
-import { loggedIn } from '@/middleware/loggedIn';
+import { db } from '../adapter';
+import { type Context } from '../context';
+import { userTable } from '../db/schemas/auth';
+import { lucia } from '../lucia';
+import { loggedIn } from '../middleware/loggedIn';
 import { zValidator } from '@hono/zod-validator';
 import { generateId } from 'lucia'; // FIX: Use Lucia v2 (replace later with better auth or auth.js)
 import postgres from 'postgres';
 
-import { loginSchema, type SuccessResponse } from '@/shared/types';
+import { loginSchema, type SuccessResponse } from '../../shared/types';
 
 export const authRouter = new Hono<Context>()
     .post('/signup', zValidator('form', loginSchema), async (ctx) => {

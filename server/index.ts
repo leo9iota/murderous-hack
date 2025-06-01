@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 
-import { type ErrorResponse } from '@/shared/types';
+import { type ErrorResponse } from '../shared/types';
 import type { Context } from './context';
 import { lucia } from './lucia';
 import { authRouter } from './routes/auth';
