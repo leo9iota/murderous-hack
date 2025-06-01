@@ -5,12 +5,21 @@
         "jsx": "react-jsx",
         "target": "ESNext",
         "module": "ESNext",
-        "moduleResolution": "Bundler",
+        "moduleResolution": "bundler",
         "skipLibCheck": true,
         "baseUrl": ".",
         "paths": {
             "@/shared/*": ["../shared/*"],
             "@/*": ["./src/*"]
-        }
-    }
+        },
+        "allowImportingTsExtensions": true,
+        "noEmit": true
+    },
+    "include": [
+        "src/**/*",
+        "../shared/**/*"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
 }

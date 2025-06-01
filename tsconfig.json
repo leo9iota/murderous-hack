@@ -24,10 +24,22 @@
         "noUnusedParameters": true,
         "noPropertyAccessFromIndexSignature": true,
 
+        // Base URL for path resolution
+        "baseUrl": ".",
+
         // Path Mapping
         "paths": {
             "@/shared/*": ["./shared/*"],
             "@/*": ["./server/*"]
         }
-    }
+    },
+    "include": [
+        "server/**/*",
+        "shared/**/*",
+        "scripts/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "frontend"
+    ]
 }
