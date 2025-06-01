@@ -8,7 +8,7 @@ import { userTable } from '@/db/schemas/auth';
 import { lucia } from '@/lucia';
 import { loggedIn } from '@/middleware/loggedIn';
 import { zValidator } from '@hono/zod-validator';
-import { generateId } from 'lucia';
+import { generateId } from 'lucia'; // FIX: Use Lucia v2 (replace later with better auth or auth.js)
 import postgres from 'postgres';
 
 import { loginSchema, type SuccessResponse } from '@/shared/types';
