@@ -1,0 +1,14 @@
+[install]
+# Configure package installation
+cache = false
+
+[run]
+# Configure runtime behavior
+bun = "bun"
+
+# Path mapping for the monorepo
+[install.scopes]
+
+# This helps Bun understand the TypeScript path mappings
+[test]
+preload = ["./server/tsconfig.json"]
