@@ -11,15 +11,6 @@
         "paths": {
             "@/shared/*": ["../shared/*"],
             "@/*": ["./src/*"]
-        },
-        "allowImportingTsExtensions": true,
-        "noEmit": true
-    },
-    "include": [
-        "src/**/*",
-        "../shared/**/*"
-    ],
-    "exclude": [
-        "node_modules"
-    ]
+        }
+    }
 }

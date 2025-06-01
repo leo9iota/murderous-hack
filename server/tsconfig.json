@@ -1,18 +1,7 @@
 {
     "extends": "../tsconfig.json",
-    "compilerOptions": {
-        "baseUrl": ".",
-        "paths": {
-            "@/shared/*": ["../shared/*"],
-            "@/*": ["./*"]
-        },
-        "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
-        "noEmit": true
-    },
     "include": [
-        "./**/*",
-        "../shared/**/*"
+        "./**/*"
     ],
     "exclude": [
         "node_modules"
