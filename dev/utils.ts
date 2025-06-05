@@ -106,7 +106,7 @@ export const utils = {
     // Check if PostgreSQL is ready
     async isPostgresReady(): Promise<boolean> {
         try {
-            await $`docker compose exec -T db pg_isready -U user -d murderous-hack-db`.quiet();
+            await $`docker compose exec -T postgres-db pg_isready -U user -d murderous-hack-db`.quiet();
             return true;
         } catch {
             return false;

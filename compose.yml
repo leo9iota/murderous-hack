@@ -5,15 +5,15 @@ services:
       dockerfile: Dockerfile
     environment:
       - PORT=3000
-      - DATABASE_URL=postgresql://user:password@db:5432/murderous-hack-db
+      - DATABASE_URL=postgresql://user:password@postgres-db:5432/murderous-hack-db
     depends_on:
-      - db
+      - postgres-db
     networks:
       - murderous-hack-network
     ports:
       - '3000:3000'
 
-  db:
+  postgres-db:
     image: postgres:17
     environment:
       - POSTGRES_USER=user

@@ -80,7 +80,7 @@ import { log, utils, withErrorHandling } from './utils';
         log.step('Starting fresh database...');
 
         log.info('Starting PostgreSQL database...');
-        await $`docker compose up -d db`;
+        await $`docker compose up -d postgres-db`;
 
         // Wait for PostgreSQL to be ready
         log.info('Waiting for PostgreSQL to be ready...');
