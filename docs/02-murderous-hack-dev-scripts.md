@@ -1,6 +1,6 @@
 # Murderous Hack Development Scripts
 
-This directory contains TypeScript scripts using Bun's shell API to easily manage the Murderous Hack development environment.
+The [dev/](../dev/) directory contains scripts using Bun's shell API to easily manage the Murderous Hack development workflow.
 
 ## 🚀 Quick Start
 
