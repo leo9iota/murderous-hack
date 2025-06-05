@@ -4,7 +4,7 @@ import { type QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { Toaster } from '@/components/ui/sonner';
-import { Header } from '@/components/site-header';
+import { Header } from '@/components/SiteHeader';
 
 interface RouterContext {
   queryClient: QueryClient;

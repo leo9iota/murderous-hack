@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 import { createCommentSchema } from '@/shared/types';
 import { useCreateComment } from '@/lib/api-hooks';
-import { FieldInfo } from './field-info';
+import { FieldInfo } from './FieldInfo';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 

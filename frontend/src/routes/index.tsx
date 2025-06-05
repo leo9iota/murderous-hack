@@ -11,8 +11,8 @@ import { orderSchema, sortBySchema } from '@/shared/types';
 import { getPosts } from '@/lib/api';
 import { useUpvotePost } from '@/lib/api-hooks';
 import { Button } from '@/components/ui/button';
-import { PostCard } from '@/components/post-card';
-import { SortBar } from '@/components/sort-bar';
+import { PostCard } from '@/components/PostCard';
+import { SortBar } from '@/components/SortBar';
 
 const homeSearchSchema = z.object({
   sortBy: fallback(sortBySchema, 'points').default('recent'),

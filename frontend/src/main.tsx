@@ -9,8 +9,8 @@ import './globals.css';
 
 import { Loader2Icon } from 'lucide-react';
 
-import { ErrorComponent } from './components/error-component';
-import { NotFound } from './components/not-found';
+import { ErrorComponent } from './components/ErrorComponent';
+import { NotFound } from './components/NotFound';
 
 const queryClient = new QueryClient();
 // Set up a Router instance

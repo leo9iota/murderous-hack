@@ -23,7 +23,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { FieldInfo } from '@/components/field-info';
+import { FieldInfo } from '@/components/FieldInfo';
 
 export const Route = createFileRoute('/_auth/submit')({
   component: () => <Submit />,

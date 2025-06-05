@@ -17,7 +17,7 @@ import { Comment } from '@/shared/types';
 import { getCommentComments, userQueryOptions } from '@/lib/api';
 import { useUpvoteComment } from '@/lib/api-hooks';
 import { cn, relativeTime } from '@/lib/utils';
-import { CommentForm } from './comment-form';
+import { CommentForm } from './CommentForm';
 import { Separator } from './ui/separator';
 
 type CommentCardProps = {

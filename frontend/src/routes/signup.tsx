@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FieldInfo } from '@/components/field-info';
+import { FieldInfo } from '@/components/FieldInfo';
 
 const signupSearchSchema = z.object({
   redirect: fallback(z.string(), '/').default('/'),

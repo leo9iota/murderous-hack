@@ -16,10 +16,10 @@ import { orderSchema, sortBySchema } from '@/shared/types';
 import { getComments, getPost, userQueryOptions } from '@/lib/api';
 import { useUpvoteComment, useUpvotePost } from '@/lib/api-hooks';
 import { Card, CardContent } from '@/components/ui/card';
-import { CommentCard } from '@/components/comment-card';
-import { CommentForm } from '@/components/comment-form';
-import { PostCard } from '@/components/post-card';
-import { SortBar } from '@/components/sort-bar';
+import { CommentCard } from '@/components/CommentCard';
+import { CommentForm } from '@/components/CommentForm';
+import { PostCard } from '@/components/PostCard';
+import { SortBar } from '@/components/SortBar';
 
 const postSearchSchema = z.object({
   id: fallback(z.number(), 0).default(0),
