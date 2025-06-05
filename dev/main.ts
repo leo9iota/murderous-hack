@@ -5,7 +5,7 @@ import { log, utils, withErrorHandling } from './utils';
 
 // Main development environment setup and start
 (async () => {
-    log.header('🚀 BetterNews Development Environment');
+    log.header('🚀 Murderous Hack Development Environment');
 
     // Step 1: Check requirements
     await withErrorHandling(async () => {
@@ -158,7 +158,7 @@ import { log, utils, withErrorHandling } from './utils';
         });
 
         // Display success message
-        log.header('🎉 Development Environment Ready!');
+        log.header('🎉 Murderous Hack Development Environment Ready!');
         console.log('');
         console.log('🌐 Frontend: http://localhost:3001');
         console.log('🔧 Backend:  http://localhost:3000');

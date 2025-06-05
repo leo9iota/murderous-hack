@@ -5,7 +5,7 @@ import { log, utils, withErrorHandling } from './utils';
 
 // Stop development environment (IIFE)
 (async () => {
-    log.header('🛑 Stopping BetterNews Development Environment');
+    log.header('🛑 Stopping Murderous Hack Development Environment');
 
     // Stop development servers
     await withErrorHandling(async () => {

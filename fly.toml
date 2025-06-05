@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for betternews-demo on 2024-10-10T03:17:49+01:00
+# fly.toml app configuration file generated for murderous-hack on 2024-10-10T03:17:49+01:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'betternews-demo'
+app = 'murderous-hack'
 primary_region = 'lhr'
 
 [build]
@@ -23,4 +23,4 @@ primary_region = 'lhr'
 
 [[env]]
   PORT = "3000"
-  DATABASE_URL = "postgres://postgres:jttYyhKpIiAac9p@betternewsdb.flycast:5432"
+  DATABASE_URL = "postgres://postgres:jttYyhKpIiAac9p@murderous-hack-db.flycast:5432"

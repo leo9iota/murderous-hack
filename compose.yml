@@ -5,11 +5,11 @@ services:
       dockerfile: Dockerfile
     environment:
       - PORT=3000
-      - DATABASE_URL=postgresql://user:password@db:5432/betternewsdb
+      - DATABASE_URL=postgresql://user:password@db:5432/murderous-hack-db
     depends_on:
       - db
     networks:
-      - betternews-network
+      - murderous-hack-network
     ports:
       - '3000:3000'
 
@@ -18,16 +18,16 @@ services:
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=betternewsdb
+      - POSTGRES_DB=murderous-hack-db
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - betternews-network
+      - murderous-hack-network
     ports:
       - '5432:5432'
 
 networks:
-  betternews-network:
+  murderous-hack-network:
     driver: bridge
 
 volumes:

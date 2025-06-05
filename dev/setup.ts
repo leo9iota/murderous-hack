@@ -5,7 +5,7 @@ import { log, utils, withErrorHandling } from './utils';
 
 // Setup development environment (IIFE)
 (async () => {
-    log.header('🔧 BetterNews Development Environment Setup');
+    log.header('🔧 Murderous Hack Development Environment Setup');
 
     // Check requirements
     await withErrorHandling(async () => {

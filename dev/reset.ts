@@ -42,7 +42,7 @@ import { log, utils, withErrorHandling } from './utils';
         process.exit(0);
     }
 
-    log.header('🔄 BetterNews Development Environment Reset');
+    log.header('🔄 Murderous Hack Development Environment Reset');
 
     // Stop all services
     await withErrorHandling(async () => {
@@ -165,7 +165,7 @@ import { log, utils, withErrorHandling } from './utils';
         });
 
         // Success message
-        log.header('🎉 Reset Complete - Fresh Environment Ready!');
+        log.header('🎉 Reset Complete - Fresh Murderous Hack Environment Ready!');
         console.log('');
         console.log('🌐 Frontend: http://localhost:3001');
         console.log('🔧 Backend:  http://localhost:3000');

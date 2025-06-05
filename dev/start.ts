@@ -5,7 +5,7 @@ import { log, utils, withErrorHandling } from './utils';
 
 // Start development environment (IIFE)
 (async () => {
-    log.header('🚀 Starting BetterNews Development Environment');
+    log.header('🚀 Starting Murderous Hack Development Environment');
 
     // Check Docker
     await withErrorHandling(async () => {
@@ -109,7 +109,7 @@ import { log, utils, withErrorHandling } from './utils';
         });
 
         // Display success message
-        log.header('🎉 All Services Running!');
+        log.header('🎉 Murderous Hack Services Running!');
         console.log('');
         console.log('🌐 Frontend: http://localhost:3001');
         console.log('🔧 Backend:  http://localhost:3000');

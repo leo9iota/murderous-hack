@@ -1,5 +1,5 @@
 {
-    "name": "betternews",
+    "name": "murderous-hack",
     "scripts": {
         "dev": "bun run --hot server/index.ts",
         "dev:setup": "bun run dev/setup.ts",
