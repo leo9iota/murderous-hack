@@ -22,8 +22,12 @@ export function Header() {
     <header className='sticky top-0 z-50 w-full border-border/40 bg-primary/95 backdrop-blur supports-[backdrop-filter]:bg-primary/90'>
       <div className='container mx-auto flex items-center justify-between p-4'>
         <div className='flex items-center space-x-4'>
-          <Link to='/' className='text-2xl font-bold'>
-            Murderous Hack
+          <Link to='/' className='flex items-center'>
+            <img
+              src="/logo.svg"
+              alt="Murderous Hack"
+              className="size-10"
+            />
           </Link>
           <nav className='hidden items-center space-x-4 md:flex'>
             <Link
@@ -77,7 +81,14 @@ export function Header() {
           </SheetTrigger>
           <SheetContent className='mb-2'>
             <SheetHeader>
-              <SheetTitle>Murderous Hack</SheetTitle>
+              <SheetTitle className="flex items-center gap-2">
+                <img
+                  src="/logo.svg"
+                  alt="Murderous Hack"
+                  className="size-6"
+                />
+                Murderous Hack
+              </SheetTitle>
               <SheetDescription className='sr-only'>Navigation</SheetDescription>
             </SheetHeader>
             <nav className='flex flex-col space-y-4'>

@@ -35,7 +35,10 @@ function RootComponent() {
           <Outlet />
         </main>
         <footer className='p-4 text-center'>
-          <p className='text-sm text-muted-foreground'>Murderous Hack &copy;</p>
+          <p className='flex items-center justify-center gap-2 text-sm text-muted-foreground'>
+            <img src='/logo.svg' alt='Murderous Hack' className='size-4' />
+            Murderous Hack &copy;
+          </p>
         </footer>
       </div>
       <Toaster />
