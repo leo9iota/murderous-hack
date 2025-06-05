@@ -51,7 +51,7 @@ const commentsInfiniteQueryOptions = ({
     initialPageParam: 1,
     staleTime: Infinity,
     retry: false,
-    getNextPageParam: (lastPage, allPages, lastPageParam) => {
+    getNextPageParam: (lastPage, _, lastPageParam) => {
       if (lastPage.pagination.totalPages <= lastPageParam) {
         return undefined;
       }
