@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from './ui/select';
 
-export function SortBar({ sortBy, order }: { sortBy: SortBy; order: Order }) {
+export function SortButton({ sortBy, order }: { sortBy: SortBy; order: Order }) {
   const navigate = useNavigate();
   return (
     <div className='mb-4 flex items-center justify-between'>

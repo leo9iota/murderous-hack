@@ -12,7 +12,7 @@ import { getPosts } from '@/lib/api';
 import { useUpvotePost } from '@/lib/api-hooks';
 import { Button } from '@/components/ui/button';
 import { PostCard } from '@/components/PostCard';
-import { SortBar } from '@/components/SortBar';
+import { SortButton } from '@/components/SortButton';
 
 const homeSearchSchema = z.object({
   sortBy: fallback(sortBySchema, 'points').default('recent'),
@@ -76,7 +76,7 @@ function HomeComponent() {
   return (
     <div className='mx-auto max-w-3xl p-4'>
       <h1 className='mb-6 text-2xl font-bold text-foreground'>Submissions</h1>
-      <SortBar sortBy={sortBy} order={order} />
+      <SortButton sortBy={sortBy} order={order} />
       <div className='space-y-4'>
         {data?.pages.map((page) =>
           page.data.map((post) => (

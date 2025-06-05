@@ -19,7 +19,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { CommentCard } from '@/components/CommentCard';
 import { CommentForm } from '@/components/CommentForm';
 import { PostCard } from '@/components/PostCard';
-import { SortBar } from '@/components/SortBar';
+import { SortButton } from '@/components/SortButton';
 
 const postSearchSchema = z.object({
   id: fallback(z.number(), 0).default(0),
@@ -108,7 +108,7 @@ function Post() {
           </Card>
         )}
         {comments && comments.pages[0].data.length > 0 && (
-          <SortBar sortBy={sortBy} order={order} />
+          <SortButton sortBy={sortBy} order={order} />
         )}
       </div>
       {comments && comments.pages[0].data.length > 0 && (
