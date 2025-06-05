@@ -25,6 +25,7 @@
 
 ## Deployment
 
-1. Deploy frontend to Vercel (free tier)
-2. Deploy backend to Railway or Render (free tier)
-3. Use Neon or Supabase for PostgreSQL (free tier)
+1. Deploy frontend to Vercel
+2. Deploy backend to Railway or Render
+3. Use Neon or Supabase for PostgreSQL
+4. Deploy everything on GCP or AWS
