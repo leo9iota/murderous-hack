@@ -1,105 +1,29 @@
 import { $ } from 'bun';
 
-// Color constants for console output
-export const colors = {
-    reset: '\x1b[0m',
-    red: '\x1b[31m',
-    green: '\x1b[32m',
-    yellow: '\x1b[33m',
-    blue: '\x1b[34m',
-    magenta: '\x1b[35m',
-    cyan: '\x1b[36m',
-    white: '\x1b[37m',
-} as const;
-
-// Logging utilities
+// Simple logging
 export const log = {
-    info: (message: string) =>
-        console.log(`${colors.blue}[INFO]${colors.reset} ${message}`),
-    success: (message: string) =>
-        console.log(`${colors.green}[SUCCESS]${colors.reset} ${message}`),
-    warning: (message: string) =>
-        console.log(`${colors.yellow}[WARNING]${colors.reset} ${message}`),
-    error: (message: string) =>
-        console.log(`${colors.red}[ERROR]${colors.reset} ${message}`),
-    step: (message: string) =>
-        console.log(`${colors.cyan}[STEP]${colors.reset} ${message}`),
-    header: (message: string) => {
-        console.log('\n' + '='.repeat(60));
-        console.log(`${colors.magenta}${message}${colors.reset}`);
-        console.log('='.repeat(60));
-    },
+    info: (msg: string) => console.log(`\x1b[36m[INFO]\x1b[0m ${msg}`),
+    success: (msg: string) => console.log(`\x1b[32m✅ ${msg}\x1b[0m`),
+    error: (msg: string) => console.log(`\x1b[31m❌ ${msg}\x1b[0m`),
+    warn: (msg: string) => console.log(`\x1b[33m⚠️  ${msg}\x1b[0m`),
+    header: (msg: string) => console.log(`\n\x1b[35m🚀 ${msg}\x1b[0m\n`),
 };
 
-// Utility functions
+// Project paths
+export const paths = {
+    root: process.cwd(),
+    frontend: 'frontend',
+    server: 'server',
+};
+
+// Simple utilities
 export const utils = {
-    // Check if a command exists
-    async commandExists(command: string): Promise<boolean> {
-        try {
-            await $`which ${command}`.quiet();
-            return true;
-        } catch {
-            return false;
-        }
-    },
-
-    // Check if a port is in use
-    async isPortInUse(port: number): Promise<boolean> {
-        try {
-            await $`lsof -i :${port}`.quiet();
-            return true;
-        } catch {
-            return false;
-        }
-    },
-
     // Kill process on port
     async killPort(port: number): Promise<void> {
         try {
-            const result = await $`lsof -ti :${port}`.quiet();
-            const pid = result.stdout.toString().trim();
-            if (pid) {
-                log.warning(`Killing process on port ${port} (PID: ${pid})`);
-                await $`kill -9 ${pid}`.quiet();
-                await new Promise((resolve) => setTimeout(resolve, 1000));
-            }
+            await $`npx kill-port ${port}`.quiet();
         } catch {
-            // Port not in use or already killed
-        }
-    },
-
-    // Wait for a condition with timeout
-    async waitFor(
-        condition: () => Promise<boolean>,
-        timeoutMs: number = 30000,
-        intervalMs: number = 1000,
-        description: string = 'condition',
-    ): Promise<boolean> {
-        const startTime = Date.now();
-        let attempt = 1;
-        const maxAttempts = Math.ceil(timeoutMs / intervalMs);
-
-        while (Date.now() - startTime < timeoutMs) {
-            log.info(`Waiting for ${description}... (${attempt}/${maxAttempts})`);
-
-            if (await condition()) {
-                return true;
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, intervalMs));
-            attempt++;
-        }
-
-        return false;
-    },
-
-    // Check if Docker is running
-    async isDockerRunning(): Promise<boolean> {
-        try {
-            await $`docker info`.quiet();
-            return true;
-        } catch {
-            return false;
+            // Port not in use
         }
     },
 
@@ -113,42 +37,48 @@ export const utils = {
         }
     },
 
-    // Check if file exists
-    async fileExists(path: string): Promise<boolean> {
-        try {
-            await $`test -f ${path}`.quiet();
-            return true;
-        } catch {
-            return false;
+    // Wait for PostgreSQL with simple retry
+    async waitForPostgres(): Promise<void> {
+        log.info('Waiting for PostgreSQL...');
+        for (let i = 0; i < 30; i++) {
+            if (await this.isPostgresReady()) {
+                log.success('PostgreSQL is ready!');
+                return;
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
+        throw new Error('PostgreSQL failed to start');
     },
 
-    // Sleep utility
-    sleep: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
-
-    // Graceful process exit handler
+    // Setup graceful shutdown
     setupGracefulExit(cleanup: () => Promise<void>) {
-        const handleExit = async (signal: string) => {
-            log.info(`Received ${signal}, shutting down gracefully...`);
+        process.on('SIGINT', async () => {
+            log.info('Shutting down...');
             await cleanup();
             process.exit(0);
-        };
-
-        process.on('SIGINT', () => handleExit('SIGINT'));
-        process.on('SIGTERM', () => handleExit('SIGTERM'));
-        process.on('exit', () => handleExit('EXIT'));
+        });
     },
 };
 
-// Error handling wrapper
-export const withErrorHandling = async <T>(
-    operation: () => Promise<T>,
-    errorMessage: string,
-): Promise<T> => {
+// Simple error handling
+export const run = async (cmd: string, description?: string) => {
     try {
-        return await operation();
+        if (description) log.info(description);
+        await $`sh -c ${cmd}`;
     } catch (error) {
-        log.error(`${errorMessage}: ${error}`);
+        log.error(`Failed: ${description || cmd}`);
         process.exit(1);
+    }
+};
+
+// Safe run - doesn't exit on failure
+export const safeRun = async (cmd: string, description?: string) => {
+    try {
+        if (description) log.info(description);
+        await $`sh -c ${cmd}`;
+        return true;
+    } catch (error) {
+        if (description) log.warn(`Skipped: ${description}`);
+        return false;
     }
 };
