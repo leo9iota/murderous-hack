@@ -15,7 +15,7 @@ import {
   SheetTrigger,
 } from './ui/sheet';
 
-export function Header() {
+export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useQuery(userQueryOptions());
   return (
