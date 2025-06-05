@@ -2,15 +2,10 @@ import { createFileRoute } from '@tanstack/react-router';
 import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
+import { loginSchema } from '@/shared/types';
 
 const signupSearchSchema = z.object({
   redirect: fallback(z.string(), '/').default('/'),
-});
-
-// Form validation schema
-const signupFormSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 export const Route = createFileRoute('/signup')({
@@ -25,7 +20,7 @@ function Signup() {
       password: ""
     },
     validators: {
-      onChange: signupFormSchema,
+      onChange: loginSchema,
     },
     onSubmit: async ({ value }) => {
       // Handle form submission
