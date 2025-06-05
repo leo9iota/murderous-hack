@@ -10,7 +10,7 @@
 
 ## Architecture
 
-![Architecture](./images/murderous-hack-architecture.png)
+![Architecture](./image/)
 
 ## Key Features
 
