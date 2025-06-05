@@ -8,11 +8,11 @@ import { $ } from 'bun'; // Use shell API from Bun
     try {
         // Stop any existing containers first
         console.log('Stopping existing containers...');
-        await $`docker-compose down`;
+        await $`docker compose down`;
 
         // Start database
         console.log('Starting database container...');
-        await $`docker-compose up -d`;
+        await $`docker compose up -d`;
 
         // More explicit waiting with longer timeout
         console.log('Waiting for database to be fully ready...');
