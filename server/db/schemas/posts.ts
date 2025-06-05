@@ -24,7 +24,7 @@ export const postsTable = pgTable('posts', {
 });
 
 export const insertPostSchema = createInsertSchema(postsTable, {
-    title: z.string().min(3, { message: 'Title must be atleast 3 chars' }),
+    title: z.string().min(3, { message: 'Title must be at least 3 chars' }),
     url: z
         .string()
         .trim()
