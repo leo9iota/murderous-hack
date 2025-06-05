@@ -1,89 +1,126 @@
 # Murderous Hack Development Scripts
 
-Simple, concise TypeScript scripts for easy development workflow management.
+Simple, concise TypeScript scripts using Bun's shell API for easy development workflow management.
 
 ## 🚀 Quick Commands
 
 ```bash
-# Complete setup and start (recommended for first time)
-bun run dev:all
+# First time setup (dependencies, database, schema)
+bun run setup
 
-# Setup only (first time)
-bun run dev:setup
-
-# Start development servers (daily use)
-bun run dev:start
+# Start development servers (backend + frontend)
+bun run start
 
 # Stop all services
-bun run dev:stop
+bun run stop
 ```
 
 ## 📋 Scripts
 
-### `simple-all.ts` - Complete Setup & Start
+### `setup.ts` - Complete Environment Setup
+- Creates `.env` file from `.env.example` (if needed)
+- Installs root dependencies (`bun install`)
+- Installs frontend dependencies (`cd frontend && bun install`)
+- Starts PostgreSQL database container
+- Sets up database schema (`bunx drizzle-kit push`)
+- **Run this once when setting up the project**
 
--   Creates `.env` from `.env.example` (if needed)
--   Installs dependencies (root + frontend)
--   Starts PostgreSQL database
--   Sets up database schema
--   Starts backend (from root) and frontend (from frontend/)
+### `start.ts` - Start Development Environment
+- Checks and starts PostgreSQL database (if not running)
+- Kills any existing processes on ports 3000/3001
+- Starts backend server on `http://localhost:3000` (from root)
+- Starts frontend server on `http://localhost:3001` (from frontend/)
+- Handles graceful shutdown with Ctrl+C
+- **Use this for daily development**
 
-### `simple-setup.ts` - Setup Only
-
--   Creates `.env` from `.env.example` (if needed)
--   Installs dependencies (root + frontend)
--   Starts PostgreSQL database
--   Sets up database schema
-
-### `simple-start.ts` - Start Development
-
--   Starts PostgreSQL (if not running)
--   Starts backend server on port 3000 (from root)
--   Starts frontend server on port 3001 (from frontend/)
--   Graceful shutdown with Ctrl+C
-
-### `simple-stop.ts` - Stop All Services
-
--   Kills processes on ports 3000/3001
--   Stops Docker services
+### `stop.ts` - Stop All Services
+- Stops frontend and backend servers (ports 3000/3001)
+- Stops Docker database container
+- **Clean shutdown of all services**
 
 ## 🌐 URLs
 
--   **Frontend**: http://localhost:3001
--   **Backend**: http://localhost:3000
--   **Database**: PostgreSQL on localhost:5432
+- **Frontend**: http://localhost:3001 (runs from `frontend/` directory)
+- **Backend API**: http://localhost:3000 (runs from root directory)
+- **Database**: PostgreSQL on localhost:5432
 
-## 🔧 Directory Structure
+## 📁 Project Structure
 
--   **Backend**: Runs from project root (`bun run dev`)
--   **Frontend**: Runs from `frontend/` directory (`cd frontend && bun run dev`)
--   **Database**: Docker container named `postgres-db`
+```
+murderous-hack/
+├── scripts/                 # Development scripts (Simple & Concise)
+│   ├── setup.ts            # Complete environment setup
+│   ├── start.ts            # Start development servers
+│   └── stop.ts             # Stop all services
+├── server/                 # Backend code (runs from root)
+├── frontend/               # Frontend code (runs from frontend/)
+├── compose.yml             # Docker configuration
+├── drizzle.config.ts       # Database configuration
+└── package.json            # Root package.json
+```
 
-## 💡 Key Features
+## ✨ Features
 
--   **Directory Aware**: Properly handles running servers from correct directories
--   **Simple & Fast**: Minimal code, maximum efficiency
--   **Error Handling**: Clear error messages
--   **Graceful Shutdown**: Proper cleanup on Ctrl+C
--   **Port Management**: Automatic port conflict resolution
+- **Simple & Concise**: Minimal, focused scripts that do exactly what they need
+- **Directory Aware**: Properly handles running backend from root and frontend from frontend/
+- **TypeScript**: Full type safety with Bun's shell API
+- **Graceful Shutdown**: Proper cleanup on Ctrl+C
+- **Port Management**: Automatic port conflict resolution
+- **Health Checks**: Waits for PostgreSQL to be ready
+- **Error Handling**: Clear error messages and proper exit codes
 
 ## 🐛 Troubleshooting
 
+### Port Already in Use
 ```bash
-# Port conflicts
-bun run dev:stop
+bun run stop  # Kills processes on ports 3000/3001
+```
 
-# Database issues
+### Database Connection Issues
+```bash
+# Check if PostgreSQL is running
+docker compose ps
+
+# Restart database
 docker compose restart postgres-db
 
 # Full restart
-bun run dev:stop && bun run dev:start
+bun run stop && bun run start
+```
+
+### Docker Issues
+- Make sure Docker is running
+- Try restarting Docker Desktop
+- Check logs: `docker compose logs postgres-db`
+
+## 💡 Tips
+
+1. **First time?** Run `bun run setup` for complete setup
+2. **Daily development?** Use `bun run start`
+3. **Schema changes?** Use `bun run db:push`
+4. **Stuck?** Try `bun run stop` then `bun run start`
+
+## 🔄 Typical Workflow
+
+```bash
+# First time setup
+bun run setup
+
+# Daily development
+bun run start
+# ... do your development work ...
+# Press Ctrl+C to stop when done
+
+# Next day
+bun run start
+# ... continue development ...
 ```
 
 ## 🛠️ Technical Details
 
--   Uses Bun's shell API (`import { $ } from "bun"`)
--   Spawns processes with proper directory context
--   Uses `npx kill-port` for reliable port cleanup
--   Simple PostgreSQL health checks
--   TypeScript with full type safety
+- **Shell API**: Uses `import { $ } from "bun"` for shell commands
+- **Process Management**: Spawns processes with `Bun.spawn()` with proper directory context
+- **Directory Handling**: Backend runs from root, frontend runs from `frontend/`
+- **Signal Handling**: Proper SIGINT handling for graceful shutdown
+- **Port Management**: Uses `npx kill-port` for reliable port cleanup
+- **Health Checks**: Simple PostgreSQL readiness checks
