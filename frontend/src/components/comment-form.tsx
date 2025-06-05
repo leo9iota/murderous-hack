@@ -1,14 +1,13 @@
-import { useForm } from "@tanstack/react-form";
-import { zodValidator } from "@tanstack/zod-form-adapter";
+import { useForm } from '@tanstack/react-form';
+import { zodValidator } from '@tanstack/zod-form-adapter';
 
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
-import { createCommentSchema } from "@/shared/types";
-import { useCreateComment } from "@/lib/api-hooks";
-
-import { FieldInfo } from "./field-info";
-import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
+import { createCommentSchema } from '@/shared/types';
+import { useCreateComment } from '@/lib/api-hooks';
+import { FieldInfo } from './field-info';
+import { Button } from './ui/button';
+import { Textarea } from './ui/textarea';
 
 export function CommentForm({
   id,
@@ -22,7 +21,7 @@ export function CommentForm({
   const createComment = useCreateComment();
   const form = useForm({
     defaultValues: {
-      content: "",
+      content: '',
     },
     validatorAdapter: zodValidator(),
     validators: {
@@ -39,12 +38,12 @@ export function CommentForm({
           onSuccess: (data) => {
             if (!data.success) {
               if (!data.isFormError) {
-                toast.error("Failed to create comment", {
+                toast.error('Failed to create comment', {
                   description: data.error,
                 });
               }
               form.setErrorMap({
-                onSubmit: data.isFormError ? data.error : "Unexpected error",
+                onSubmit: data.isFormError ? data.error : 'Unexpected error',
               });
               throw new Error(data.error);
             } else {
@@ -64,12 +63,12 @@ export function CommentForm({
         e.stopPropagation();
         form.handleSubmit();
       }}
-      className="grid gap-2"
+      className='grid gap-2'
     >
       <form.Field
-        name="content"
+        name='content'
         children={(field) => (
-          <div className="grid gap-2">
+          <div className='grid gap-2'>
             <Textarea
               id={field.name}
               aria-label={field.name}
@@ -77,9 +76,9 @@ export function CommentForm({
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.currentTarget.value)}
-              placeholder="What are your thoughts?"
+              placeholder='What are your thoughts?'
               rows={4}
-              className="w-full p-2 text-sm"
+              className='w-full p-2 text-sm'
             />
             <FieldInfo field={field} />
           </div>
@@ -89,18 +88,18 @@ export function CommentForm({
         selector={(state) => [state.errorMap]}
         children={([errorMap]) =>
           errorMap.onSubmit ? (
-            <p className="text-[0.8rem] font-medium text-destructive">
+            <p className='text-[0.8rem] font-medium text-destructive'>
               {errorMap.onSubmit?.toString()}
             </p>
           ) : null
         }
       />
-      <div className="flex justify-end space-x-2">
+      <div className='flex justify-end space-x-2'>
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (
-            <Button type="submit" disabled={!canSubmit}>
-              {isSubmitting ? "..." : "Add comment"}
+            <Button type='submit' disabled={!canSubmit}>
+              {isSubmitting ? '...' : 'Add comment'}
             </Button>
           )}
         />

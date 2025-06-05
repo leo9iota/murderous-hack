@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   useQuery,
   useQueryClient,
   useSuspenseInfiniteQuery,
-} from "@tanstack/react-query";
+} from '@tanstack/react-query';
 
 import {
   ChevronDownIcon,
@@ -11,15 +11,14 @@ import {
   MessageSquareIcon,
   MinusIcon,
   PlusIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
-import { Comment } from "@/shared/types";
-import { getCommentComments, userQueryOptions } from "@/lib/api";
-import { useUpvoteComment } from "@/lib/api-hooks";
-import { cn, relativeTime } from "@/lib/utils";
-
-import { CommentForm } from "./comment-form";
-import { Separator } from "./ui/separator";
+import { Comment } from '@/shared/types';
+import { getCommentComments, userQueryOptions } from '@/lib/api';
+import { useUpvoteComment } from '@/lib/api-hooks';
+import { cn, relativeTime } from '@/lib/utils';
+import { CommentForm } from './comment-form';
+import { Separator } from './ui/separator';
 
 type CommentCardProps = {
   comment: Comment;
@@ -27,7 +26,7 @@ type CommentCardProps = {
   activeReplyId: number | null;
   setActiveReplyId: React.Dispatch<React.SetStateAction<number | null>>;
   isLast: boolean;
-  toggleUpvote: ReturnType<typeof useUpvoteComment>["mutate"];
+  toggleUpvote: ReturnType<typeof useUpvoteComment>['mutate'];
 };
 
 export function CommentCard({
@@ -47,7 +46,7 @@ export function CommentCard({
     fetchNextPage,
     isFetchingNextPage,
   } = useSuspenseInfiniteQuery({
-    queryKey: ["comments", "comment", comment.id],
+    queryKey: ['comments', 'comment', comment.id],
     queryFn: ({ pageParam }) => getCommentComments(comment.id, pageParam),
     initialPageParam: 1,
     staleTime: Infinity,
@@ -56,7 +55,7 @@ export function CommentCard({
       pages: [
         {
           success: true,
-          message: "Comments fetched",
+          message: 'Comments fetched',
           data: comment.childComments ?? [],
           pagination: {
             page: 1,
@@ -83,17 +82,17 @@ export function CommentCard({
   return (
     <div
       className={cn(
-        depth > 0 && "ml-4 border-l border-border pl-4",
-        isDraft && "pointer-events-none opacity-50",
+        depth > 0 && 'ml-4 border-l border-border pl-4',
+        isDraft && 'pointer-events-none opacity-50',
       )}
     >
-      <div className="py-2">
-        <div className="mb-2 flex items-center space-x-1 text-xs">
+      <div className='py-2'>
+        <div className='mb-2 flex items-center space-x-1 text-xs'>
           <button
             disabled={!user}
             className={cn(
-              "flex items-center space-x-1 hover:text-primary",
-              isUpvoted ? "text-primary" : "text-muted-foreground",
+              'flex items-center space-x-1 hover:text-primary',
+              isUpvoted ? 'text-primary' : 'text-muted-foreground',
             )}
             onClick={() =>
               toggleUpvote({
@@ -104,17 +103,17 @@ export function CommentCard({
             }
           >
             <ChevronUpIcon size={14} />
-            <span className="font-medium">{comment.points}</span>
+            <span className='font-medium'>{comment.points}</span>
           </button>
-          <span className="text-muted-foreground">·</span>
-          <span className="font-medium">{comment.author.username}</span>
-          <span className="text-muted-foreground">·</span>
-          <span className="text-muted-foreground">
+          <span className='text-muted-foreground'>·</span>
+          <span className='font-medium'>{comment.author.username}</span>
+          <span className='text-muted-foreground'>·</span>
+          <span className='text-muted-foreground'>
             {relativeTime(comment.createdAt)}
           </span>
-          <span className="text-muted-foreground">·</span>
+          <span className='text-muted-foreground'>·</span>
           <button
-            className="text-muted-foreground hover:text-foreground"
+            className='text-muted-foreground hover:text-foreground'
             onClick={() => setIsCollapsed((prev) => !prev)}
           >
             {isCollapsed ? <PlusIcon size={14} /> : <MinusIcon size={14} />}
@@ -122,14 +121,12 @@ export function CommentCard({
         </div>
         {!isCollapsed && (
           <>
-            <p className="mb-2 text-sm text-foreground">{comment.content}</p>
-            <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+            <p className='mb-2 text-sm text-foreground'>{comment.content}</p>
+            <div className='flex items-center space-x-1 text-xs text-muted-foreground'>
               {user && (
                 <button
-                  className="flex items-center space-x-1 hover:text-foreground"
-                  onClick={() =>
-                    setActiveReplyId(isReplying ? null : comment.id)
-                  }
+                  className='flex items-center space-x-1 hover:text-foreground'
+                  onClick={() => setActiveReplyId(isReplying ? null : comment.id)}
                 >
                   <MessageSquareIcon size={12} />
                   <span>reply</span>
@@ -137,7 +134,7 @@ export function CommentCard({
               )}
             </div>
             {isReplying && (
-              <div className="mt-2">
+              <div className='mt-2'>
                 <CommentForm
                   id={comment.id}
                   isParent
@@ -165,13 +162,13 @@ export function CommentCard({
           ));
         })}
       {!isCollapsed && (hasNextPage || loadFirstPage) && (
-        <div className="mt-2">
+        <div className='mt-2'>
           <button
-            className="flex items-center space-x-1 text-xs text-muted-foreground hover:text-foreground"
+            className='flex items-center space-x-1 text-xs text-muted-foreground hover:text-foreground'
             onClick={() => {
               if (loadFirstPage) {
                 queryClient.invalidateQueries({
-                  queryKey: ["comments", "comment", comment.id],
+                  queryKey: ['comments', 'comment', comment.id],
                 });
               } else {
                 fetchNextPage();
@@ -190,7 +187,7 @@ export function CommentCard({
           </button>
         </div>
       )}
-      {!isLast && <Separator className="my-2" />}
+      {!isLast && <Separator className='my-2' />}
     </div>
   );
 }

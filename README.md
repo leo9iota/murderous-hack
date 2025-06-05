@@ -14,14 +14,14 @@
 
 ## Key Features
 
-- Paginated queries with [InfiniteQueries](https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries)
-- Caching and cache-control
-- Optimistic updates
+-   Paginated queries with [InfiniteQueries](https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries)
+-   Caching and cache-control
+-   Optimistic updates
 
 ## Reminder
 
-- **Backend Setup**: After each restart run the `bun start` command to spin up the Docker container and setup Drizzle ORM.
-- **API Testing**: First hit the `api/auth/login` endpoint with a POST request, before API testing.
+-   **Backend Setup**: After each restart run the `bun start` command to spin up the Docker container and setup Drizzle ORM.
+-   **API Testing**: First hit the `api/auth/login` endpoint with a POST request, before API testing.
 
 ## Deployment
 

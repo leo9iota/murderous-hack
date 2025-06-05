@@ -1,24 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router';
 import {
   infiniteQueryOptions,
   useSuspenseInfiniteQuery,
-} from "@tanstack/react-query";
-import { fallback, zodSearchValidator } from "@tanstack/router-zod-adapter";
+} from '@tanstack/react-query';
+import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
 
-import { z } from "zod";
+import { z } from 'zod';
 
-import { orderSchema, sortBySchema } from "@/shared/types";
-import { getPosts } from "@/lib/api";
-import { useUpvotePost } from "@/lib/api-hooks";
-import { Button } from "@/components/ui/button";
-import { PostCard } from "@/components/post-card";
-import { SortBar } from "@/components/sort-bar";
+import { orderSchema, sortBySchema } from '@/shared/types';
+import { getPosts } from '@/lib/api';
+import { useUpvotePost } from '@/lib/api-hooks';
+import { Button } from '@/components/ui/button';
+import { PostCard } from '@/components/post-card';
+import { SortBar } from '@/components/sort-bar';
 
 const homeSearchSchema = z.object({
-  sortBy: fallback(sortBySchema, "points").default("recent"),
-  order: fallback(orderSchema, "desc").default("desc"),
-  author: z.optional(fallback(z.string(), "")),
-  site: z.optional(fallback(z.string(), "")),
+  sortBy: fallback(sortBySchema, 'points').default('recent'),
+  order: fallback(orderSchema, 'desc').default('desc'),
+  author: z.optional(fallback(z.string(), '')),
+  site: z.optional(fallback(z.string(), '')),
 });
 
 const postsInfiniteQueryOptions = ({
@@ -28,7 +28,7 @@ const postsInfiniteQueryOptions = ({
   site,
 }: z.infer<typeof homeSearchSchema>) =>
   infiniteQueryOptions({
-    queryKey: ["posts", sortBy, order, author, site],
+    queryKey: ['posts', sortBy, order, author, site],
     queryFn: ({ pageParam }) =>
       getPosts({
         pageParam,
@@ -49,7 +49,7 @@ const postsInfiniteQueryOptions = ({
     },
   });
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute('/')({
   component: HomeComponent,
   validateSearch: zodSearchValidator(homeSearchSchema),
   loaderDeps: ({ search }) => ({
@@ -74,10 +74,10 @@ function HomeComponent() {
 
   const upvoteMutation = useUpvotePost();
   return (
-    <div className="mx-auto max-w-3xl p-4">
-      <h1 className="mb-6 text-2xl font-bold text-foreground">Submissions</h1>
+    <div className='mx-auto max-w-3xl p-4'>
+      <h1 className='mb-6 text-2xl font-bold text-foreground'>Submissions</h1>
       <SortBar sortBy={sortBy} order={order} />
-      <div className="space-y-4">
+      <div className='space-y-4'>
         {data?.pages.map((page) =>
           page.data.map((post) => (
             <PostCard
@@ -88,16 +88,16 @@ function HomeComponent() {
           )),
         )}
       </div>
-      <div className="mt-6">
+      <div className='mt-6'>
         <Button
           onClick={() => fetchNextPage()}
           disabled={!hasNextPage || isFetchingNextPage}
         >
           {isFetchingNextPage
-            ? "Loading more..."
+            ? 'Loading more...'
             : hasNextPage
-              ? "Load more"
-              : "Nothing more"}
+              ? 'Load more'
+              : 'Nothing more'}
         </Button>
       </div>
     </div>
