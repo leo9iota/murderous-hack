@@ -1,109 +1,127 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useForm } from '@tanstack/react-form';
+import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
+
+import { toast } from 'sonner';
 import { z } from 'zod';
-import { loginSchema } from '@/shared/types';
+
+import { loginSchema } from '@/shared/client-types';
+import { postSignup } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const signupSearchSchema = z.object({
   redirect: fallback(z.string(), '/').default('/'),
 });
 
 export const Route = createFileRoute('/signup')({
-  component: Signup,
+  component: RouteComponent,
   validateSearch: zodSearchValidator(signupSearchSchema),
 });
 
-function Signup() {
+function RouteComponent() {
+  const search = Route.useSearch();
+  const navigate = useNavigate();
+
   const form = useForm({
     defaultValues: {
-      username: "",
-      password: ""
+      username: '',
+      password: '',
     },
     validators: {
       onChange: loginSchema,
     },
     onSubmit: async ({ value }) => {
-      // Handle form submission
-      console.log('Form submitted:', value);
+      const result = await postSignup(value.username, value.password);
+
+      if (result.success) {
+        toast.success(result.message);
+        navigate({ to: search.redirect });
+      } else {
+        toast.error(result.error);
+      }
     },
   });
 
   return (
-    <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          form.handleSubmit();
-        }}
-        className="space-y-4"
-      >
-        <form.Field
-          name="username"
-          children={(field) => (
-            <div>
-              <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-1">
-                Username
-              </label>
-              <input
-                id={field.name}
-                name={field.name}
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your username"
-              />
-              {field.state.meta.errors.length > 0 && (
-                <p className="mt-1 text-sm text-red-600">
-                  {field.state.meta.errors.join(', ')}
-                </p>
+    <div className='w-full'>
+      <Card className='mx-auto mt-12 max-w-sm border-border/25'>
+        <CardHeader>
+          <CardTitle>Sign Up</CardTitle>
+          <CardDescription>Create a new account to get started</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              form.handleSubmit();
+            }}
+            className='space-y-4'
+          >
+            <form.Field
+              name='username'
+              children={(field) => (
+                <div className='space-y-2'>
+                  <Label htmlFor={field.name}>Username</Label>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder='Enter your username'
+                  />
+                  {field.state.meta.errors.length > 0 && (
+                    <p className='text-sm text-destructive'>
+                      {String(field.state.meta.errors[0])}
+                    </p>
+                  )}
+                </div>
               )}
-            </div>
-          )}
-        />
+            />
 
-        <form.Field
-          name="password"
-          children={(field) => (
-            <div>
-              <label htmlFor={field.name} className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                id={field.name}
-                name={field.name}
-                type="password"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter your password"
-              />
-              {field.state.meta.errors.length > 0 && (
-                <p className="mt-1 text-sm text-red-600">
-                  {field.state.meta.errors.join(', ')}
-                </p>
+            <form.Field
+              name='password'
+              children={(field) => (
+                <div className='space-y-2'>
+                  <Label htmlFor={field.name}>Password</Label>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    type='password'
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder='Enter your password'
+                  />
+                  {field.state.meta.errors.length > 0 && (
+                    <p className='text-sm text-destructive'>
+                      {String(field.state.meta.errors[0])}
+                    </p>
+                  )}
+                </div>
               )}
-            </div>
-          )}
-        />
+            />
 
-        <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting]}
-          children={([canSubmit, isSubmitting]) => (
-            <button
-              type="submit"
-              disabled={!canSubmit}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            <Button
+              type='submit'
+              className='w-full'
+              disabled={form.state.isSubmitting}
             >
-              {isSubmitting ? 'Signing up...' : 'Sign Up'}
-            </button>
-          )}
-        />
-      </form>
+              {form.state.isSubmitting ? 'Creating Account...' : 'Sign Up'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
