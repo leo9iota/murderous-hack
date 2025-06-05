@@ -54,7 +54,7 @@ function ErrorDisplay({ error }: { error: Error }) {
                   <div className='rounded-md bg-muted p-4'>
                     <h3 className='mb-2 font-bold'>Error Message</h3>
                     <p className='mb-4 text-sm'>{error.message}</p>
-                    <h3 className='mb-2 font-semibold'>Stack Trace:</h3>
+                    <h3 className='mb-2 font-bold'>Stack Trace</h3>
                     <pre className='overflow-x-auto whitespace-pre-wrap text-xs'>
                       {error.stack}
                     </pre>
