@@ -1,8 +1,4 @@
-import React from 'react'
-
-type Props = {}
-
-function Post({}: Props) {
+function Post() {
   return (
     <div>Post</div>
   )

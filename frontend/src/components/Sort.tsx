@@ -1,8 +1,4 @@
-import React from 'react'
-
-type Props = {}
-
-function Sort({}: Props) {
+function Sort() {
   return (
     <div>Sort</div>
   )

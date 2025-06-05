@@ -1,8 +1,4 @@
-import React from 'react';
-
-type Props = {};
-
-function Comment({}: Props) {
+function Comment() {
   return <div>Comment</div>;
 }
 

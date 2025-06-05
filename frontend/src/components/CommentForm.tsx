@@ -1,8 +1,4 @@
-import React from 'react'
-
-type Props = {}
-
-function CommentForm({}: Props) {
+function CommentForm() {
   return (
     <div>CommentForm</div>
   )
