@@ -35,7 +35,7 @@ function RootComponent() {
           <Outlet />
         </main>
         <footer className='p-4 text-center'>
-          <p className='text-sm text-muted-foreground'>BetterNews &copy;</p>
+          <p className='text-sm text-muted-foreground'>Murderous Hack &copy;</p>
         </footer>
       </div>
       <Toaster />

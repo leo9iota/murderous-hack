@@ -23,7 +23,7 @@ export function Header() {
       <div className='container mx-auto flex items-center justify-between p-4'>
         <div className='flex items-center space-x-4'>
           <Link to='/' className='text-2xl font-bold'>
-            BetterNews
+            Murderous Hack
           </Link>
           <nav className='hidden items-center space-x-4 md:flex'>
             <Link
@@ -77,7 +77,7 @@ export function Header() {
           </SheetTrigger>
           <SheetContent className='mb-2'>
             <SheetHeader>
-              <SheetTitle>BetterNews</SheetTitle>
+              <SheetTitle>Murderous Hack</SheetTitle>
               <SheetDescription className='sr-only'>Navigation</SheetDescription>
             </SheetHeader>
             <nav className='flex flex-col space-y-4'>
