@@ -2,18 +2,16 @@
     "name": "murderous-hack",
     "scripts": {
         "dev": "bun run --hot server/index.ts",
-        "dev:setup": "bun run dev/simple-setup.ts",
-        "dev:start": "bun run dev/simple-start.ts",
-        "dev:stop": "bun run dev/simple-stop.ts",
-        "dev:all": "bun run dev/simple-all.ts",
+        "setup": "bun run scripts/setup.ts",
+        "start": "bun run scripts/start.ts",
+        "stop": "bun run scripts/stop.ts",
         "db:push": "bunx drizzle-kit push",
         "db:generate": "bunx drizzle-kit generate",
         "db:migrate": "bunx drizzle-kit migrate",
         "fmt:write": "prettier . --write",
         "fmt:check": "prettier . --check",
         "lint:server": "cd server && eslint .",
-        "lint:frontend": "cd frontend && eslint .",
-        "start": "bun server/index.ts"
+        "lint:frontend": "cd frontend && eslint ."
     },
     "dependencies": {
         "@hono/zod-validator": "^0.4.1",
