@@ -20,7 +20,14 @@ export default defineConfig({
         alias: {
             '@/shared': path.resolve(__dirname, '../shared'),
             '@': path.resolve(__dirname, './src'),
+            buffer: 'buffer',
         },
+    },
+    define: {
+        global: 'globalThis',
+    },
+    optimizeDeps: {
+        include: ['buffer'],
     },
     server: {
         proxy: {
