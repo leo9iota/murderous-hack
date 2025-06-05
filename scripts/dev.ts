@@ -1,24 +1,16 @@
-import { $ } from 'bun'; // Use shell API from Bun
+import { $ } from 'bun';
 
-// Make use of IIFE (because I can)
-/**
- * NOTE: Docker Desktop (Windows 11) has to be running for that script to work
- */
 (async () => {
     try {
-        // Stop any existing containers first
         console.log('Stopping existing containers...');
         await $`docker compose down`;
 
-        // Start database
         console.log('Starting database container...');
         await $`docker compose up -d`;
 
-        // More explicit waiting with longer timeout
         console.log('Waiting for database to be fully ready...');
         await new Promise((resolve) => setTimeout(resolve, 5000));
 
-        // Try to push schema
         console.log('Pushing database schema...');
         try {
             await $`bun db:push`;
@@ -27,7 +19,6 @@ import { $ } from 'bun'; // Use shell API from Bun
             throw error;
         }
 
-        // Start dev server
         console.log('Starting development server...');
         await $`bun dev`;
     } catch (error) {
