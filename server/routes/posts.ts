@@ -395,4 +395,40 @@ export const postRouter = new Hono<Context>()
                 200,
             );
         },
+    )
+    .delete(
+        '/:id',
+        loggedIn,
+        zValidator('param', z.object({ id: z.coerce.number() })),
+        async (c) => {
+            const { id } = c.req.valid('param');
+            const user = c.get('user')!;
+
+            // First check if the post exists and belongs to the user
+            const [post] = await db
+                .select({ userId: postsTable.userId })
+                .from(postsTable)
+                .where(eq(postsTable.id, id))
+                .limit(1);
+
+            if (!post) {
+                throw new HTTPException(404, { message: 'Post not found' });
+            }
+
+            if (post.userId !== user.id) {
+                throw new HTTPException(403, { message: 'You can only delete your own posts' });
+            }
+
+            // Delete the post (this will cascade delete comments and upvotes if foreign keys are set up)
+            await db.delete(postsTable).where(eq(postsTable.id, id));
+
+            return c.json<SuccessResponse<null>>(
+                {
+                    success: true,
+                    message: 'Post deleted successfully',
+                    data: null,
+                },
+                200,
+            );
+        },
     );
