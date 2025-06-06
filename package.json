@@ -2,7 +2,6 @@
     "name": "murderous-hack",
     "scripts": {
         "dev": "bun run --hot server/index.ts",
-        "dev:better-auth": "bun run --hot server/better-index.ts",
         "setup": "bun run scripts/setup.ts",
         "start": "bun run scripts/start.ts",
         "stop": "bun run scripts/stop.ts",
@@ -16,12 +15,10 @@
     },
     "dependencies": {
         "@hono/zod-validator": "^0.4.1",
-        "@lucia-auth/adapter-drizzle": "^1.1.0",
         "better-auth": "^1.1.1",
         "drizzle-orm": "^0.34.1",
         "drizzle-zod": "^0.5.1",
         "hono": "^4.6.3",
-        "lucia": "^3.2.1",
         "postgres": "^3.4.4",
         "zod": "^3.23.8"
     },
