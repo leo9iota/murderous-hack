@@ -13,7 +13,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Button } from './ui/button';
 
-export function ErrorComponent({ error }: { error: Error }) {
+export function ErrorInfo({ error }: { error: Error }) {
   const router = useRouter();
   const isDev = process.env.NODE_ENV !== 'production';
 

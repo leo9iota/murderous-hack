@@ -9,7 +9,7 @@ import './globals.css';
 
 import { Loader2Icon } from 'lucide-react';
 
-import { ErrorComponent } from './components/ErrorComponent';
+import { ErrorInfo } from './components/ErrorInfo';
 import { NotFound } from './components/NotFound';
 
 const queryClient = new QueryClient();
@@ -26,7 +26,7 @@ const router = createRouter({
     </div>
   ),
   defaultNotFoundComponent: NotFound,
-  defaultErrorComponent: ({ error }) => <ErrorComponent error={error} />,
+  defaultErrorComponent: ({ error }) => <ErrorInfo error={error} />,
 });
 
 // Register things for typesafety
