@@ -4,7 +4,13 @@ import { current, produce } from 'immer';
 import { toast } from 'sonner';
 
 import { Comment, PaginatedResponse, Post, SuccessResponse } from '@/shared/types';
-import { GetPostsSuccess, postComment, upvoteComment, upvotePost } from './api';
+import {
+    deletePost,
+    GetPostsSuccess,
+    postComment,
+    upvoteComment,
+    upvotePost,
+} from './api';
 
 const updatePostUpvote = (draft: Post) => {
     draft.points += draft.isUpvoted ? -1 : +1;
@@ -273,6 +279,59 @@ export const useCreateComment = () => {
                 : ['comments', 'post', id];
             toast.error('Failed to create comment');
             queryClient.invalidateQueries({ queryKey });
+        },
+    });
+};
+
+export const useDeletePost = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: deletePost,
+        onMutate: async (postId) => {
+            await queryClient.cancelQueries({ queryKey: ['posts'] });
+            await queryClient.cancelQueries({ queryKey: ['post', postId] });
+
+            const previousPosts = queryClient.getQueryData(['posts']);
+
+            queryClient.setQueriesData<InfiniteData<GetPostsSuccess>>(
+                { queryKey: ['posts'] },
+                produce((oldData) => {
+                    if (!oldData) return undefined;
+
+                    oldData.pages.forEach((page) => {
+                        page.data = page.data.filter((post) => post.id !== postId);
+                    });
+                }),
+            );
+
+            return { previousPosts };
+        },
+        onSuccess: (data, postId) => {
+            if (data.success) {
+                queryClient.removeQueries({ queryKey: ['post', postId] });
+
+                queryClient.invalidateQueries({
+                    queryKey: ['posts'],
+                    refetchType: 'none',
+                });
+
+                toast.success('Post deleted successfully');
+            } else {
+                toast.error('Failed to delete post');
+            }
+        },
+        onError: (err, postId, context) => {
+            console.error('Delete post error:', err);
+
+            if (context?.previousPosts) {
+                queryClient.setQueryData(['posts'], context.previousPosts);
+            }
+
+            queryClient.invalidateQueries({ queryKey: ['posts'] });
+            queryClient.invalidateQueries({ queryKey: ['post', postId] });
+
+            toast.error('Failed to delete post');
         },
     });
 };
