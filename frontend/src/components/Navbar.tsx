@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import { Link, useRouter } from '@tanstack/react-router';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { MenuIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
-import { userQueryOptions } from '@/lib/api';
+import { userQueryOptions, postLogout } from '@/lib/api';
 import { Button } from './ui/button';
 import {
   Sheet,
@@ -18,6 +19,23 @@ import {
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useQuery(userQueryOptions());
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const result = await postLogout();
+      if (result.success) {
+        await queryClient.invalidateQueries({ queryKey: ['user'] });
+        router.invalidate();
+        toast.success('Logged out successfully');
+      } else {
+        toast.error('Logout failed', { description: result.error });
+      }
+    } catch (error) {
+      toast.error('Logout failed', { description: String(error) });
+    }
+  };
   return (
     <header className='bg-mh-primary/95 supports-[backdrop-filter]:bg-mh-primary/90 sticky top-0 z-50 w-full border-border/40 backdrop-blur'>
       <div className='container mx-auto flex items-center justify-between p-4'>
@@ -54,12 +72,12 @@ export function Navbar() {
             <>
               <span>{user}</span>
               <Button
-                asChild
                 size='sm'
                 variant='secondary'
                 className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
+                onClick={handleLogout}
               >
-                <a href='api/auth/logout'>Log out</a>
+                Log out
               </Button>
             </>
           ) : (
@@ -119,12 +137,12 @@ export function Navbar() {
                 <>
                   <span>user: {user}</span>
                   <Button
-                    asChild
                     size='sm'
                     variant='secondary'
                     className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
+                    onClick={handleLogout}
                   >
-                    <a href='api/auth/logout'>Log out</a>
+                    Log out
                   </Button>
                 </>
               ) : (
