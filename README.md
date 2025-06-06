@@ -12,6 +12,10 @@
 
 ![Architecture](./images/murderous-hack-architecture.png)
 
+## Auth
+
+![Auth](./images/murderous-hack-auth.png)
+
 ## Key Features
 
 -   Paginated queries with [InfiniteQueries](https://tanstack.com/query/latest/docs/framework/react/guides/infinite-queries)
