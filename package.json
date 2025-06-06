@@ -15,7 +15,7 @@
     },
     "dependencies": {
         "@hono/zod-validator": "^0.4.1",
-        "better-auth": "^1.1.1",
+        "better-auth": "^1.2.8",
         "drizzle-orm": "^0.34.1",
         "drizzle-zod": "^0.5.1",
         "hono": "^4.6.3",
