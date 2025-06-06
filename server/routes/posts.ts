@@ -8,34 +8,125 @@ import { userTable } from '@/db/schemas/auth';
 import { commentsTable } from '@/db/schemas/comments';
 import { postsTable } from '@/db/schemas/posts';
 import { commentUpvotesTable, postUpvotesTable } from '@/db/schemas/upvotes';
-import { loggedIn } from '@/middleware/loggedIn';
+import { loggedIn } from '@/middleware/logged-in';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 
 import {
+    insertPostSchema,
     createCommentSchema,
-    createPostSchema,
     paginationSchema,
-    type Comment,
-    type PaginatedResponse,
-    type Post,
     type SuccessResponse,
 } from '@/shared/types';
-import { getISOFormatDateQuery } from '@/lib/utils';
 
 export const postRouter = new Hono<Context>()
-    .post('/', loggedIn, zValidator('form', createPostSchema), async (c) => {
+    .get('/', zValidator('query', paginationSchema), async (c) => {
+        const { page, sortBy, order, author, site } = c.req.valid('query');
+        const user = c.get('user');
+        const limit = 10;
+        const offset = (page - 1) * limit;
+
+        let orderByClause;
+        switch (sortBy) {
+            case 'recent':
+                orderByClause = order === 'asc' ? asc(postsTable.createdAt) : desc(postsTable.createdAt);
+                break;
+            case 'points':
+                orderByClause = order === 'asc' ? asc(postsTable.points) : desc(postsTable.points);
+                break;
+            case 'comments':
+                orderByClause = order === 'asc' ? asc(postsTable.commentCount) : desc(postsTable.commentCount);
+                break;
+            default:
+                orderByClause = desc(postsTable.points);
+        }
+
+        const whereConditions = [];
+        if (author) {
+            whereConditions.push(eq(userTable.username, author));
+        }
+        if (site) {
+            whereConditions.push(sql`${postsTable.url} LIKE ${`%${site}%`}`);
+        }
+
+        const posts = await db
+            .select({
+                id: postsTable.id,
+                title: postsTable.title,
+                url: postsTable.url,
+                content: postsTable.content,
+                points: postsTable.points,
+                commentCount: postsTable.commentCount,
+                createdAt: postsTable.createdAt,
+                author: userTable.username,
+                isUpvoted: user
+                    ? countDistinct(
+                          sql`CASE WHEN ${postUpvotesTable.userId} = ${user.id} THEN 1 END`,
+                      )
+                    : sql`0`,
+            })
+            .from(postsTable)
+            .innerJoin(userTable, eq(postsTable.userId, userTable.id))
+            .leftJoin(
+                postUpvotesTable,
+                and(
+                    eq(postUpvotesTable.postId, postsTable.id),
+                    user ? eq(postUpvotesTable.userId, user.id) : undefined,
+                ),
+            )
+            .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+            .groupBy(postsTable.id, userTable.username)
+            .orderBy(orderByClause)
+            .limit(limit)
+            .offset(offset);
+
+        const [{ totalCount }] = await db
+            .select({ totalCount: countDistinct(postsTable.id) })
+            .from(postsTable)
+            .innerJoin(userTable, eq(postsTable.userId, userTable.id))
+            .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+
+        const totalPages = Math.ceil(totalCount / limit);
+
+        return c.json<
+            SuccessResponse<{
+                data: typeof posts;
+                pagination: {
+                    page: number;
+                    totalPages: number;
+                    totalCount: number;
+                };
+            }>
+        >({
+            success: true,
+            message: 'Posts fetched',
+            data: {
+                data: posts.map((post) => ({
+                    ...post,
+                    isUpvoted: Boolean(post.isUpvoted),
+                })),
+                pagination: {
+                    page,
+                    totalPages,
+                    totalCount,
+                },
+            },
+        });
+    })
+    .post('/', loggedIn, zValidator('form', insertPostSchema), async (c) => {
         const { title, url, content } = c.req.valid('form');
         const user = c.get('user')!;
+
         const [post] = await db
             .insert(postsTable)
             .values({
-                title,
-                content,
-                url,
                 userId: user.id,
+                title,
+                url: url || null,
+                content: content || null,
             })
             .returning({ id: postsTable.id });
+
         return c.json<SuccessResponse<{ postId: number }>>(
             {
                 success: true,
@@ -45,370 +136,119 @@ export const postRouter = new Hono<Context>()
             201,
         );
     })
-    .get('/', zValidator('query', paginationSchema), async (c) => {
-        const { limit, page, sortBy, order, author, site } = c.req.valid('query');
+    .get('/:id', zValidator('param', z.object({ id: z.string() })), async (c) => {
+        const { id } = c.req.valid('param');
         const user = c.get('user');
 
-        const offset = (page - 1) * limit;
-
-        const sortByColumn =
-            sortBy === 'points' ? postsTable.points : postsTable.createdAt;
-        const sortOrder = order === 'desc' ? desc(sortByColumn) : asc(sortByColumn);
-
-        const [count] = await db
-            .select({ count: countDistinct(postsTable.id) })
-            .from(postsTable)
-            .where(
-                and(
-                    author ? eq(postsTable.userId, author) : undefined,
-                    site ? eq(postsTable.url, site) : undefined,
-                ),
-            );
-
-        const postsQuery = db
+        const [post] = await db
             .select({
                 id: postsTable.id,
                 title: postsTable.title,
                 url: postsTable.url,
+                content: postsTable.content,
                 points: postsTable.points,
-                createdAt: getISOFormatDateQuery(postsTable.createdAt),
                 commentCount: postsTable.commentCount,
-                author: {
-                    username: userTable.username,
-                    id: userTable.id,
-                },
+                createdAt: postsTable.createdAt,
+                author: userTable.username,
                 isUpvoted: user
-                    ? sql<boolean>`CASE WHEN ${postUpvotesTable.userId} IS NOT NULL THEN true ELSE false END`
-                    : sql<boolean>`false`,
+                    ? countDistinct(
+                          sql`CASE WHEN ${postUpvotesTable.userId} = ${user.id} THEN 1 END`,
+                      )
+                    : sql`0`,
             })
             .from(postsTable)
-            .leftJoin(userTable, eq(postsTable.userId, userTable.id))
-            .orderBy(sortOrder)
-            .limit(limit)
-            .offset(offset)
-            .where(
-                and(
-                    author ? eq(postsTable.userId, author) : undefined,
-                    site ? eq(postsTable.url, site) : undefined,
-                ),
-            );
-
-        if (user) {
-            postsQuery.leftJoin(
+            .innerJoin(userTable, eq(postsTable.userId, userTable.id))
+            .leftJoin(
                 postUpvotesTable,
                 and(
                     eq(postUpvotesTable.postId, postsTable.id),
-                    eq(postUpvotesTable.userId, user.id),
+                    user ? eq(postUpvotesTable.userId, user.id) : undefined,
                 ),
-            );
+            )
+            .where(eq(postsTable.id, Number(id)))
+            .groupBy(postsTable.id, userTable.username)
+            .limit(1);
+
+        if (!post) {
+            throw new HTTPException(404, { message: 'Post not found' });
         }
 
-        const posts = await postsQuery;
-
-        return c.json<PaginatedResponse<Post[]>>(
-            {
-                data: posts as Post[],
-                success: true,
-                message: 'Posts fetched',
-                pagination: {
-                    page: page,
-                    totalPages: Math.ceil(count.count / limit) as number,
-                },
+        return c.json<SuccessResponse<typeof post>>({
+            success: true,
+            message: 'Post fetched',
+            data: {
+                ...post,
+                isUpvoted: Boolean(post.isUpvoted),
             },
-            200,
-        );
+        });
     })
     .post(
         '/:id/upvote',
         loggedIn,
-        zValidator('param', z.object({ id: z.coerce.number() })),
+        zValidator('param', z.object({ id: z.string() })),
         async (c) => {
             const { id } = c.req.valid('param');
             const user = c.get('user')!;
-            let pointsChange: -1 | 1 = 1;
 
-            const points = await db.transaction(async (tx) => {
-                const [existingUpvote] = await tx
-                    .select()
-                    .from(postUpvotesTable)
-                    .where(
-                        and(
-                            eq(postUpvotesTable.postId, id),
-                            eq(postUpvotesTable.userId, user.id),
-                        ),
-                    )
-                    .limit(1);
-
-                pointsChange = existingUpvote ? -1 : 1;
-
-                const [updated] = await tx
-                    .update(postsTable)
-                    .set({ points: sql`${postsTable.points} + ${pointsChange}` })
-                    .where(eq(postsTable.id, id))
-                    .returning({ points: postsTable.points });
-
-                if (!updated) {
-                    throw new HTTPException(404, { message: 'Post not found' });
-                }
-
-                if (existingUpvote) {
-                    await tx
-                        .delete(postUpvotesTable)
-                        .where(eq(postUpvotesTable.id, existingUpvote.id));
-                } else {
-                    await tx
-                        .insert(postUpvotesTable)
-                        .values({ postId: id, userId: user.id });
-                }
-
-                return updated.points;
-            });
-
-            return c.json<SuccessResponse<{ count: number; isUpvoted: boolean }>>(
-                {
-                    success: true,
-                    message: 'Post updated',
-                    data: { count: points, isUpvoted: pointsChange > 0 },
-                },
-                200,
-            );
-        },
-    )
-    .post(
-        '/:id/comment',
-        loggedIn,
-        zValidator('param', z.object({ id: z.coerce.number() })),
-        zValidator('form', createCommentSchema),
-        async (c) => {
-            const { id } = c.req.valid('param');
-            const { content } = c.req.valid('form');
-            const user = c.get('user')!;
-
-            const [comment] = await db.transaction(async (tx) => {
-                const [updated] = await tx
-                    .update(postsTable)
-                    .set({ commentCount: sql`${postsTable.commentCount} + 1` })
-                    .where(eq(postsTable.id, id))
-                    .returning({ commentCount: postsTable.commentCount });
-
-                if (!updated) {
-                    throw new HTTPException(404, {
-                        message: 'Post not found',
-                    });
-                }
-
-                return await tx
-                    .insert(commentsTable)
-                    .values({
-                        content,
-                        userId: user.id,
-                        postId: id,
-                    })
-                    .returning({
-                        id: commentsTable.id,
-                        userId: commentsTable.userId,
-                        postId: commentsTable.postId,
-                        content: commentsTable.content,
-                        points: commentsTable.points,
-                        depth: commentsTable.depth,
-                        parentCommentId: commentsTable.parentCommentId,
-                        createdAt: getISOFormatDateQuery(commentsTable.createdAt).as(
-                            'created_at',
-                        ),
-                        commentCount: commentsTable.commentCount,
-                    });
-            });
-            return c.json<SuccessResponse<Comment>>({
-                success: true,
-                message: 'Comment created',
-                data: {
-                    ...comment,
-                    commentUpvotes: [],
-                    childComments: [],
-                    author: {
-                        username: user.username,
-                        id: user.id,
-                    },
-                } as Comment,
-            });
-        },
-    )
-    .get(
-        '/:id/comments',
-        zValidator('param', z.object({ id: z.coerce.number() })),
-        zValidator(
-            'query',
-            paginationSchema.extend({
-                includeChildren: z.boolean({ coerce: true }).optional(),
-            }),
-        ),
-        async (c) => {
-            const user = c.get('user');
-            const { id } = c.req.valid('param');
-            const { limit, page, sortBy, order, includeChildren } =
-                c.req.valid('query');
-            const offset = (page - 1) * limit;
-
-            const [postExists] = await db
-                .select({ exists: sql`1` })
-                .from(postsTable)
-                .where(eq(postsTable.id, id))
-                .limit(1);
-
-            if (!postExists) {
-                throw new HTTPException(404, { message: 'Post not found' });
-            }
-
-            const sortByColumn =
-                sortBy === 'points' ? commentsTable.points : commentsTable.createdAt;
-
-            const sortOrder =
-                order === 'desc' ? desc(sortByColumn) : asc(sortByColumn);
-
-            console.log(sortBy, order);
-
-            const [count] = await db
-                .select({ count: countDistinct(commentsTable.id) })
-                .from(commentsTable)
+            const [existingUpvote] = await db
+                .select()
+                .from(postUpvotesTable)
                 .where(
                     and(
-                        eq(commentsTable.postId, id),
-                        isNull(commentsTable.parentCommentId),
-                    ),
-                );
-
-            const comments = await db.query.comments.findMany({
-                where: and(
-                    eq(commentsTable.postId, id),
-                    isNull(commentsTable.parentCommentId),
-                ),
-                orderBy: sortOrder,
-                limit: limit,
-                offset: offset,
-                with: {
-                    author: {
-                        columns: {
-                            username: true,
-                            id: true,
-                        },
-                    },
-                    commentUpvotes: {
-                        columns: { userId: true },
-                        where: eq(commentUpvotesTable.userId, user?.id ?? ''),
-                        limit: 1,
-                    },
-                    childComments: {
-                        limit: includeChildren ? 2 : 0,
-                        with: {
-                            author: {
-                                columns: {
-                                    username: true,
-                                    id: true,
-                                },
-                            },
-                            commentUpvotes: {
-                                columns: { userId: true },
-                                where: eq(
-                                    commentUpvotesTable.userId,
-                                    user?.id ?? '',
-                                ),
-                                limit: 1,
-                            },
-                        },
-                        orderBy: sortOrder,
-                        extras: {
-                            createdAt: getISOFormatDateQuery(
-                                commentsTable.createdAt,
-                            ).as('created_at'),
-                        },
-                    },
-                },
-                extras: {
-                    createdAt: getISOFormatDateQuery(commentsTable.createdAt).as(
-                        'created_at',
-                    ),
-                },
-            });
-
-            return c.json<PaginatedResponse<Comment[]>>(
-                {
-                    success: true,
-                    message: 'Comments fetched',
-                    data: comments as Comment[],
-                    pagination: {
-                        page,
-                        totalPages: Math.ceil(count.count / limit) as number,
-                    },
-                },
-                200,
-            );
-        },
-    )
-    .get(
-        '/:id',
-        zValidator('param', z.object({ id: z.coerce.number() })),
-        async (c) => {
-            const user = c.get('user');
-
-            const { id } = c.req.valid('param');
-            const postsQuery = db
-                .select({
-                    id: postsTable.id,
-                    title: postsTable.title,
-                    url: postsTable.url,
-                    points: postsTable.points,
-                    content: postsTable.content,
-                    createdAt: getISOFormatDateQuery(postsTable.createdAt),
-                    commentCount: postsTable.commentCount,
-                    author: {
-                        username: userTable.username,
-                        id: userTable.id,
-                    },
-                    isUpvoted: user
-                        ? sql<boolean>`CASE WHEN ${postUpvotesTable.userId} IS NOT NULL THEN true ELSE false END`
-                        : sql<boolean>`false`,
-                })
-                .from(postsTable)
-                .leftJoin(userTable, eq(postsTable.userId, userTable.id))
-                .where(eq(postsTable.id, id));
-
-            if (user) {
-                postsQuery.leftJoin(
-                    postUpvotesTable,
-                    and(
-                        eq(postUpvotesTable.postId, postsTable.id),
+                        eq(postUpvotesTable.postId, Number(id)),
                         eq(postUpvotesTable.userId, user.id),
                     ),
-                );
+                )
+                .limit(1);
+
+            if (existingUpvote) {
+                await db
+                    .delete(postUpvotesTable)
+                    .where(
+                        and(
+                            eq(postUpvotesTable.postId, Number(id)),
+                            eq(postUpvotesTable.userId, user.id),
+                        ),
+                    );
+
+                await db
+                    .update(postsTable)
+                    .set({
+                        points: sql`${postsTable.points} - 1`,
+                    })
+                    .where(eq(postsTable.id, Number(id)));
+            } else {
+                await db.insert(postUpvotesTable).values({
+                    postId: Number(id),
+                    userId: user.id,
+                });
+
+                await db
+                    .update(postsTable)
+                    .set({
+                        points: sql`${postsTable.points} + 1`,
+                    })
+                    .where(eq(postsTable.id, Number(id)));
             }
 
-            const [post] = await postsQuery;
-            if (!post) {
-                throw new HTTPException(404, { message: 'Post not found' });
-            }
-            return c.json<SuccessResponse<Post>>(
-                {
-                    success: true,
-                    message: 'Post Fetched',
-                    data: post as Post,
-                },
-                200,
-            );
+            return c.json<SuccessResponse>({
+                success: true,
+                message: existingUpvote ? 'Post downvoted' : 'Post upvoted',
+            });
         },
     )
     .delete(
         '/:id',
         loggedIn,
-        zValidator('param', z.object({ id: z.coerce.number() })),
+        zValidator('param', z.object({ id: z.string() })),
         async (c) => {
             const { id } = c.req.valid('param');
             const user = c.get('user')!;
 
-            // First check if the post exists and belongs to the user
             const [post] = await db
                 .select({ userId: postsTable.userId })
                 .from(postsTable)
-                .where(eq(postsTable.id, id))
+                .where(eq(postsTable.id, Number(id)))
                 .limit(1);
 
             if (!post) {
@@ -416,19 +256,135 @@ export const postRouter = new Hono<Context>()
             }
 
             if (post.userId !== user.id) {
-                throw new HTTPException(403, { message: 'You can only delete your own posts' });
+                throw new HTTPException(403, { message: 'Forbidden' });
             }
 
-            // Delete the post (this will cascade delete comments and upvotes if foreign keys are set up)
-            await db.delete(postsTable).where(eq(postsTable.id, id));
+            await db.delete(postsTable).where(eq(postsTable.id, Number(id)));
 
-            return c.json<SuccessResponse<null>>(
+            return c.json<SuccessResponse>({
+                success: true,
+                message: 'Post deleted',
+            });
+        },
+    )
+    .get(
+        '/:id/comments',
+        zValidator('param', z.object({ id: z.string() })),
+        zValidator('query', paginationSchema),
+        async (c) => {
+            const { id } = c.req.valid('param');
+            const { page, sortBy, order } = c.req.valid('query');
+            const user = c.get('user');
+            const limit = 10;
+            const offset = (page - 1) * limit;
+
+            let orderByClause;
+            switch (sortBy) {
+                case 'recent':
+                    orderByClause = order === 'asc' ? asc(commentsTable.createdAt) : desc(commentsTable.createdAt);
+                    break;
+                case 'points':
+                    orderByClause = order === 'asc' ? asc(commentsTable.points) : desc(commentsTable.points);
+                    break;
+                default:
+                    orderByClause = desc(commentsTable.points);
+            }
+
+            const comments = await db
+                .select({
+                    id: commentsTable.id,
+                    content: commentsTable.content,
+                    points: commentsTable.points,
+                    createdAt: commentsTable.createdAt,
+                    author: userTable.username,
+                    isUpvoted: user
+                        ? countDistinct(
+                              sql`CASE WHEN ${commentUpvotesTable.userId} = ${user.id} THEN 1 END`,
+                          )
+                        : sql`0`,
+                })
+                .from(commentsTable)
+                .innerJoin(userTable, eq(commentsTable.userId, userTable.id))
+                .leftJoin(
+                    commentUpvotesTable,
+                    and(
+                        eq(commentUpvotesTable.commentId, commentsTable.id),
+                        user ? eq(commentUpvotesTable.userId, user.id) : undefined,
+                    ),
+                )
+                .where(eq(commentsTable.postId, Number(id)))
+                .groupBy(commentsTable.id, userTable.username)
+                .orderBy(orderByClause)
+                .limit(limit)
+                .offset(offset);
+
+            const [{ totalCount }] = await db
+                .select({ totalCount: countDistinct(commentsTable.id) })
+                .from(commentsTable)
+                .where(eq(commentsTable.postId, Number(id)));
+
+            const totalPages = Math.ceil(totalCount / limit);
+
+            return c.json<
+                SuccessResponse<{
+                    data: typeof comments;
+                    pagination: {
+                        page: number;
+                        totalPages: number;
+                        totalCount: number;
+                    };
+                }>
+            >({
+                success: true,
+                message: 'Comments fetched',
+                data: {
+                    data: comments.map((comment) => ({
+                        ...comment,
+                        isUpvoted: Boolean(comment.isUpvoted),
+                    })),
+                    pagination: {
+                        page,
+                        totalPages,
+                        totalCount,
+                    },
+                },
+            });
+        },
+    )
+    .post(
+        '/:id/comment',
+        loggedIn,
+        zValidator('param', z.object({ id: z.string() })),
+        zValidator('form', createCommentSchema),
+        async (c) => {
+            const { id } = c.req.valid('param');
+            const { content } = c.req.valid('form');
+            const user = c.get('user')!;
+
+            const [comment] = await db
+                .insert(commentsTable)
+                .values({
+                    userId: user.id,
+                    postId: Number(id),
+                    content,
+                })
+                .returning({ id: commentsTable.id });
+
+            // Update post comment count
+            await db
+                .update(postsTable)
+                .set({
+                    commentCount: sql`${postsTable.commentCount} + 1`,
+                })
+                .where(eq(postsTable.id, Number(id)));
+
+            return c.json<SuccessResponse<{ commentId: number }>>(
                 {
                     success: true,
-                    message: 'Post deleted successfully',
-                    data: null,
+                    message: 'Comment created',
+                    data: { commentId: comment.id },
                 },
-                200,
+                201,
             );
         },
     );
