@@ -42,7 +42,11 @@ app.onError((err, c) => {
                 {
                     success: false,
                     error: err.message,
-                    isFormError: !!err.cause?.form,
+                    isFormError:
+                        !!err.cause &&
+                        typeof err.cause === 'object' &&
+                        err.cause !== null &&
+                        'form' in err.cause,
                 },
                 err.status,
             );
