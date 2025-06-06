@@ -1,22 +1,13 @@
+import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
 
-import { ChevronUpIcon, Trash2Icon, MoreVerticalIcon } from 'lucide-react';
+import { ChevronUpIcon, MoreVerticalIcon, Trash2Icon } from 'lucide-react';
 
 import { Post } from '@/shared/types';
 import { userQueryOptions } from '@/lib/api';
 import { useDeletePost } from '@/lib/api-hooks';
 import { cn, relativeTime } from '@/lib/utils';
-import { badgeVariants } from './ui/badge';
-import { Card, CardContent, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +18,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from './ui/alert-dialog';
+import { badgeVariants } from './ui/badge';
+import { Button } from './ui/button';
+import { Card, CardContent, CardTitle } from './ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 export const PostCard = ({
   post,
@@ -98,16 +98,16 @@ export const PostCard = ({
             {isOwner && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="size-8 p-0">
-                    <MoreVerticalIcon className="size-4" />
+                  <Button variant='ghost' size='sm' className='size-8 p-0'>
+                    <MoreVerticalIcon className='size-4' />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align='end'>
                   <DropdownMenuItem
                     onClick={() => setShowDeleteDialog(true)}
-                    className="text-destructive focus:text-destructive"
+                    className='text-destructive focus:text-destructive'
                   >
-                    <Trash2Icon className="mr-2 size-4" />
+                    <Trash2Icon className='mr-2 size-4' />
                     Delete Post
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -132,7 +132,11 @@ export const PostCard = ({
               <span>·</span>
               <span>{relativeTime(post.createdAt)}</span>
               <span>·</span>
-              <Link to={'/post'} search={{ id: post.id }} className='hover:underline'>
+              <Link
+                to={'/post'}
+                search={{ id: post.id }}
+                className='hover:underline'
+              >
                 {post.commentCount} comments
               </Link>
             </div>
@@ -145,14 +149,15 @@ export const PostCard = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Post</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this post? This action cannot be undone.
+              Are you sure you want to delete this post? This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
             >
               Delete
             </AlertDialogAction>
