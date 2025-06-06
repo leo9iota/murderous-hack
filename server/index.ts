@@ -5,35 +5,21 @@ import { HTTPException } from 'hono/http-exception';
 
 import { type ErrorResponse } from '@/shared/types';
 import type { Context } from './context';
-import { lucia } from './lucia';
+import { auth } from './auth';
+import { authMiddleware } from './middleware/auth';
 import { authRouter } from './routes/auth';
 import { commentsRouter } from './routes/comments';
 import { postRouter } from './routes/posts';
 
 const app = new Hono<Context>();
 
-app.use('*', cors(), async (c, next) => {
-    const sessionId = lucia.readSessionCookie(c.req.header('Cookie') ?? '');
-    if (!sessionId) {
-        c.set('user', null);
-        c.set('session', null);
-        return next();
-    }
+// Apply auth middleware
+app.use('*', cors(), authMiddleware);
 
-    const { session, user } = await lucia.validateSession(sessionId);
-    if (session && session.fresh) {
-        c.header('Set-Cookie', lucia.createSessionCookie(session.id).serialize(), {
-            append: true,
-        });
-    }
-    if (!session) {
-        c.header('Set-Cookie', lucia.createBlankSessionCookie().serialize(), {
-            append: true,
-        });
-    }
-    c.set('session', session);
-    c.set('user', user);
-    return next();
+// Better Auth endpoints
+app.on(['POST', 'GET'], '/api/auth/**', async (c) => {
+    const response = await auth.handler(c.req.raw);
+    return response;
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -43,6 +29,11 @@ const routes = app
     .route('/posts', postRouter)
     .route('/comments', commentsRouter);
 
+// Serve static files
+app.use('*', serveStatic({ root: './frontend/dist' }));
+app.use('*', serveStatic({ path: './frontend/dist/index.html' }));
+
+// Error handling
 app.onError((err, c) => {
     if (err instanceof HTTPException) {
         const errResponse =
@@ -51,38 +42,24 @@ app.onError((err, c) => {
                 {
                     success: false,
                     error: err.message,
-                    isFormError:
-                        err.cause &&
-                        typeof err.cause === 'object' &&
-                        'form' in err.cause
-                            ? err.cause.form === true
-                            : false,
+                    isFormError: !!err.cause?.form,
                 },
                 err.status,
             );
         return errResponse;
     }
-
     return c.json<ErrorResponse>(
         {
             success: false,
             error:
                 process.env.NODE_ENV === 'production'
-                    ? 'Interal Server Error'
-                    : (err.stack ?? err.message),
+                    ? 'Internal Server Error'
+                    : (err?.stack ?? err?.message ?? 'Unknown Error'),
         },
         500,
     );
 });
 
-app.get('*', serveStatic({ root: './frontend/dist' }));
-app.get('*', serveStatic({ path: './frontend/dist/index.html' }));
-
-export default {
-    port: process.env['PORT'] || 3000,
-    hostname: '0.0.0.0',
-    fetch: app.fetch,
-};
-
-console.log('Server Running on port', process.env['PORT'] || 3000);
+export default app;
+export type ApiRoutes = typeof routes;
 export type ApiRoutes = typeof routes;
