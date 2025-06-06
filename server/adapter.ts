@@ -1,6 +1,5 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 
-import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
 import postgres from 'postgres';
 import { z } from 'zod';
 
@@ -37,4 +36,4 @@ export const db = drizzle(queryClient, {
     },
 });
 
-export const adapter = new DrizzlePostgreSQLAdapter(db, sessionTable, userTable);
+
