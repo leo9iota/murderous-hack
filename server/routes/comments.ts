@@ -33,10 +33,16 @@ export const commentsRouter = new Hono<Context>()
             let orderByClause;
             switch (sortBy) {
                 case 'recent':
-                    orderByClause = order === 'asc' ? asc(commentsTable.createdAt) : desc(commentsTable.createdAt);
+                    orderByClause =
+                        order === 'asc'
+                            ? asc(commentsTable.createdAt)
+                            : desc(commentsTable.createdAt);
                     break;
                 case 'points':
-                    orderByClause = order === 'asc' ? asc(commentsTable.points) : desc(commentsTable.points);
+                    orderByClause =
+                        order === 'asc'
+                            ? asc(commentsTable.points)
+                            : desc(commentsTable.points);
                     break;
                 default:
                     orderByClause = desc(commentsTable.points);

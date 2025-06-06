@@ -9,7 +9,7 @@ import type {
     SortBy,
     SuccessResponse,
 } from '@/shared/types';
-import { signUp, signIn, signOut, getSession } from './auth-client';
+import { getSession, signIn, signOut, signUp } from './auth-client';
 
 const client = hc<ApiRoutes>('/', {
     fetch: (input: RequestInfo | URL, init?: RequestInit) =>

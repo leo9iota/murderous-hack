@@ -38,11 +38,12 @@ import { $ } from 'bun';
         console.log('');
         console.log('Next steps:');
         console.log('  bun run dev        # Start backend server');
-        console.log('  cd frontend && bun run dev  # Start frontend server (in another terminal)');
+        console.log(
+            '  cd frontend && bun run dev  # Start frontend server (in another terminal)',
+        );
         console.log('');
         console.log('Or use the start script:');
         console.log('  bun run scripts/start.ts');
-        
     } catch (error) {
         console.error('Setup failed:', error);
         process.exit(1);

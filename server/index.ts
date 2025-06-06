@@ -4,8 +4,8 @@ import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 
 import { type ErrorResponse } from '@/shared/types';
-import type { Context } from './context';
 import { auth } from './auth';
+import type { Context } from './context';
 import { authMiddleware } from './middleware/auth';
 import { authRouter } from './routes/auth';
 import { commentsRouter } from './routes/comments';
@@ -61,5 +61,4 @@ app.onError((err, c) => {
 });
 
 export default app;
-export type ApiRoutes = typeof routes;
 export type ApiRoutes = typeof routes;

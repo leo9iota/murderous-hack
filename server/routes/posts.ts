@@ -13,8 +13,8 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 
 import {
-    insertPostSchema,
     createCommentSchema,
+    insertPostSchema,
     paginationSchema,
     type SuccessResponse,
 } from '@/shared/types';
@@ -29,13 +29,22 @@ export const postRouter = new Hono<Context>()
         let orderByClause;
         switch (sortBy) {
             case 'recent':
-                orderByClause = order === 'asc' ? asc(postsTable.createdAt) : desc(postsTable.createdAt);
+                orderByClause =
+                    order === 'asc'
+                        ? asc(postsTable.createdAt)
+                        : desc(postsTable.createdAt);
                 break;
             case 'points':
-                orderByClause = order === 'asc' ? asc(postsTable.points) : desc(postsTable.points);
+                orderByClause =
+                    order === 'asc'
+                        ? asc(postsTable.points)
+                        : desc(postsTable.points);
                 break;
             case 'comments':
-                orderByClause = order === 'asc' ? asc(postsTable.commentCount) : desc(postsTable.commentCount);
+                orderByClause =
+                    order === 'asc'
+                        ? asc(postsTable.commentCount)
+                        : desc(postsTable.commentCount);
                 break;
             default:
                 orderByClause = desc(postsTable.points);
@@ -281,10 +290,16 @@ export const postRouter = new Hono<Context>()
             let orderByClause;
             switch (sortBy) {
                 case 'recent':
-                    orderByClause = order === 'asc' ? asc(commentsTable.createdAt) : desc(commentsTable.createdAt);
+                    orderByClause =
+                        order === 'asc'
+                            ? asc(commentsTable.createdAt)
+                            : desc(commentsTable.createdAt);
                     break;
                 case 'points':
-                    orderByClause = order === 'asc' ? asc(commentsTable.points) : desc(commentsTable.points);
+                    orderByClause =
+                        order === 'asc'
+                            ? asc(commentsTable.points)
+                            : desc(commentsTable.points);
                     break;
                 default:
                     orderByClause = desc(commentsTable.points);

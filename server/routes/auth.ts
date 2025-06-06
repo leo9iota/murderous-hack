@@ -3,7 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { eq } from 'drizzle-orm';
 
 import { db } from '@/adapter';
-import { userTable, sessionTable } from '@/db/schemas/auth';
+import { sessionTable, userTable } from '@/db/schemas/auth';
 import { zValidator } from '@hono/zod-validator';
 import postgres from 'postgres';
 
@@ -69,7 +69,10 @@ export const authRouter = new Hono()
             });
 
             // Set session cookie
-            c.header('Set-Cookie', `better-auth.session_token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`);
+            c.header(
+                'Set-Cookie',
+                `better-auth.session_token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`,
+            );
 
             return c.json<SuccessResponse>(
                 {
@@ -130,7 +133,10 @@ export const authRouter = new Hono()
         });
 
         // Set session cookie
-        c.header('Set-Cookie', `better-auth.session_token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`);
+        c.header(
+            'Set-Cookie',
+            `better-auth.session_token=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${60 * 60 * 24 * 7}`,
+        );
 
         return c.json<SuccessResponse>(
             {
@@ -143,15 +149,22 @@ export const authRouter = new Hono()
     .get('/logout', async (c) => {
         // Get session token from cookie
         const cookies = c.req.header('Cookie') || '';
-        const sessionTokenMatch = cookies.match(/better-auth\.session_token=([^;]+)/);
+        const sessionTokenMatch = cookies.match(
+            /better-auth\.session_token=([^;]+)/,
+        );
 
         if (sessionTokenMatch) {
             const sessionToken = sessionTokenMatch[1];
             // Delete session from database
-            await db.delete(sessionTable).where(eq(sessionTable.token, sessionToken));
+            await db
+                .delete(sessionTable)
+                .where(eq(sessionTable.token, sessionToken));
         }
 
-        c.header('Set-Cookie', 'better-auth.session_token=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
+        c.header(
+            'Set-Cookie',
+            'better-auth.session_token=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0',
+        );
 
         return c.json<SuccessResponse>({
             success: true,
@@ -161,7 +174,9 @@ export const authRouter = new Hono()
     .get('/user', async (c) => {
         // Get session token from cookie
         const cookies = c.req.header('Cookie') || '';
-        const sessionTokenMatch = cookies.match(/better-auth\.session_token=([^;]+)/);
+        const sessionTokenMatch = cookies.match(
+            /better-auth\.session_token=([^;]+)/,
+        );
 
         if (!sessionTokenMatch) {
             throw new HTTPException(401, { message: 'Unauthorized' });

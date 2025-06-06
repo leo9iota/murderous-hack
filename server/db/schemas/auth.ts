@@ -19,11 +19,15 @@ export const userTable = pgTable('user', {
     createdAt: timestamp('created_at', {
         withTimezone: true,
         mode: 'date',
-    }).defaultNow().notNull(),
+    })
+        .defaultNow()
+        .notNull(),
     updatedAt: timestamp('updated_at', {
         withTimezone: true,
         mode: 'date',
-    }).defaultNow().notNull(),
+    })
+        .defaultNow()
+        .notNull(),
 });
 
 export const userRelations = relations(userTable, ({ many }) => ({
@@ -53,9 +57,13 @@ export const sessionTable = pgTable('session', {
     createdAt: timestamp('created_at', {
         withTimezone: true,
         mode: 'date',
-    }).defaultNow().notNull(),
+    })
+        .defaultNow()
+        .notNull(),
     updatedAt: timestamp('updated_at', {
         withTimezone: true,
         mode: 'date',
-    }).defaultNow().notNull(),
+    })
+        .defaultNow()
+        .notNull(),
 });

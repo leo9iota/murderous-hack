@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { MenuIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { userQueryOptions, postLogout } from '@/lib/api';
+import { postLogout, userQueryOptions } from '@/lib/api';
 import { Button } from './ui/button';
 import {
   Sheet,
@@ -41,11 +41,7 @@ export function Navbar() {
       <div className='container mx-auto flex items-center justify-between p-4'>
         <div className='flex items-center space-x-4'>
           <Link to='/' className='flex items-center'>
-            <img
-              src="/logo.svg"
-              alt="Murderous Hack"
-              className="size-10"
-            />
+            <img src='/logo.svg' alt='Murderous Hack' className='size-10' />
           </Link>
           <nav className='hidden items-center space-x-4 md:flex'>
             <Link
@@ -99,12 +95,8 @@ export function Navbar() {
           </SheetTrigger>
           <SheetContent className='mb-2'>
             <SheetHeader>
-              <SheetTitle className="flex items-center gap-2">
-                <img
-                  src="/logo.svg"
-                  alt="Murderous Hack"
-                  className="size-6"
-                />
+              <SheetTitle className='flex items-center gap-2'>
+                <img src='/logo.svg' alt='Murderous Hack' className='size-6' />
                 Murderous Hack
               </SheetTitle>
               <SheetDescription className='sr-only'>Navigation</SheetDescription>

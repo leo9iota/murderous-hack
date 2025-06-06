@@ -1,7 +1,7 @@
 import { createMiddleware } from 'hono/factory';
 
-import type { Context } from '@/context';
 import { auth } from '@/auth';
+import type { Context } from '@/context';
 
 export const authMiddleware = createMiddleware<Context>(async (c, next) => {
     try {

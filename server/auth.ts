@@ -1,9 +1,10 @@
-import { betterAuth } from 'better-auth';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { eq } from 'drizzle-orm';
 
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+
 import { db } from './adapter';
-import { userTable, sessionTable } from './db/schemas/auth';
+import { sessionTable, userTable } from './db/schemas/auth';
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -13,7 +14,10 @@ export const auth = betterAuth({
             session: sessionTable,
         },
     }),
-    baseURL: process.env.NODE_ENV === 'production' ? 'https://your-domain.com' : 'http://localhost:3000',
+    baseURL:
+        process.env.NODE_ENV === 'production'
+            ? 'https://your-domain.com'
+            : 'http://localhost:3000',
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: false,
@@ -51,7 +55,8 @@ export const auth = betterAuth({
     advanced: {
         generateId: () => {
             // Generate a random ID similar to Lucia's generateId
-            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const chars =
+                'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let result = '';
             for (let i = 0; i < 15; i++) {
                 result += chars.charAt(Math.floor(Math.random() * chars.length));

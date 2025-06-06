@@ -52,7 +52,6 @@ import { $ } from 'bun';
 
         // Keep alive
         await new Promise(() => {});
-        
     } catch (error) {
         console.error('Start failed:', error);
         process.exit(1);
