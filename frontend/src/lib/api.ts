@@ -265,3 +265,27 @@ export async function postComment(id: number, content: string, isNested?: boolea
         } as ErrorResponse;
     }
 }
+
+export async function deletePost(id: number) {
+    try {
+        const res = await client.posts[':id'].$delete({
+            param: {
+                id: id.toString(),
+            },
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            return data;
+        }
+
+        const data = (await res.json()) as unknown as ErrorResponse;
+        return data;
+    } catch (e) {
+        return {
+            success: false,
+            error: String(e),
+            isFormError: false,
+        } as ErrorResponse;
+    }
+}
