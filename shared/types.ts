@@ -5,6 +5,9 @@ import { insertPostSchema } from '../server/db/schemas/posts';
 import type { ApiRoutes } from '../server/index';
 
 export { type ApiRoutes };
+export { insertPostSchema };
+
+
 
 export type SuccessResponse<T = void> = {
     success: true;
