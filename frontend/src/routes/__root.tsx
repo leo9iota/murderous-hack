@@ -29,7 +29,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 function RootComponent() {
   return (
     <>
-      <div className='flex min-h-screen flex-col bg-[#f5f5ed] text-foreground'>
+      <div className='bg-mh-secondary flex min-h-screen flex-col text-foreground'>
         <Navbar />
         <main className='container mx-auto grow p-4'>
           <Outlet />
