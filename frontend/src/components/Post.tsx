@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { ChevronUpIcon, MoreVerticalIcon, Trash2Icon } from 'lucide-react';
 
-import { Post } from '@/shared/types';
+import { Post as PostType } from '@/shared/types';
 import { userQueryOptions } from '@/lib/api';
 import { useDeletePost } from '@/lib/api-hooks';
 import { cn, relativeTime } from '@/lib/utils';
@@ -28,11 +28,11 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 
-export const PostCard = ({
+export const Post = ({
   post,
   onUpvote,
 }: {
-  post: Post;
+  post: PostType;
   onUpvote?: (id: number) => void;
 }) => {
   const { data: user } = useQuery(userQueryOptions());

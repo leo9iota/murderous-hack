@@ -16,9 +16,9 @@ import { orderSchema, sortBySchema } from '@/shared/types';
 import { getComments, getPost, userQueryOptions } from '@/lib/api';
 import { useUpvoteComment, useUpvotePost } from '@/lib/api-hooks';
 import { Card, CardContent } from '@/components/ui/card';
-import { CommentCard } from '@/components/CommentCard';
+import { Comment } from '@/components/Comment';
 import { CommentForm } from '@/components/CommentForm';
-import { PostCard } from '@/components/PostCard';
+import { Post as PostComponent } from '@/components/Post';
 import { SortButton } from '@/components/SortButton';
 
 const postSearchSchema = z.object({
@@ -91,7 +91,7 @@ function Post() {
   return (
     <div className='mx-auto max-w-3xl'>
       {data && (
-        <PostCard
+        <PostComponent
           post={data.data}
           onUpvote={() => upvotePost.mutate(id.toString())}
         />
@@ -116,7 +116,7 @@ function Post() {
           <CardContent className='p-4'>
             {comments.pages.map((page) =>
               page.data.map((comment, index) => (
-                <CommentCard
+                <Comment
                   key={comment.id}
                   comment={comment}
                   depth={0}

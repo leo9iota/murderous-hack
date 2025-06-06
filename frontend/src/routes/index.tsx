@@ -11,7 +11,7 @@ import { orderSchema, sortBySchema } from '@/shared/types';
 import { getPosts } from '@/lib/api';
 import { useUpvotePost } from '@/lib/api-hooks';
 import { Button } from '@/components/ui/button';
-import { PostCard } from '@/components/PostCard';
+import { Post } from '@/components/Post';
 import { SortButton } from '@/components/SortButton';
 
 const homeSearchSchema = z.object({
@@ -80,7 +80,7 @@ function HomeComponent() {
       <div className='space-y-4'>
         {data?.pages.map((page) =>
           page.data.map((post) => (
-            <PostCard
+            <Post
               post={post}
               key={post.id}
               onUpvote={() => upvoteMutation.mutate(post.id.toString())}

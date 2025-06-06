@@ -13,15 +13,15 @@ import {
   PlusIcon,
 } from 'lucide-react';
 
-import { Comment } from '@/shared/types';
+import { Comment as CommentType } from '@/shared/types';
 import { getCommentComments, userQueryOptions } from '@/lib/api';
 import { useUpvoteComment } from '@/lib/api-hooks';
 import { cn, relativeTime } from '@/lib/utils';
 import { CommentForm } from './CommentForm';
 import { Separator } from './ui/separator';
 
-type CommentCardProps = {
-  comment: Comment;
+type CommentProps = {
+  comment: CommentType;
   depth: number;
   activeReplyId: number | null;
   setActiveReplyId: React.Dispatch<React.SetStateAction<number | null>>;
@@ -29,14 +29,14 @@ type CommentCardProps = {
   toggleUpvote: ReturnType<typeof useUpvoteComment>['mutate'];
 };
 
-export function CommentCard({
+export function Comment({
   comment,
   depth,
   activeReplyId,
   setActiveReplyId,
   isLast,
   toggleUpvote,
-}: CommentCardProps) {
+}: CommentProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const queryClient = useQueryClient();
 
@@ -150,7 +150,7 @@ export function CommentCard({
         comments.pages.map((page, index) => {
           const isLastPage = index === comments.pages.length - 1;
           return page.data.map((reply, index) => (
-            <CommentCard
+            <Comment
               key={reply.id}
               comment={reply}
               depth={depth + 1}
