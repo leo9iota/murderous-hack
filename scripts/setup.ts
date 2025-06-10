@@ -2,6 +2,16 @@ import { $ } from 'bun';
 
 (async () => {
     try {
+        // Display ASCII art banner
+        console.log(`
+ __  __             _                       _  _         _
+ |  \\/  |_  _ _ _ __| |___ _ _ ___ _  _ ___ | || |__ _ __| |__
+ | |\\/| | || | '_/ _\` / -_) '_/ _ \\ || (_-< | __ / _\` / _| / /
+ |_|  |_|\\_,_|_| \\__,_\\___|_| \\___/\\_,_/__/ |_||_\\__,_\\__|_\\_\\
+
+`);
+        console.log('🚀 Setting up development environment...\n');
+
         console.log('Creating .env file...');
         try {
             await $`test -f .env`;
