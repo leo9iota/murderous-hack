@@ -10,9 +10,14 @@ import { commentUpvotesTable } from './upvotes';
 
 export const commentsTable = pgTable('comments', {
     id: serial('id').primaryKey(),
-    userId: text('user_id').notNull(),
-    postId: integer('post_id').notNull(),
-    parentCommentId: integer('parent_comment_id'),
+    userId: text('user_id')
+        .notNull()
+        .references(() => userTable.id, { onDelete: 'cascade' }),
+    postId: integer('post_id')
+        .notNull()
+        .references(() => postsTable.id, { onDelete: 'cascade' }),
+    parentCommentId: integer('parent_comment_id')
+        .references(() => commentsTable.id, { onDelete: 'cascade' }),
     content: text('content').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true })
         .defaultNow()
