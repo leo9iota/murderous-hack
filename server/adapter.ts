@@ -4,7 +4,12 @@ import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
 import postgres from 'postgres';
 import { z } from 'zod';
 
-import { sessionTable, userRelations, userTable } from './db/schemas/auth';
+import {
+    sessionRelations,
+    sessionTable,
+    userRelations,
+    userTable,
+} from './db/schemas/auth';
 import { commentRelations, commentsTable } from './db/schemas/comments';
 import { postsRelations, postsTable } from './db/schemas/posts';
 import {
@@ -32,6 +37,7 @@ export const db = drizzle(queryClient, {
         commentUpvotes: commentUpvotesTable,
         // Relations
         userRelations,
+        sessionRelations,
         postsRelations,
         commentRelations,
         postUpvoteRelations,
