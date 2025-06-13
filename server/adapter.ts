@@ -23,17 +23,19 @@ const processEnv = EnvSchema.parse(process.env);
 const queryClient = postgres(processEnv.DATABASE_URL);
 export const db = drizzle(queryClient, {
     schema: {
+        // Tables
         user: userTable,
         session: sessionTable,
         posts: postsTable,
         comments: commentsTable,
         postUpvotes: postUpvotesTable,
-        commentUpvoted: commentUpvotesTable,
-        postsRelations,
-        commentUpvoteRelations,
-        postUpvoteRelations,
+        commentUpvotes: commentUpvotesTable,
+        // Relations
         userRelations,
+        postsRelations,
         commentRelations,
+        postUpvoteRelations,
+        commentUpvoteRelations,
     },
 });
 
