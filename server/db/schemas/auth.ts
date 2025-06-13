@@ -15,10 +15,10 @@ export const userRelations = relations(userTable, ({ many }) => ({
     posts: many(postsTable, { relationName: 'author' }),
     comments: many(commentsTable, { relationName: 'author' }),
     postUpvotes: many(postUpvotesTable, {
-        relationName: 'postUpvotes',
+        relationName: 'userPostUpvotes',
     }),
     commentUpvotes: many(commentUpvotesTable, {
-        relationName: 'commentUpvotes',
+        relationName: 'userCommentUpvotes',
     }),
 }));
 
