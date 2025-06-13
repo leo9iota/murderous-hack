@@ -36,11 +36,11 @@ import { $ } from 'bun';
 
         console.log('✅ Setup complete!');
         console.log('');
-        console.log('Next steps:');
+        console.log('💡 Next steps:');
         console.log('$ bun run dev');
         console.log('$ cd frontend && bun run dev');
         console.log('');
-        console.log('Or use the start script:');
+        console.log('💡 Or use the start script:');
         console.log('$ bun run start');
     } catch (error) {
         console.error('❌ Setup failed:', error);
