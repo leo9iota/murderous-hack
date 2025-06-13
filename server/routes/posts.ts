@@ -4,10 +4,10 @@ import { and, asc, countDistinct, desc, eq, isNull, sql } from 'drizzle-orm';
 
 import { db } from '@/adapter';
 import { type Context } from '@/context';
-import { userTable } from '@/db/schemas/auth';
-import { commentsTable } from '@/db/schemas/comments';
-import { postsTable } from '@/db/schemas/posts';
-import { commentUpvotesTable, postUpvotesTable } from '@/db/schemas/upvotes';
+import { users } from '@/db/schemas/auth';
+import { comments } from '@/db/schemas/comments';
+import { posts } from '@/db/schemas/posts';
+import { commentUpvotes, postUpvotes } from '@/db/schemas/upvotes';
 import { loggedIn } from '@/middleware/loggedIn';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
@@ -28,14 +28,14 @@ export const postRouter = new Hono<Context>()
         const { title, url, content } = c.req.valid('form');
         const user = c.get('user')!;
         const [post] = await db
-            .insert(postsTable)
+            .insert(posts)
             .values({
                 title,
                 content,
                 url,
                 userId: user.id,
             })
-            .returning({ id: postsTable.id });
+            .returning({ id: posts.id });
         return c.json<SuccessResponse<{ postId: number }>>(
             {
                 success: true,
@@ -52,62 +52,62 @@ export const postRouter = new Hono<Context>()
         const offset = (page - 1) * limit;
 
         const sortByColumn =
-            sortBy === 'points' ? postsTable.points : postsTable.createdAt;
+            sortBy === 'points' ? posts.points : posts.createdAt;
         const sortOrder = order === 'desc' ? desc(sortByColumn) : asc(sortByColumn);
 
         const [count] = await db
-            .select({ count: countDistinct(postsTable.id) })
-            .from(postsTable)
+            .select({ count: countDistinct(posts.id) })
+            .from(posts)
             .where(
                 and(
-                    author ? eq(postsTable.userId, author) : undefined,
-                    site ? eq(postsTable.url, site) : undefined,
+                    author ? eq(posts.userId, author) : undefined,
+                    site ? eq(posts.url, site) : undefined,
                 ),
             );
 
         const postsQuery = db
             .select({
-                id: postsTable.id,
-                title: postsTable.title,
-                url: postsTable.url,
-                points: postsTable.points,
-                createdAt: getISOFormatDateQuery(postsTable.createdAt),
-                commentCount: postsTable.commentCount,
+                id: posts.id,
+                title: posts.title,
+                url: posts.url,
+                points: posts.points,
+                createdAt: getISOFormatDateQuery(posts.createdAt),
+                commentCount: posts.commentCount,
                 author: {
-                    username: userTable.username,
-                    id: userTable.id,
+                    username: users.username,
+                    id: users.id,
                 },
                 isUpvoted: user
-                    ? sql<boolean>`CASE WHEN ${postUpvotesTable.userId} IS NOT NULL THEN true ELSE false END`
+                    ? sql<boolean>`CASE WHEN ${postUpvotes.userId} IS NOT NULL THEN true ELSE false END`
                     : sql<boolean>`false`,
             })
-            .from(postsTable)
-            .leftJoin(userTable, eq(postsTable.userId, userTable.id))
+            .from(posts)
+            .leftJoin(users, eq(posts.userId, users.id))
             .orderBy(sortOrder)
             .limit(limit)
             .offset(offset)
             .where(
                 and(
-                    author ? eq(postsTable.userId, author) : undefined,
-                    site ? eq(postsTable.url, site) : undefined,
+                    author ? eq(posts.userId, author) : undefined,
+                    site ? eq(posts.url, site) : undefined,
                 ),
             );
 
         if (user) {
             postsQuery.leftJoin(
-                postUpvotesTable,
+                postUpvotes,
                 and(
-                    eq(postUpvotesTable.postId, postsTable.id),
-                    eq(postUpvotesTable.userId, user.id),
+                    eq(postUpvotes.postId, posts.id),
+                    eq(postUpvotes.userId, user.id),
                 ),
             );
         }
 
-        const posts = await postsQuery;
+        const postsResult = await postsQuery;
 
         return c.json<PaginatedResponse<Post[]>>(
             {
-                data: posts as Post[],
+                data: postsResult as Post[],
                 success: true,
                 message: 'Posts fetched',
                 pagination: {
@@ -130,11 +130,11 @@ export const postRouter = new Hono<Context>()
             const points = await db.transaction(async (tx) => {
                 const [existingUpvote] = await tx
                     .select()
-                    .from(postUpvotesTable)
+                    .from(postUpvotes)
                     .where(
                         and(
-                            eq(postUpvotesTable.postId, id),
-                            eq(postUpvotesTable.userId, user.id),
+                            eq(postUpvotes.postId, id),
+                            eq(postUpvotes.userId, user.id),
                         ),
                     )
                     .limit(1);
@@ -142,10 +142,10 @@ export const postRouter = new Hono<Context>()
                 pointsChange = existingUpvote ? -1 : 1;
 
                 const [updated] = await tx
-                    .update(postsTable)
-                    .set({ points: sql`${postsTable.points} + ${pointsChange}` })
-                    .where(eq(postsTable.id, id))
-                    .returning({ points: postsTable.points });
+                    .update(posts)
+                    .set({ points: sql`${posts.points} + ${pointsChange}` })
+                    .where(eq(posts.id, id))
+                    .returning({ points: posts.points });
 
                 if (!updated) {
                     throw new HTTPException(404, { message: 'Post not found' });
@@ -153,11 +153,11 @@ export const postRouter = new Hono<Context>()
 
                 if (existingUpvote) {
                     await tx
-                        .delete(postUpvotesTable)
-                        .where(eq(postUpvotesTable.id, existingUpvote.id));
+                        .delete(postUpvotes)
+                        .where(eq(postUpvotes.id, existingUpvote.id));
                 } else {
                     await tx
-                        .insert(postUpvotesTable)
+                        .insert(postUpvotes)
                         .values({ postId: id, userId: user.id });
                 }
 
@@ -186,10 +186,10 @@ export const postRouter = new Hono<Context>()
 
             const [comment] = await db.transaction(async (tx) => {
                 const [updated] = await tx
-                    .update(postsTable)
-                    .set({ commentCount: sql`${postsTable.commentCount} + 1` })
-                    .where(eq(postsTable.id, id))
-                    .returning({ commentCount: postsTable.commentCount });
+                    .update(posts)
+                    .set({ commentCount: sql`${posts.commentCount} + 1` })
+                    .where(eq(posts.id, id))
+                    .returning({ commentCount: posts.commentCount });
 
                 if (!updated) {
                     throw new HTTPException(404, {
@@ -198,24 +198,24 @@ export const postRouter = new Hono<Context>()
                 }
 
                 return await tx
-                    .insert(commentsTable)
+                    .insert(comments)
                     .values({
                         content,
                         userId: user.id,
                         postId: id,
                     })
                     .returning({
-                        id: commentsTable.id,
-                        userId: commentsTable.userId,
-                        postId: commentsTable.postId,
-                        content: commentsTable.content,
-                        points: commentsTable.points,
-                        depth: commentsTable.depth,
-                        parentCommentId: commentsTable.parentCommentId,
-                        createdAt: getISOFormatDateQuery(commentsTable.createdAt).as(
+                        id: comments.id,
+                        userId: comments.userId,
+                        postId: comments.postId,
+                        content: comments.content,
+                        points: comments.points,
+                        depth: comments.depth,
+                        parentCommentId: comments.parentCommentId,
+                        createdAt: getISOFormatDateQuery(comments.createdAt).as(
                             'created_at',
                         ),
-                        commentCount: commentsTable.commentCount,
+                        commentCount: comments.commentCount,
                     });
             });
             return c.json<SuccessResponse<Comment>>({
@@ -229,7 +229,7 @@ export const postRouter = new Hono<Context>()
                         username: user.username,
                         id: user.id,
                     },
-                } as Comment,
+                } as unknown as Comment,
             });
         },
     )
@@ -251,8 +251,8 @@ export const postRouter = new Hono<Context>()
 
             const [postExists] = await db
                 .select({ exists: sql`1` })
-                .from(postsTable)
-                .where(eq(postsTable.id, id))
+                .from(posts)
+                .where(eq(posts.id, id))
                 .limit(1);
 
             if (!postExists) {
@@ -260,7 +260,7 @@ export const postRouter = new Hono<Context>()
             }
 
             const sortByColumn =
-                sortBy === 'points' ? commentsTable.points : commentsTable.createdAt;
+                sortBy === 'points' ? comments.points : comments.createdAt;
 
             const sortOrder =
                 order === 'desc' ? desc(sortByColumn) : asc(sortByColumn);
@@ -268,19 +268,19 @@ export const postRouter = new Hono<Context>()
             console.log(sortBy, order);
 
             const [count] = await db
-                .select({ count: countDistinct(commentsTable.id) })
-                .from(commentsTable)
+                .select({ count: countDistinct(comments.id) })
+                .from(comments)
                 .where(
                     and(
-                        eq(commentsTable.postId, id),
-                        isNull(commentsTable.parentCommentId),
+                        eq(comments.postId, id),
+                        isNull(comments.parentCommentId),
                     ),
                 );
 
-            const comments = await db.query.comments.findMany({
+            const commentsData = await db.query.comments.findMany({
                 where: and(
-                    eq(commentsTable.postId, id),
-                    isNull(commentsTable.parentCommentId),
+                    eq(comments.postId, id),
+                    isNull(comments.parentCommentId),
                 ),
                 orderBy: sortOrder,
                 limit: limit,
@@ -294,7 +294,7 @@ export const postRouter = new Hono<Context>()
                     },
                     commentUpvotes: {
                         columns: { userId: true },
-                        where: eq(commentUpvotesTable.userId, user?.id ?? ''),
+                        where: eq(commentUpvotes.userId, user?.id ?? ''),
                         limit: 1,
                     },
                     childComments: {
@@ -308,23 +308,20 @@ export const postRouter = new Hono<Context>()
                             },
                             commentUpvotes: {
                                 columns: { userId: true },
-                                where: eq(
-                                    commentUpvotesTable.userId,
-                                    user?.id ?? '',
-                                ),
+                                where: eq(commentUpvotes.userId, user?.id ?? ''),
                                 limit: 1,
                             },
                         },
                         orderBy: sortOrder,
                         extras: {
                             createdAt: getISOFormatDateQuery(
-                                commentsTable.createdAt,
+                                comments.createdAt,
                             ).as('created_at'),
                         },
                     },
                 },
                 extras: {
-                    createdAt: getISOFormatDateQuery(commentsTable.createdAt).as(
+                    createdAt: getISOFormatDateQuery(comments.createdAt).as(
                         'created_at',
                     ),
                 },
@@ -334,7 +331,7 @@ export const postRouter = new Hono<Context>()
                 {
                     success: true,
                     message: 'Comments fetched',
-                    data: comments as Comment[],
+                    data: commentsData as Comment[],
                     pagination: {
                         page,
                         totalPages: Math.ceil(count.count / limit) as number,
@@ -353,31 +350,31 @@ export const postRouter = new Hono<Context>()
             const { id } = c.req.valid('param');
             const postsQuery = db
                 .select({
-                    id: postsTable.id,
-                    title: postsTable.title,
-                    url: postsTable.url,
-                    points: postsTable.points,
-                    content: postsTable.content,
-                    createdAt: getISOFormatDateQuery(postsTable.createdAt),
-                    commentCount: postsTable.commentCount,
+                    id: posts.id,
+                    title: posts.title,
+                    url: posts.url,
+                    points: posts.points,
+                    content: posts.content,
+                    createdAt: getISOFormatDateQuery(posts.createdAt),
+                    commentCount: posts.commentCount,
                     author: {
-                        username: userTable.username,
-                        id: userTable.id,
+                        username: users.username,
+                        id: users.id,
                     },
                     isUpvoted: user
-                        ? sql<boolean>`CASE WHEN ${postUpvotesTable.userId} IS NOT NULL THEN true ELSE false END`
+                        ? sql<boolean>`CASE WHEN ${postUpvotes.userId} IS NOT NULL THEN true ELSE false END`
                         : sql<boolean>`false`,
                 })
-                .from(postsTable)
-                .leftJoin(userTable, eq(postsTable.userId, userTable.id))
-                .where(eq(postsTable.id, id));
+                .from(posts)
+                .leftJoin(users, eq(posts.userId, users.id))
+                .where(eq(posts.id, id));
 
             if (user) {
                 postsQuery.leftJoin(
-                    postUpvotesTable,
+                    postUpvotes,
                     and(
-                        eq(postUpvotesTable.postId, postsTable.id),
-                        eq(postUpvotesTable.userId, user.id),
+                        eq(postUpvotes.postId, posts.id),
+                        eq(postUpvotes.userId, user.id),
                     ),
                 );
             }
@@ -406,9 +403,9 @@ export const postRouter = new Hono<Context>()
 
             // First check if the post exists and belongs to the user
             const [post] = await db
-                .select({ userId: postsTable.userId })
-                .from(postsTable)
-                .where(eq(postsTable.id, id))
+                .select({ userId: posts.userId })
+                .from(posts)
+                .where(eq(posts.id, id))
                 .limit(1);
 
             if (!post) {
@@ -416,16 +413,18 @@ export const postRouter = new Hono<Context>()
             }
 
             if (post.userId !== user.id) {
-                throw new HTTPException(403, { message: 'You can only delete your own posts' });
+                throw new HTTPException(403, {
+                    message: 'You can only delete your own posts',
+                });
             }
 
             // Delete the post (this will cascade delete comments and upvotes if foreign keys are set up)
-            await db.delete(postsTable).where(eq(postsTable.id, id));
+            await db.delete(posts).where(eq(posts.id, id));
 
             return c.json<SuccessResponse<null>>(
                 {
                     success: true,
-                    message: 'Post deleted successfully',
+                    message: 'Post deleted',
                     data: null,
                 },
                 200,

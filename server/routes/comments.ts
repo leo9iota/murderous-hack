@@ -4,9 +4,9 @@ import { and, asc, countDistinct, desc, eq, sql } from 'drizzle-orm';
 
 import { db } from '@/adapter';
 import { type Context } from '@/context';
-import { commentsTable } from '@/db/schemas/comments';
-import { postsTable } from '@/db/schemas/posts';
-import { commentUpvotesTable } from '@/db/schemas/upvotes';
+import { comments } from '@/db/schemas/comments';
+import { posts } from '@/db/schemas/posts';
+import { commentUpvotes } from '@/db/schemas/upvotes';
 import { loggedIn } from '@/middleware/loggedIn';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
@@ -34,12 +34,12 @@ export const commentsRouter = new Hono<Context>()
             const [comment] = await db.transaction(async (tx) => {
                 const [parentComment] = await tx
                     .select({
-                        id: commentsTable.id,
-                        postId: commentsTable.postId,
-                        depth: commentsTable.depth,
+                        id: comments.id,
+                        postId: comments.postId,
+                        depth: comments.depth,
                     })
-                    .from(commentsTable)
-                    .where(eq(commentsTable.id, id))
+                    .from(comments)
+                    .where(eq(comments.id, id))
                     .limit(1);
 
                 if (!parentComment) {
@@ -51,16 +51,16 @@ export const commentsRouter = new Hono<Context>()
                 const postId = parentComment.postId;
 
                 const [updateParentComment] = await tx
-                    .update(commentsTable)
-                    .set({ commentCount: sql`${commentsTable.commentCount} + 1` })
-                    .where(eq(commentsTable.id, parentComment.id))
-                    .returning({ commentCount: commentsTable.commentCount });
+                    .update(comments)
+                    .set({ commentCount: sql`${comments.commentCount} + 1` })
+                    .where(eq(comments.id, parentComment.id))
+                    .returning({ commentCount: comments.commentCount });
 
                 const [updatedPost] = await tx
-                    .update(postsTable)
-                    .set({ commentCount: sql`${postsTable.commentCount} + 1` })
-                    .where(eq(postsTable.id, postId))
-                    .returning({ commentCount: postsTable.commentCount });
+                    .update(posts)
+                    .set({ commentCount: sql`${posts.commentCount} + 1` })
+                    .where(eq(posts.id, postId))
+                    .returning({ commentCount: posts.commentCount });
 
                 if (!updateParentComment || !updatedPost) {
                     throw new HTTPException(404, {
@@ -69,7 +69,7 @@ export const commentsRouter = new Hono<Context>()
                 }
 
                 return await tx
-                    .insert(commentsTable)
+                    .insert(comments)
                     .values({
                         content,
                         userId: user.id,
@@ -78,22 +78,22 @@ export const commentsRouter = new Hono<Context>()
                         depth: parentComment.depth + 1,
                     })
                     .returning({
-                        id: commentsTable.id,
-                        userId: commentsTable.userId,
-                        postId: commentsTable.postId,
-                        content: commentsTable.content,
-                        points: commentsTable.points,
-                        depth: commentsTable.depth,
-                        parentCommentId: commentsTable.parentCommentId,
-                        createdAt: getISOFormatDateQuery(commentsTable.createdAt).as(
+                        id: comments.id,
+                        userId: comments.userId,
+                        postId: comments.postId,
+                        content: comments.content,
+                        points: comments.points,
+                        depth: comments.depth,
+                        parentCommentId: comments.parentCommentId,
+                        createdAt: getISOFormatDateQuery(comments.createdAt).as(
                             'created_at',
                         ),
-                        commentCount: commentsTable.commentCount,
+                        commentCount: comments.commentCount,
                     });
             });
             return c.json<SuccessResponse<Comment>>({
                 success: true,
-                message: 'Comment Created',
+                message: 'Comment created',
                 data: {
                     ...comment,
                     childComments: [],
@@ -118,11 +118,11 @@ export const commentsRouter = new Hono<Context>()
             const points = await db.transaction(async (tx) => {
                 const [existingUpvote] = await tx
                     .select()
-                    .from(commentUpvotesTable)
+                    .from(commentUpvotes)
                     .where(
                         and(
-                            eq(commentUpvotesTable.commentId, id),
-                            eq(commentUpvotesTable.userId, user.id),
+                            eq(commentUpvotes.commentId, id),
+                            eq(commentUpvotes.userId, user.id),
                         ),
                     )
                     .limit(1);
@@ -130,10 +130,10 @@ export const commentsRouter = new Hono<Context>()
                 pointsChange = existingUpvote ? -1 : 1;
 
                 const [updated] = await tx
-                    .update(commentsTable)
-                    .set({ points: sql`${commentsTable.points} + ${pointsChange}` })
-                    .where(eq(commentsTable.id, id))
-                    .returning({ points: commentsTable.points });
+                    .update(comments)
+                    .set({ points: sql`${comments.points} + ${pointsChange}` })
+                    .where(eq(comments.id, id))
+                    .returning({ points: comments.points });
 
                 if (!updated) {
                     throw new HTTPException(404, { message: 'Comment not found' });
@@ -141,11 +141,11 @@ export const commentsRouter = new Hono<Context>()
 
                 if (existingUpvote) {
                     await tx
-                        .delete(commentUpvotesTable)
-                        .where(eq(commentUpvotesTable.id, existingUpvote.id));
+                        .delete(commentUpvotes)
+                        .where(eq(commentUpvotes.id, existingUpvote.id));
                 } else {
                     await tx
-                        .insert(commentUpvotesTable)
+                        .insert(commentUpvotes)
                         .values({ commentId: id, userId: user.id });
                 }
 
@@ -182,19 +182,19 @@ export const commentsRouter = new Hono<Context>()
             const offset = (page - 1) * limit;
 
             const sortByColumn =
-                sortBy === 'points' ? commentsTable.points : commentsTable.createdAt;
+                sortBy === 'points' ? comments.points : comments.createdAt;
             const sortOrder =
                 order === 'desc' ? desc(sortByColumn) : asc(sortByColumn);
 
             const [count] = await db
                 .select({
-                    count: countDistinct(commentsTable.id),
+                    count: countDistinct(comments.id),
                 })
-                .from(commentsTable)
-                .where(eq(commentsTable.parentCommentId, id));
+                .from(comments)
+                .where(eq(comments.parentCommentId, id));
 
-            const comments = await db.query.comments.findMany({
-                where: and(eq(commentsTable.parentCommentId, id)),
+            const commentsData = await db.query.comments.findMany({
+                where: and(eq(comments.parentCommentId, id)),
                 orderBy: sortOrder,
                 limit: limit,
                 offset: offset,
@@ -207,12 +207,12 @@ export const commentsRouter = new Hono<Context>()
                     },
                     commentUpvotes: {
                         columns: { userId: true },
-                        where: eq(commentUpvotesTable.userId, user?.id ?? ''),
+                        where: eq(commentUpvotes.userId, user?.id ?? ''),
                         limit: 1,
                     },
                 },
                 extras: {
-                    createdAt: getISOFormatDateQuery(commentsTable.createdAt).as(
+                    createdAt: getISOFormatDateQuery(comments.createdAt).as(
                         'created_at',
                     ),
                 },
@@ -221,7 +221,7 @@ export const commentsRouter = new Hono<Context>()
             return c.json<PaginatedResponse<Comment[]>>({
                 success: true,
                 message: 'Comments fetched',
-                data: comments as Comment[],
+                data: commentsData as Comment[],
                 pagination: {
                     page,
                     totalPages: Math.ceil(count.count / limit) as number,
