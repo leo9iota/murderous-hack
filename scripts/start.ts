@@ -2,15 +2,6 @@ import { $ } from 'bun';
 
 (async () => {
     try {
-        console.log(`
-  __  __             _                       _  _         _
- |  \\/  |_  _ _ _ __| |___ _ _ ___ _  _ ___ | || |__ _ __| |__
- | |\\/| | || | '_/ _\` / -_) '_/ _ \\ || (_-< | __ / _\` / _| / /
- |_|  |_|\\_,_|_| \\__,_\\___|_| \\___/\\_,_/__/ |_||_\\__,_\\__|_\\_\\
-
-`);
-        console.log('🚀 Starting development environment...\n');
-
         console.log('Checking database...');
         try {
             await $`docker compose exec -T postgres-db pg_isready -U user -d murderous-hack-db`.quiet();
@@ -61,6 +52,7 @@ import { $ } from 'bun';
 
         // Keep alive
         await new Promise(() => {});
+        
     } catch (error) {
         console.error('Start failed:', error);
         process.exit(1);

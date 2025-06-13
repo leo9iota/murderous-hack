@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Link, useRouter } from '@tanstack/react-router';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 
 import { MenuIcon } from 'lucide-react';
-import { toast } from 'sonner';
 
-import { postLogout, userQueryOptions } from '@/lib/api';
+import { userQueryOptions } from '@/lib/api';
 import { Button } from './ui/button';
 import {
   Sheet,
@@ -19,29 +18,16 @@ import {
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useQuery(userQueryOptions());
-  const queryClient = useQueryClient();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      const result = await postLogout();
-      if (result.success) {
-        await queryClient.invalidateQueries({ queryKey: ['user'] });
-        router.invalidate();
-        toast.success('Logged out successfully');
-      } else {
-        toast.error('Logout failed', { description: result.error });
-      }
-    } catch (error) {
-      toast.error('Logout failed', { description: String(error) });
-    }
-  };
   return (
     <header className='bg-mh-primary/95 supports-[backdrop-filter]:bg-mh-primary/90 sticky top-0 z-50 w-full border-border/40 backdrop-blur'>
       <div className='container mx-auto flex items-center justify-between p-4'>
         <div className='flex items-center space-x-4'>
           <Link to='/' className='flex items-center'>
-            <img src='/logo.svg' alt='Murderous Hack' className='size-10' />
+            <img
+              src="/logo.svg"
+              alt="Murderous Hack"
+              className="size-10"
+            />
           </Link>
           <nav className='hidden items-center space-x-4 md:flex'>
             <Link
@@ -68,12 +54,12 @@ export function Navbar() {
             <>
               <span>{user}</span>
               <Button
+                asChild
                 size='sm'
                 variant='secondary'
                 className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
-                onClick={handleLogout}
               >
-                Log out
+                <a href='api/auth/logout'>Log out</a>
               </Button>
             </>
           ) : (
@@ -95,8 +81,12 @@ export function Navbar() {
           </SheetTrigger>
           <SheetContent className='mb-2'>
             <SheetHeader>
-              <SheetTitle className='flex items-center gap-2'>
-                <img src='/logo.svg' alt='Murderous Hack' className='size-6' />
+              <SheetTitle className="flex items-center gap-2">
+                <img
+                  src="/logo.svg"
+                  alt="Murderous Hack"
+                  className="size-6"
+                />
                 Murderous Hack
               </SheetTitle>
               <SheetDescription className='sr-only'>Navigation</SheetDescription>
@@ -129,12 +119,12 @@ export function Navbar() {
                 <>
                   <span>user: {user}</span>
                   <Button
+                    asChild
                     size='sm'
                     variant='secondary'
                     className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
-                    onClick={handleLogout}
                   >
-                    Log out
+                    <a href='api/auth/logout'>Log out</a>
                   </Button>
                 </>
               ) : (

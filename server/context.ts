@@ -1,18 +1,6 @@
 import type { Env } from 'hono';
 
-export interface Session {
-    id: string;
-    token: string;
-    expiresAt: Date;
-    userId: string;
-}
-
-export interface User {
-    id: string;
-    username: string;
-    email: string | null;
-    name: string | null;
-}
+import type { Session, User } from 'lucia';
 
 export interface Context extends Env {
     Variables: {

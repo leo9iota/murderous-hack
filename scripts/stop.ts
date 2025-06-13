@@ -9,6 +9,7 @@ import { $ } from 'bun';
         await $`docker compose down`;
 
         console.log('✅ All services stopped!');
+        
     } catch (error) {
         console.error('Stop failed:', error);
         process.exit(1);

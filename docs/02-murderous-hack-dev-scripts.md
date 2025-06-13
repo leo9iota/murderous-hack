@@ -18,34 +18,31 @@ bun run stop
 ## 📋 Scripts
 
 ### `setup.ts` - Complete Environment Setup
-
--   Creates `.env` file from `.env.example` (if needed)
--   Installs root dependencies (`bun install`)
--   Installs frontend dependencies (`cd frontend && bun install`)
--   Starts PostgreSQL database container
--   Sets up database schema (`bunx drizzle-kit push`)
--   **Run this once when setting up the project**
+- Creates `.env` file from `.env.example` (if needed)
+- Installs root dependencies (`bun install`)
+- Installs frontend dependencies (`cd frontend && bun install`)
+- Starts PostgreSQL database container
+- Sets up database schema (`bunx drizzle-kit push`)
+- **Run this once when setting up the project**
 
 ### `start.ts` - Start Development Environment
-
--   Checks and starts PostgreSQL database (if not running)
--   Kills any existing processes on ports 3000/3001
--   Starts backend server on `http://localhost:3000` (from root)
--   Starts frontend server on `http://localhost:3001` (from frontend/)
--   Handles graceful shutdown with Ctrl+C
--   **Use this for daily development**
+- Checks and starts PostgreSQL database (if not running)
+- Kills any existing processes on ports 3000/3001
+- Starts backend server on `http://localhost:3000` (from root)
+- Starts frontend server on `http://localhost:3001` (from frontend/)
+- Handles graceful shutdown with Ctrl+C
+- **Use this for daily development**
 
 ### `stop.ts` - Stop All Services
-
--   Stops frontend and backend servers (ports 3000/3001)
--   Stops Docker database container
--   **Clean shutdown of all services**
+- Stops frontend and backend servers (ports 3000/3001)
+- Stops Docker database container
+- **Clean shutdown of all services**
 
 ## 🌐 URLs
 
--   **Frontend**: http://localhost:3001 (runs from `frontend/` directory)
--   **Backend API**: http://localhost:3000 (runs from root directory)
--   **Database**: PostgreSQL on localhost:5432
+- **Frontend**: http://localhost:3001 (runs from `frontend/` directory)
+- **Backend API**: http://localhost:3000 (runs from root directory)
+- **Database**: PostgreSQL on localhost:5432
 
 ## 📁 Project Structure
 
@@ -64,24 +61,22 @@ murderous-hack/
 
 ## ✨ Features
 
--   **Simple & Concise**: Minimal, focused scripts that do exactly what they need
--   **Directory Aware**: Properly handles running backend from root and frontend from frontend/
--   **TypeScript**: Full type safety with Bun's shell API
--   **Graceful Shutdown**: Proper cleanup on Ctrl+C
--   **Port Management**: Automatic port conflict resolution
--   **Health Checks**: Waits for PostgreSQL to be ready
--   **Error Handling**: Clear error messages and proper exit codes
+- **Simple & Concise**: Minimal, focused scripts that do exactly what they need
+- **Directory Aware**: Properly handles running backend from root and frontend from frontend/
+- **TypeScript**: Full type safety with Bun's shell API
+- **Graceful Shutdown**: Proper cleanup on Ctrl+C
+- **Port Management**: Automatic port conflict resolution
+- **Health Checks**: Waits for PostgreSQL to be ready
+- **Error Handling**: Clear error messages and proper exit codes
 
 ## 🐛 Troubleshooting
 
 ### Port Already in Use
-
 ```bash
 bun run stop  # Kills processes on ports 3000/3001
 ```
 
 ### Database Connection Issues
-
 ```bash
 # Check if PostgreSQL is running
 docker compose ps
@@ -94,10 +89,9 @@ bun run stop && bun run start
 ```
 
 ### Docker Issues
-
--   Make sure Docker is running
--   Try restarting Docker Desktop
--   Check logs: `docker compose logs postgres-db`
+- Make sure Docker is running
+- Try restarting Docker Desktop
+- Check logs: `docker compose logs postgres-db`
 
 ## 💡 Tips
 
@@ -124,9 +118,9 @@ bun run start
 
 ## 🛠️ Technical Details
 
--   **Shell API**: Uses `import { $ } from "bun"` for shell commands
--   **Process Management**: Spawns processes with `Bun.spawn()` with proper directory context
--   **Directory Handling**: Backend runs from root, frontend runs from `frontend/`
--   **Signal Handling**: Proper SIGINT handling for graceful shutdown
--   **Port Management**: Uses `npx kill-port` for reliable port cleanup
--   **Health Checks**: Simple PostgreSQL readiness checks
+- **Shell API**: Uses `import { $ } from "bun"` for shell commands
+- **Process Management**: Spawns processes with `Bun.spawn()` with proper directory context
+- **Directory Handling**: Backend runs from root, frontend runs from `frontend/`
+- **Signal Handling**: Proper SIGINT handling for graceful shutdown
+- **Port Management**: Uses `npx kill-port` for reliable port cleanup
+- **Health Checks**: Simple PostgreSQL readiness checks

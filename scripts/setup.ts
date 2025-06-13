@@ -2,15 +2,6 @@ import { $ } from 'bun';
 
 (async () => {
     try {
-        console.log(`
-  __  __             _                       _  _         _
- |  \\/  |_  _ _ _ __| |___ _ _ ___ _  _ ___ | || |__ _ __| |__
- | |\\/| | || | '_/ _\` / -_) '_/ _ \\ || (_-< | __ / _\` / _| / /
- |_|  |_|\\_,_|_| \\__,_\\___|_| \\___/\\_,_/__/ |_||_\\__,_\\__|_\\_\\
-
-`);
-        console.log('🚀 Setting up development environment...\n');
-
         console.log('Creating .env file...');
         try {
             await $`test -f .env`;
@@ -47,12 +38,11 @@ import { $ } from 'bun';
         console.log('');
         console.log('Next steps:');
         console.log('  bun run dev        # Start backend server');
-        console.log(
-            '  cd frontend && bun run dev  # Start frontend server (in another terminal)',
-        );
+        console.log('  cd frontend && bun run dev  # Start frontend server (in another terminal)');
         console.log('');
         console.log('Or use the start script:');
         console.log('  bun run scripts/start.ts');
+        
     } catch (error) {
         console.error('Setup failed:', error);
         process.exit(1);
