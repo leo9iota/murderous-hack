@@ -1,42 +1,42 @@
 import { relations } from 'drizzle-orm';
 import { pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
-import { commentsTable } from './comments';
-import { postsTable } from './posts';
-import { commentUpvotesTable, postUpvotesTable } from './upvotes';
+import { comments } from './comments';
+import { posts } from './posts';
+import { commentUpvotes, postUpvotes } from './upvotes';
 
-export const userTable = pgTable('user', {
+export const users = pgTable('users', {
     id: text('id').primaryKey(),
     username: text('username').notNull().unique(),
-    password_hash: text('password_hash').notNull(),
+    passwordHash: text('password_hash').notNull(),
 });
 
-export const userRelations = relations(userTable, ({ many }) => ({
-    sessions: many(sessionTable),
-    posts: many(postsTable, { relationName: 'author' }),
-    comments: many(commentsTable, { relationName: 'author' }),
-    postUpvotes: many(postUpvotesTable, {
+export const userRelations = relations(users, ({ many }) => ({
+    sessions: many(sessions),
+    posts: many(posts, { relationName: 'author' }),
+    comments: many(comments, { relationName: 'author' }),
+    postUpvotes: many(postUpvotes, {
         relationName: 'userPostUpvotes',
     }),
-    commentUpvotes: many(commentUpvotesTable, {
+    commentUpvotes: many(commentUpvotes, {
         relationName: 'userCommentUpvotes',
     }),
 }));
 
-export const sessionTable = pgTable('session', {
+export const sessions = pgTable('sessions', {
     id: text('id').primaryKey(),
     userId: text('user_id')
         .notNull()
-        .references(() => userTable.id, { onDelete: 'cascade' }),
+        .references(() => users.id, { onDelete: 'cascade' }),
     expiresAt: timestamp('expires_at', {
         withTimezone: true,
         mode: 'date',
     }).notNull(),
 });
 
-export const sessionRelations = relations(sessionTable, ({ one }) => ({
-    user: one(userTable, {
-        fields: [sessionTable.userId],
-        references: [userTable.id],
+export const sessionRelations = relations(sessions, ({ one }) => ({
+    user: one(users, {
+        fields: [sessions.userId],
+        references: [users.id],
     }),
 }));

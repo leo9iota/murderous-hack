@@ -4,20 +4,19 @@ import { integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-import { userTable } from './auth';
-import { postsTable } from './posts';
-import { commentUpvotesTable } from './upvotes';
+import { users } from './auth';
+import { posts } from './posts';
+import { commentUpvotes } from './upvotes';
 
-export const commentsTable = pgTable('comments', {
+export const comments = pgTable('comments', {
     id: serial('id').primaryKey(),
     userId: text('user_id')
         .notNull()
-        .references(() => userTable.id, { onDelete: 'cascade' }),
+        .references(() => users.id, { onDelete: 'cascade' }),
     postId: integer('post_id')
         .notNull()
-        .references(() => postsTable.id, { onDelete: 'cascade' }),
-    parentCommentId: integer('parent_comment_id')
-        .references(() => commentsTable.id, { onDelete: 'cascade' }),
+        .references(() => posts.id, { onDelete: 'cascade' }),
+    parentCommentId: integer('fk_parent_comment_id'),
     content: text('content').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true })
         .defaultNow()
@@ -27,27 +26,27 @@ export const commentsTable = pgTable('comments', {
     points: integer('points').default(0).notNull(),
 });
 
-export const commentRelations = relations(commentsTable, ({ one, many }) => ({
-    author: one(userTable, {
-        fields: [commentsTable.userId],
-        references: [userTable.id],
+export const commentRelations = relations(comments, ({ one, many }) => ({
+    author: one(users, {
+        fields: [comments.userId],
+        references: [users.id],
         relationName: 'author',
     }),
-    parentComment: one(commentsTable, {
-        fields: [commentsTable.parentCommentId],
-        references: [commentsTable.id],
+    parentComment: one(comments, {
+        fields: [comments.parentCommentId],
+        references: [comments.id],
         relationName: 'childComments',
     }),
-    childComments: many(commentsTable, {
+    childComments: many(comments, {
         relationName: 'childComments',
     }),
-    post: one(postsTable, {
-        fields: [commentsTable.postId],
-        references: [postsTable.id],
+    post: one(posts, {
+        fields: [comments.postId],
+        references: [posts.id],
     }),
-    commentUpvotes: many(commentUpvotesTable, { relationName: 'commentUpvotes' }),
+    commentUpvotes: many(commentUpvotes, { relationName: 'commentUpvotes' }),
 }));
 
-export const insertCommentsSchema = createInsertSchema(commentsTable, {
-    content: z.string().min(3, { message: 'Comment must be at least 3 chars' }),
+export const insertCommentsSchema = createInsertSchema(comments, {
+    content: z.string().min(3, { message: 'Comment must be at least 3 characters long' }),
 });

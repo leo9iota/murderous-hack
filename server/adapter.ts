@@ -4,19 +4,14 @@ import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
 import postgres from 'postgres';
 import { z } from 'zod';
 
-import {
-    sessionRelations,
-    sessionTable,
-    userRelations,
-    userTable,
-} from './db/schemas/auth';
-import { commentRelations, commentsTable } from './db/schemas/comments';
-import { postsRelations, postsTable } from './db/schemas/posts';
+import { sessionRelations, sessions, userRelations, users } from './db/schemas/auth';
+import { commentRelations, comments } from './db/schemas/comments';
+import { postRelations, posts } from './db/schemas/posts';
 import {
     commentUpvoteRelations,
-    commentUpvotesTable,
+    commentUpvotes,
     postUpvoteRelations,
-    postUpvotesTable,
+    postUpvotes,
 } from './db/schemas/upvotes';
 
 const EnvSchema = z.object({
@@ -29,20 +24,20 @@ const queryClient = postgres(processEnv.DATABASE_URL);
 export const db = drizzle(queryClient, {
     schema: {
         // Tables
-        user: userTable,
-        session: sessionTable,
-        posts: postsTable,
-        comments: commentsTable,
-        postUpvotes: postUpvotesTable,
-        commentUpvotes: commentUpvotesTable,
+        users: users,
+        sessions: sessions,
+        posts: posts,
+        comments: comments,
+        postUpvotes: postUpvotes,
+        commentUpvotes: commentUpvotes,
         // Relations
         userRelations,
         sessionRelations,
-        postsRelations,
+        postRelations,
         commentRelations,
         postUpvoteRelations,
         commentUpvoteRelations,
     },
 });
 
-export const adapter = new DrizzlePostgreSQLAdapter(db, sessionTable, userTable);
+export const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users);

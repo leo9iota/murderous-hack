@@ -8,20 +8,20 @@ import {
     unique,
 } from 'drizzle-orm/pg-core';
 
-import { userTable } from './auth';
-import { commentsTable } from './comments';
-import { postsTable } from './posts';
+import { users } from './auth';
+import { comments } from './comments';
+import { posts } from './posts';
 
-export const postUpvotesTable = pgTable(
+export const postUpvotes = pgTable(
     'post_upvotes',
     {
         id: serial('id').primaryKey(),
         postId: integer('post_id')
             .notNull()
-            .references(() => postsTable.id, { onDelete: 'cascade' }),
+            .references(() => posts.id, { onDelete: 'cascade' }),
         userId: text('user_id')
             .notNull()
-            .references(() => userTable.id, { onDelete: 'cascade' }),
+            .references(() => users.id, { onDelete: 'cascade' }),
         createdAt: timestamp('created_at', { withTimezone: true })
             .defaultNow()
             .notNull(),
@@ -31,29 +31,29 @@ export const postUpvotesTable = pgTable(
     }),
 );
 
-export const postUpvoteRelations = relations(postUpvotesTable, ({ one }) => ({
-    post: one(postsTable, {
-        fields: [postUpvotesTable.postId],
-        references: [postsTable.id],
+export const postUpvoteRelations = relations(postUpvotes, ({ one }) => ({
+    post: one(posts, {
+        fields: [postUpvotes.postId],
+        references: [posts.id],
         relationName: 'postUpvotes',
     }),
-    user: one(userTable, {
-        fields: [postUpvotesTable.userId],
-        references: [userTable.id],
+    user: one(users, {
+        fields: [postUpvotes.userId],
+        references: [users.id],
         relationName: 'userPostUpvotes',
     }),
 }));
 
-export const commentUpvotesTable = pgTable(
+export const commentUpvotes = pgTable(
     'comment_upvotes',
     {
         id: serial('id').primaryKey(),
         commentId: integer('comment_id')
             .notNull()
-            .references(() => commentsTable.id, { onDelete: 'cascade' }),
+            .references(() => comments.id, { onDelete: 'cascade' }),
         userId: text('user_id')
             .notNull()
-            .references(() => userTable.id, { onDelete: 'cascade' }),
+            .references(() => users.id, { onDelete: 'cascade' }),
         createdAt: timestamp('created_at', { withTimezone: true })
             .defaultNow()
             .notNull(),
@@ -63,15 +63,15 @@ export const commentUpvotesTable = pgTable(
     }),
 );
 
-export const commentUpvoteRelations = relations(commentUpvotesTable, ({ one }) => ({
-    comment: one(commentsTable, {
-        fields: [commentUpvotesTable.commentId],
-        references: [commentsTable.id],
+export const commentUpvoteRelations = relations(commentUpvotes, ({ one }) => ({
+    comment: one(comments, {
+        fields: [commentUpvotes.commentId],
+        references: [comments.id],
         relationName: 'commentUpvotes',
     }),
-    user: one(userTable, {
-        fields: [commentUpvotesTable.userId],
-        references: [userTable.id],
+    user: one(users, {
+        fields: [commentUpvotes.userId],
+        references: [users.id],
         relationName: 'userCommentUpvotes',
     }),
 }));

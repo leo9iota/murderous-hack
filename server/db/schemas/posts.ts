@@ -4,15 +4,15 @@ import { integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 import { createInsertSchema } from 'drizzle-zod';
 import { z } from 'zod';
 
-import { userTable } from './auth';
-import { commentsTable } from './comments';
-import { postUpvotesTable } from './upvotes';
+import { users } from './auth';
+import { comments } from './comments';
+import { postUpvotes } from './upvotes';
 
-export const postsTable = pgTable('posts', {
+export const posts = pgTable('posts', {
     id: serial('id').primaryKey(),
     userId: text('user_id')
         .notNull()
-        .references(() => userTable.id, { onDelete: 'cascade' }),
+        .references(() => users.id, { onDelete: 'cascade' }),
     title: text('title').notNull(),
     url: text('url'),
     content: text('content'),
@@ -25,23 +25,23 @@ export const postsTable = pgTable('posts', {
         .notNull(),
 });
 
-export const insertPostSchema = createInsertSchema(postsTable, {
-    title: z.string().min(3, { message: 'Title must be at least 3 chars' }),
+export const insertPostSchema = createInsertSchema(posts, {
+    title: z.string().min(3, { message: 'Title must be at least 3 characters long' }),
     url: z
         .string()
         .trim()
-        .url({ message: 'URL must be a valid URL' })
+        .url({ message: 'URL must be valid' })
         .optional()
         .or(z.literal('')),
     content: z.string().optional(),
 });
 
-export const postsRelations = relations(postsTable, ({ one, many }) => ({
-    author: one(userTable, {
-        fields: [postsTable.userId],
-        references: [userTable.id],
+export const postRelations = relations(posts, ({ one, many }) => ({
+    author: one(users, {
+        fields: [posts.userId],
+        references: [users.id],
         relationName: 'author',
     }),
-    postUpvotesTable: many(postUpvotesTable, { relationName: 'postUpvotes' }),
-    comments: many(commentsTable),
+    postUpvotesTable: many(postUpvotes, { relationName: 'postUpvotes' }),
+    comments: many(comments),
 }));
