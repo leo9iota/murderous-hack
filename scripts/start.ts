@@ -47,8 +47,8 @@ import { $ } from 'bun';
 
         console.log('✅ Development environment running!');
         console.log('🌐 Frontend:  http://localhost:3001');
-        console.log('⚙️ Backend:   http://localhost:3000');
-        console.log('Press Ctrl+C to stop');
+        console.log('✨ Backend:   http://localhost:3000');
+        console.log('💡 Press Ctrl+C to stop');
 
         // Keep alive
         await new Promise(() => {});
