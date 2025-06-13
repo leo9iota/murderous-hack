@@ -316,7 +316,7 @@ export const useDeletePost = () => {
                     refetchType: 'none',
                 });
 
-                toast.success('Post deleted successfully');
+                toast.success('Post deleted');
             } else {
                 toast.error('Failed to delete post');
             }
