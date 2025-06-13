@@ -16,7 +16,7 @@ export const comments = pgTable('comments', {
     postId: integer('post_id')
         .notNull()
         .references(() => posts.id, { onDelete: 'cascade' }),
-    parentCommentId: integer('fk_parent_comment_id'),
+    parentCommentId: integer('parent_comment_id'),
     content: text('content').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true })
         .defaultNow()
