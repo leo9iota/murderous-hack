@@ -12,6 +12,7 @@ export const userTable = pgTable('user', {
 });
 
 export const userRelations = relations(userTable, ({ many }) => ({
+    sessions: many(sessionTable),
     posts: many(postsTable, { relationName: 'author' }),
     comments: many(commentsTable, { relationName: 'author' }),
     postUpvotes: many(postUpvotesTable, {
@@ -26,9 +27,16 @@ export const sessionTable = pgTable('session', {
     id: text('id').primaryKey(),
     userId: text('user_id')
         .notNull()
-        .references(() => userTable.id),
+        .references(() => userTable.id, { onDelete: 'cascade' }),
     expiresAt: timestamp('expires_at', {
         withTimezone: true,
         mode: 'date',
     }).notNull(),
 });
+
+export const sessionRelations = relations(sessionTable, ({ one }) => ({
+    user: one(userTable, {
+        fields: [sessionTable.userId],
+        references: [userTable.id],
+    }),
+}));
