@@ -5,45 +5,22 @@ import { HTTPException } from 'hono/http-exception';
 
 import { type ErrorResponse } from '@/shared/types';
 import type { Context } from './context';
-import { lucia } from './lucia';
+import { authMiddleware } from './middleware/auth';
 import { authRouter } from './routes/auth';
 import { commentsRouter } from './routes/comments';
 import { postRouter } from './routes/posts';
 
 const app = new Hono<Context>();
 
-app.use('*', cors(), async (c, next) => {
-    const sessionId = lucia.readSessionCookie(c.req.header('Cookie') ?? '');
-    if (!sessionId) {
-        c.set('user', null);
-        c.set('session', null);
-        return next();
-    }
+app.use('*', cors(), authMiddleware);
 
-    const { session, user } = await lucia.validateSession(sessionId);
-    if (session && session.fresh) {
-        c.header('Set-Cookie', lucia.createSessionCookie(session.id).serialize(), {
-            append: true,
-        });
-    }
-    if (!session) {
-        c.header('Set-Cookie', lucia.createBlankSessionCookie().serialize(), {
-            append: true,
-        });
-    }
-    c.set('session', session);
-    c.set('user', user);
-    return next();
-});
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const routes = app
     .basePath('/api')
     .route('/auth', authRouter)
     .route('/posts', postRouter)
     .route('/comments', commentsRouter);
 
-app.onError((err, c) => {
+routes.onError((err, c) => {
     if (err instanceof HTTPException) {
         const errResponse =
             err.res ??
@@ -68,7 +45,7 @@ app.onError((err, c) => {
             success: false,
             error:
                 process.env.NODE_ENV === 'production'
-                    ? 'Interal Server Error'
+                    ? 'Internal server error'
                     : (err.stack ?? err.message),
         },
         500,
