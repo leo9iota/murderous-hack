@@ -8,7 +8,7 @@ import { users } from '@/db/schemas/auth';
 import { comments } from '@/db/schemas/comments';
 import { posts } from '@/db/schemas/posts';
 import { commentUpvotes, postUpvotes } from '@/db/schemas/upvotes';
-import { loggedIn } from '@/middleware/loggedIn';
+import { requireAuth } from '@/middleware/requireAuth';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 
@@ -24,7 +24,7 @@ import {
 import { getISOFormatDateQuery } from '@/lib/utils';
 
 export const postRouter = new Hono<Context>()
-    .post('/', loggedIn, zValidator('form', createPostSchema), async (c) => {
+    .post('/', requireAuth, zValidator('form', createPostSchema), async (c) => {
         const { title, url, content } = c.req.valid('form');
         const user = c.get('user')!;
         const [post] = await db
@@ -51,8 +51,7 @@ export const postRouter = new Hono<Context>()
 
         const offset = (page - 1) * limit;
 
-        const sortByColumn =
-            sortBy === 'points' ? posts.points : posts.createdAt;
+        const sortByColumn = sortBy === 'points' ? posts.points : posts.createdAt;
         const sortOrder = order === 'desc' ? desc(sortByColumn) : asc(sortByColumn);
 
         const [count] = await db
@@ -120,7 +119,7 @@ export const postRouter = new Hono<Context>()
     })
     .post(
         '/:id/upvote',
-        loggedIn,
+        requireAuth,
         zValidator('param', z.object({ id: z.coerce.number() })),
         async (c) => {
             const { id } = c.req.valid('param');
@@ -176,7 +175,7 @@ export const postRouter = new Hono<Context>()
     )
     .post(
         '/:id/comment',
-        loggedIn,
+        requireAuth,
         zValidator('param', z.object({ id: z.coerce.number() })),
         zValidator('form', createCommentSchema),
         async (c) => {
@@ -226,7 +225,7 @@ export const postRouter = new Hono<Context>()
                     commentUpvotes: [],
                     childComments: [],
                     author: {
-                        username: user.username,
+                        username: user.name || 'unknown',
                         id: user.id,
                     },
                 } as unknown as Comment,
@@ -271,10 +270,7 @@ export const postRouter = new Hono<Context>()
                 .select({ count: countDistinct(comments.id) })
                 .from(comments)
                 .where(
-                    and(
-                        eq(comments.postId, id),
-                        isNull(comments.parentCommentId),
-                    ),
+                    and(eq(comments.postId, id), isNull(comments.parentCommentId)),
                 );
 
             const commentData = await db.query.comments.findMany({
@@ -314,9 +310,9 @@ export const postRouter = new Hono<Context>()
                         },
                         orderBy: sortOrder,
                         extras: {
-                            createdAt: getISOFormatDateQuery(
-                                comments.createdAt,
-                            ).as('created_at'),
+                            createdAt: getISOFormatDateQuery(comments.createdAt).as(
+                                'created_at',
+                            ),
                         },
                     },
                 },
@@ -395,7 +391,7 @@ export const postRouter = new Hono<Context>()
     )
     .delete(
         '/:id',
-        loggedIn,
+        requireAuth,
         zValidator('param', z.object({ id: z.coerce.number() })),
         async (c) => {
             const { id } = c.req.valid('param');

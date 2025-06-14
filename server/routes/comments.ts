@@ -7,7 +7,7 @@ import { type Context } from '@/context';
 import { comments } from '@/db/schemas/comments';
 import { posts } from '@/db/schemas/posts';
 import { commentUpvotes } from '@/db/schemas/upvotes';
-import { loggedIn } from '@/middleware/loggedIn';
+import { requireAuth } from '@/middleware/requireAuth';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 
@@ -23,7 +23,7 @@ import { getISOFormatDateQuery } from '@/lib/utils';
 export const commentsRouter = new Hono<Context>()
     .post(
         '/:id',
-        loggedIn,
+        requireAuth,
         zValidator('param', z.object({ id: z.coerce.number() })),
         zValidator('form', createCommentSchema),
         async (c) => {
@@ -99,7 +99,7 @@ export const commentsRouter = new Hono<Context>()
                     childComments: [],
                     commentUpvotes: [],
                     author: {
-                        username: user.username,
+                        username: user.name || 'unknown',
                         id: user.id,
                     },
                 } as Comment,
@@ -108,7 +108,7 @@ export const commentsRouter = new Hono<Context>()
     )
     .post(
         '/:id/upvote',
-        loggedIn,
+        requireAuth,
         zValidator('param', z.object({ id: z.coerce.number() })),
         async (c) => {
             const { id } = c.req.valid('param');
