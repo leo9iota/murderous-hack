@@ -23,8 +23,8 @@ import { $ } from 'bun';
         console.log('🆗 Starting database container...');
         await $`docker compose up -d postgres-db`;
 
-        console.log('🆗 Waiting for database to be fully ready...');
-        await new Promise((resolve) => setTimeout(resolve, 8000));
+        console.log('⌛ Waiting for database to be fully ready...');
+        await new Promise((resolve) => setTimeout(resolve, 6969));
 
         console.log('🆗 Pushing database schema...');
         try {

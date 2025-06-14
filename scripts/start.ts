@@ -10,14 +10,16 @@ import { $ } from 'bun';
             console.log('🆗 Starting database...');
             await $`docker compose up -d postgres-db`;
             console.log('⌛ Waiting for database...');
-            await new Promise((resolve) => setTimeout(resolve, 5000));
+            await new Promise((resolve) => setTimeout(resolve, 6969));
         }
 
         console.log('🆗 Killing any existing processes on ports 3000 and 3001...');
         try {
             await $`bunx kill-port 3000 3001`.quiet();
         } catch {
-            // Ports not in use
+            console.log(
+                '💡 Ports 3000 and 3001 are not in use',
+            );
         }
 
         console.log('🆗 Starting backend server...');
@@ -34,7 +36,6 @@ import { $ } from 'bun';
             stderr: 'inherit',
         });
 
-        // Graceful shutdown
         process.on('SIGINT', async () => {
             console.log('\n🆗 Shutting down servers...');
             backend.kill();
@@ -45,12 +46,11 @@ import { $ } from 'bun';
             process.exit(0);
         });
 
-        console.log('✅ Development environment running!');
-        console.log('🌐 Frontend:  http://localhost:3001');
-        console.log('✨ Backend:   http://localhost:3000');
+        console.log('✅ Development environment is up and running!');
+        console.log('✨ Frontend:     http://localhost:3001');
+        console.log('✨ Backend:      http://localhost:3000');
         console.log('💡 Press Ctrl+C to stop');
 
-        // Keep alive
         await new Promise(() => {});
     } catch (error) {
         console.error('❌ Start failed:', error);
