@@ -1,4 +1,5 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
+
 import postgres from 'postgres';
 import { z } from 'zod';
 
@@ -37,5 +38,3 @@ export const db = drizzle(queryClient, {
         commentUpvoteRelations,
     },
 });
-
-
