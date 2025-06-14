@@ -216,7 +216,7 @@ import type { Context } from '@/context';
 import { users } from '@/db/schemas/auth';
 import { lucia } from '@/lucia'; // Keep for other endpoints
 import { auth } from '@/auth'; // NEW - for signup only
-import { loggedIn } from '@/middleware/loggedIn';
+import { requireAuth } from '@/middleware/requireAuth';
 import { zValidator } from '@hono/zod-validator';
 import { generateId } from 'lucia';
 import postgres from 'postgres';
@@ -267,7 +267,7 @@ export const authRouter = new Hono<Context>()
     .get('/logout', async (c) => {
         // ... existing Lucia logout logic unchanged
     })
-    .get('/user', loggedIn, async (c) => {
+    .get('/user', requireAuth, async (c) => {
         // ... existing Lucia user logic unchanged
     });
 ```
@@ -379,7 +379,7 @@ export const authRouter = new Hono<Context>()
 
 **Update:** `server/routes/auth.ts` - User endpoint only
 ```typescript
-    .get('/user', loggedIn, async (c) => {
+    .get('/user', requireAuth, async (c) => {
         const user = c.get('user')!;
         return c.json<SuccessResponse<{ username: string }>>({
             success: true,
