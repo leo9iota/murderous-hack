@@ -59,34 +59,24 @@ cd frontend && bun add better-auth
 
 ---
 
-## 🔧 Phase 2: Backend Migration (1.5-2.5 hours)
+## 🔧 Phase 2: Backend Migration (Atomic Steps)
 
-### 2.1 Update Database Schema (30-45 min)
+### 2.1 Add Better Auth Schema Fields (Non-Breaking) (15 min)
 
-**Current Lucia Schema:**
+**Goal**: Add new fields to database schema without breaking existing Lucia code
+
+**Update:** `server/db/schemas/auth.ts`
 ```typescript
-// server/db/schemas/auth.ts - CURRENT
+// server/db/schemas/auth.ts - ADD FIELDS ONLY
+import { relations } from 'drizzle-orm';
+import { boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+
 export const users = pgTable('users', {
     id: text('id').primaryKey(),
     username: text('username').notNull().unique(),
     passwordHash: text('password_hash').notNull(),
-});
-
-export const sessions = pgTable('sessions', {
-    id: text('id').primaryKey(),
-    userId: text('user_id').notNull().references(() => users.id),
-    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-});
-```
-
-**New Better Auth Schema:**
-```typescript
-// server/db/schemas/auth.ts - NEW
-export const users = pgTable('users', {
-    id: text('id').primaryKey(),
-    username: text('username').notNull().unique(),
-    passwordHash: text('password_hash').notNull(),
-    email: text('email'), // Better Auth expects email field
+    // NEW FIELDS (nullable to avoid breaking existing data)
+    email: text('email'),
     emailVerified: boolean('email_verified').default(false),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
@@ -94,26 +84,39 @@ export const users = pgTable('users', {
 
 export const sessions = pgTable('sessions', {
     id: text('id').primaryKey(),
-    userId: text('user_id').notNull().references(() => users.id),
-    expiresAt: timestamp('expires_at').notNull(),
+    userId: text('user_id')
+        .notNull()
+        .references(() => users.id, { onDelete: 'cascade' }),
+    expiresAt: timestamp('expires_at', {
+        withTimezone: true,
+        mode: 'date',
+    }).notNull(),
+    // NEW FIELDS (nullable to avoid breaking existing sessions)
     ipAddress: text('ip_address'),
     userAgent: text('user_agent'),
     createdAt: timestamp('created_at').defaultNow(),
 });
+
+// Keep existing relations unchanged
 ```
 
 **Action Items:**
-- [ ] Update `server/db/schemas/auth.ts` with new schema
+- [ ] Update `server/db/schemas/auth.ts` with additional fields
 - [ ] Run `bun run db:push` to update database
-- [ ] Verify schema changes in database
+- [ ] Verify existing auth still works (login/signup should work normally)
+- [ ] Check database has new columns with `\d users` and `\d sessions`
 
-### 2.2 Replace Lucia Configuration (20-30 min)
+**✅ Success Criteria**: Existing Lucia auth continues to work, new columns exist in DB
 
-**Remove:** `server/lucia.ts`
+---
+
+### 2.2 Create Better Auth Configuration (10 min)
+
+**Goal**: Create Better Auth config file without using it yet
 
 **Create:** `server/auth.ts`
 ```typescript
-// server/auth.ts - NEW FILE
+// server/auth.ts - NEW FILE (not used yet)
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./adapter";
@@ -129,7 +132,7 @@ export const auth = betterAuth({
     }),
     emailAndPassword: {
         enabled: true,
-        requireEmailVerification: false, // Keep simple for now
+        requireEmailVerification: false,
     },
     session: {
         cookieCache: {
@@ -144,57 +147,21 @@ export type User = typeof auth.$Infer.User;
 ```
 
 **Action Items:**
-- [ ] Delete `server/lucia.ts`
-- [ ] Create `server/auth.ts` with Better Auth config
-- [ ] Update imports throughout codebase
+- [ ] Create `server/auth.ts` file
+- [ ] Verify file compiles without errors
+- [ ] Don't import or use anywhere yet
 
-### 2.3 Update Server Context (15 min)
+**✅ Success Criteria**: File exists, compiles, existing auth still works
 
-**Update:** `server/context.ts`
-```typescript
-// server/context.ts - UPDATED
-import type { Env } from 'hono';
-import type { Session, User } from './auth';
+---
 
-export interface Context extends Env {
-    Variables: {
-        user: User | null;
-        session: Session | null;
-    };
-}
-```
+### 2.3 Create Better Auth Middleware (10 min)
 
-**Action Items:**
-- [ ] Update `server/context.ts` with new types
-- [ ] Remove Lucia type imports
-
-### 2.4 Update Database Adapter (10 min)
-
-**Update:** `server/adapter.ts`
-```typescript
-// server/adapter.ts - UPDATED (remove Lucia adapter)
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import { z } from 'zod';
-
-// Remove this line:
-// import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
-
-// Remove this line:
-// export const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users);
-
-// Keep everything else the same
-```
-
-**Action Items:**
-- [ ] Remove Lucia adapter import and export
-- [ ] Keep database connection and schema exports
-
-### 2.5 Update Authentication Middleware (20-30 min)
+**Goal**: Create new middleware without using it yet
 
 **Create:** `server/middleware/auth.ts`
 ```typescript
-// server/middleware/auth.ts - NEW FILE
+// server/middleware/auth.ts - NEW FILE (not used yet)
 import { createMiddleware } from 'hono/factory';
 import { auth } from '../auth';
 import type { Context } from '../context';
@@ -224,76 +191,36 @@ export const requireAuth = createMiddleware<Context>(async (c, next) => {
 });
 ```
 
-**Update:** `server/middleware/loggedIn.ts`
-```typescript
-// server/middleware/loggedIn.ts - UPDATED
-import { createMiddleware } from 'hono/factory';
-import { HTTPException } from 'hono/http-exception';
-import type { Context } from '@/context';
-
-export const loggedIn = createMiddleware<Context>(async (c, next) => {
-    const user = c.get('user');
-    if (!user) {
-        throw new HTTPException(401, { message: 'Unauthorized' });
-    }
-    await next();
-});
-```
-
 **Action Items:**
-- [ ] Create new `server/middleware/auth.ts`
-- [ ] Update `server/middleware/loggedIn.ts` (minimal changes)
-- [ ] Test middleware functionality
+- [ ] Create `server/middleware/auth.ts` file
+- [ ] Verify file compiles without errors
+- [ ] Don't import or use in server yet
 
-### 2.6 Update Main Server File (15-20 min)
+**✅ Success Criteria**: File exists, compiles, existing auth still works
 
-**Update:** `server/index.ts`
+---
+
+### 2.4 Migrate Signup Endpoint Only (15 min)
+
+**Goal**: Replace only the signup logic with Better Auth
+
+**Update:** `server/routes/auth.ts` - Signup section only
 ```typescript
-// server/index.ts - UPDATED
-import { Hono } from 'hono';
-import { serveStatic } from 'hono/bun';
-import { cors } from 'hono/cors';
-import { HTTPException } from 'hono/http-exception';
-
-import { type ErrorResponse } from '@/shared/types';
-import type { Context } from './context';
-import { authMiddleware } from './middleware/auth'; // NEW
-import { authRouter } from './routes/auth';
-import { commentsRouter } from './routes/comments';
-import { postRouter } from './routes/posts';
-
-const app = new Hono<Context>();
-
-// Replace Lucia middleware with Better Auth middleware
-app.use('*', cors(), authMiddleware);
-
-// Rest of the file remains the same...
-const routes = app
-    .basePath('/api')
-    .route('/auth', authRouter)
-    .route('/posts', postRouter)
-    .route('/comments', commentsRouter);
-
-// ... rest of server setup
-```
-
-**Action Items:**
-- [ ] Replace Lucia session middleware with Better Auth middleware
-- [ ] Remove Lucia imports
-- [ ] Test server startup
-
-### 2.7 Migrate Authentication Routes (45-60 min)
-
-**Update:** `server/routes/auth.ts`
-```typescript
-// server/routes/auth.ts - MAJOR UPDATE
+// server/routes/auth.ts - UPDATE SIGNUP ONLY
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import { zValidator } from '@hono/zod-validator';
+import { eq } from 'drizzle-orm';
 
+import { db } from '@/adapter';
 import type { Context } from '@/context';
-import { auth } from '@/auth';
+import { users } from '@/db/schemas/auth';
+import { lucia } from '@/lucia'; // Keep for other endpoints
+import { auth } from '@/auth'; // NEW - for signup only
 import { loggedIn } from '@/middleware/loggedIn';
+import { zValidator } from '@hono/zod-validator';
+import { generateId } from 'lucia';
+import postgres from 'postgres';
+
 import { loginSchema, type SuccessResponse } from '@/shared/types';
 
 export const authRouter = new Hono<Context>()
@@ -301,9 +228,10 @@ export const authRouter = new Hono<Context>()
         const { username, password } = c.req.valid('form');
 
         try {
+            // Use Better Auth for signup
             const result = await auth.api.signUpEmail({
                 body: {
-                    email: `${username}@murderoushack.local`, // Fake email for username-only auth
+                    email: `${username}@murderoushack.local`, // Fake email pattern
                     password,
                     name: username,
                 },
@@ -332,10 +260,40 @@ export const authRouter = new Hono<Context>()
             throw new HTTPException(500, { message: 'Failed to create user' });
         }
     })
+    // Keep all other endpoints unchanged for now
+    .post('/login', zValidator('form', loginSchema), async (c) => {
+        // ... existing Lucia login logic unchanged
+    })
+    .get('/logout', async (c) => {
+        // ... existing Lucia logout logic unchanged
+    })
+    .get('/user', loggedIn, async (c) => {
+        // ... existing Lucia user logic unchanged
+    });
+```
+
+**Action Items:**
+- [ ] Update only the `/signup` endpoint in `server/routes/auth.ts`
+- [ ] Keep all other endpoints using Lucia
+- [ ] Test signup creates user with Better Auth
+- [ ] Test login still works with Lucia
+- [ ] Verify user can signup → login → access protected routes
+
+**✅ Success Criteria**: Signup uses Better Auth, login/logout still use Lucia, both work together
+
+---
+
+### 2.5 Migrate Login Endpoint Only (15 min)
+
+**Goal**: Replace only the login logic with Better Auth
+
+**Update:** `server/routes/auth.ts` - Login section only
+```typescript
     .post('/login', zValidator('form', loginSchema), async (c) => {
         const { username, password } = c.req.valid('form');
 
         try {
+            // Use Better Auth for login
             const result = await auth.api.signInEmail({
                 body: {
                     email: `${username}@murderoushack.local`,
@@ -366,8 +324,28 @@ export const authRouter = new Hono<Context>()
             throw new HTTPException(500, { message: 'Login failed' });
         }
     })
+```
+
+**Action Items:**
+- [ ] Update only the `/login` endpoint
+- [ ] Keep logout and user endpoints using Lucia
+- [ ] Test login works with Better Auth
+- [ ] Test logout still works with Lucia
+- [ ] Verify full flow: signup → login → logout
+
+**✅ Success Criteria**: Both signup and login use Better Auth, logout still uses Lucia
+
+---
+
+### 2.6 Migrate Logout Endpoint Only (10 min)
+
+**Goal**: Replace only the logout logic with Better Auth
+
+**Update:** `server/routes/auth.ts` - Logout section only
+```typescript
     .get('/logout', async (c) => {
         try {
+            // Use Better Auth for logout
             const result = await auth.api.signOut({
                 headers: c.req.raw.headers,
             });
@@ -383,129 +361,303 @@ export const authRouter = new Hono<Context>()
             return c.redirect('/');
         }
     })
+```
+
+**Action Items:**
+- [ ] Update only the `/logout` endpoint
+- [ ] Keep user endpoint using Lucia
+- [ ] Test logout works with Better Auth
+- [ ] Verify full flow: signup → login → logout → login again
+
+**✅ Success Criteria**: Signup, login, logout all use Better Auth, user endpoint still uses Lucia
+
+---
+
+### 2.7 Migrate User Endpoint Only (10 min)
+
+**Goal**: Replace only the user endpoint logic
+
+**Update:** `server/routes/auth.ts` - User endpoint only
+```typescript
     .get('/user', loggedIn, async (c) => {
         const user = c.get('user')!;
         return c.json<SuccessResponse<{ username: string }>>({
             success: true,
             message: 'User fetched',
-            data: { username: user.name || user.email.split('@')[0] },
+            data: {
+                username: user.name || user.email?.split('@')[0] || 'unknown'
+            },
         });
     });
 ```
 
 **Action Items:**
-- [ ] Replace all Lucia auth calls with Better Auth API calls
-- [ ] Update signup logic to handle username-as-email pattern
-- [ ] Update login logic with Better Auth
-- [ ] Update logout logic
-- [ ] Update user endpoint
-- [ ] Test all auth endpoints
+- [ ] Update only the `/user` endpoint
+- [ ] Handle Better Auth user object structure
+- [ ] Test user endpoint returns correct data
+- [ ] Verify protected routes still work
+
+**✅ Success Criteria**: All auth endpoints use Better Auth, user data displays correctly
 
 ---
 
-## 🎨 Phase 3: Frontend Updates (30-60 minutes)
+### 2.8 Switch to Better Auth Middleware (10 min)
 
-### 3.1 Update API Client (15-20 min)
+**Goal**: Replace Lucia middleware with Better Auth middleware in main server
 
-**Update:** `frontend/src/lib/api.ts`
+**Update:** `server/index.ts`
 ```typescript
-// frontend/src/lib/api.ts - MINIMAL CHANGES
-// Most of the file stays the same, just update error handling if needed
+// server/index.ts - REPLACE MIDDLEWARE ONLY
+import { Hono } from 'hono';
+import { serveStatic } from 'hono/bun';
+import { cors } from 'hono/cors';
+import { HTTPException } from 'hono/http-exception';
 
-export const postSignup = async (username: string, password: string) => {
-    try {
-        const res = await client.auth.signup.$post({
-            form: {
-                username,
-                password,
-            },
-        });
-        // Rest stays the same...
-    } catch (e) {
-        return {
-            success: false,
-            error: String(e),
-            isFormError: false,
-        } as ErrorResponse;
-    }
-};
+import { type ErrorResponse } from '@/shared/types';
+import type { Context } from './context';
+import { authMiddleware } from './middleware/auth'; // NEW
+// Remove: import { lucia } from './lucia';
+import { authRouter } from './routes/auth';
+import { commentsRouter } from './routes/comments';
+import { postRouter } from './routes/posts';
 
-// postLogin function stays mostly the same
-// getUser function may need minor updates
+const app = new Hono<Context>();
+
+// Replace Lucia middleware with Better Auth middleware
+app.use('*', cors(), authMiddleware);
+
+// Remove the old Lucia session middleware block:
+// app.use('*', cors(), async (c, next) => {
+//     const sessionId = lucia.readSessionCookie(c.req.header('Cookie') ?? '');
+//     // ... rest of Lucia middleware
+// });
+
+// Rest of server setup remains the same
+const routes = app
+    .basePath('/api')
+    .route('/auth', authRouter)
+    .route('/posts', postRouter)
+    .route('/comments', commentsRouter);
+
+// ... rest unchanged
 ```
 
 **Action Items:**
-- [ ] Test API calls still work
-- [ ] Update error handling if needed
-- [ ] Verify cookie handling works
+- [ ] Replace Lucia middleware with `authMiddleware` in `server/index.ts`
+- [ ] Remove Lucia import from server/index.ts
+- [ ] Test server starts without errors
+- [ ] Test all auth flows work end-to-end
+- [ ] Test protected routes work
 
-### 3.2 Test Frontend Auth Flows (15-20 min)
-
-**Test Checklist:**
-- [ ] Signup flow works
-- [ ] Login flow works
-- [ ] Logout flow works
-- [ ] Protected routes work
-- [ ] User session persists on refresh
-- [ ] Error handling works properly
-
-### 3.3 Update TypeScript Types (10-15 min)
-
-**Update types if needed:**
-- [ ] Check if any frontend types need updating
-- [ ] Update user interface if structure changed
-- [ ] Verify all TypeScript errors are resolved
+**✅ Success Criteria**: Server uses Better Auth middleware, all auth flows work
 
 ---
 
-## 🧹 Phase 4: Cleanup & Testing (30-60 minutes)
+### 2.9 Update Context Types (5 min)
 
-### 4.1 Remove Lucia Dependencies (10 min)
-```bash
-# Verify Lucia is completely removed
-bun remove lucia @lucia-auth/adapter-drizzle
-cd frontend && bun remove lucia
+**Goal**: Update TypeScript context to use Better Auth types
 
-# Clean up any remaining imports
-grep -r "lucia" server/ frontend/ --exclude-dir=node_modules
+**Update:** `server/context.ts`
+```typescript
+// server/context.ts - UPDATE TYPES
+import type { Env } from 'hono';
+import type { Session, User } from './auth'; // NEW
+
+export interface Context extends Env {
+    Variables: {
+        user: User | null;
+        session: Session | null;
+    };
+}
 ```
 
-### 4.2 Database Migration & Cleanup (15-20 min)
-```bash
-# Push final schema changes
-bun run db:push
+**Action Items:**
+- [ ] Update `server/context.ts` with Better Auth types
+- [ ] Remove any Lucia type imports
+- [ ] Verify TypeScript compiles without errors
 
-# Verify database structure
-# Check that new columns exist and old sessions still work
+**✅ Success Criteria**: No TypeScript errors, context uses Better Auth types
+
+---
+
+### 2.10 Clean Up Lucia Dependencies (5 min)
+
+**Goal**: Remove all Lucia code and imports
+
+**Update:** `server/adapter.ts`
+```typescript
+// server/adapter.ts - REMOVE LUCIA ADAPTER
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import { z } from 'zod';
+
+// Remove these lines:
+// import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
+// export const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users);
+
+// Keep everything else the same
 ```
 
-### 4.3 Comprehensive Testing (20-30 min)
+**Delete:** `server/lucia.ts`
 
-**Backend Testing:**
-- [ ] Server starts without errors
-- [ ] All auth endpoints respond correctly
-- [ ] Database connections work
-- [ ] Session management works
-- [ ] Protected routes work
+**Action Items:**
+- [ ] Remove Lucia adapter import and export from `server/adapter.ts`
+- [ ] Delete `server/lucia.ts` file
+- [ ] Remove any remaining Lucia imports from routes
+- [ ] Verify no TypeScript errors
 
-**Frontend Testing:**
-- [ ] Login page works
-- [ ] Signup page works
-- [ ] Logout works
-- [ ] Protected pages work
-- [ ] Session persistence works
-- [ ] Error states work
+**✅ Success Criteria**: No Lucia code remains, everything compiles and works
 
-**Integration Testing:**
-- [ ] Full user journey: signup → login → use app → logout
-- [ ] Session expiration handling
-- [ ] Error scenarios (wrong password, etc.)
+---
 
-### 4.4 Final Code Review (10 min)
+## 🎨 Phase 3: Frontend Updates (Atomic Steps)
+
+### 3.1 Test Current Frontend (5 min)
+
+**Goal**: Verify frontend still works with backend changes
+
+**Action Items:**
+- [ ] Start frontend: `cd frontend && bun run dev`
+- [ ] Test signup flow works
+- [ ] Test login flow works
+- [ ] Test logout flow works
+- [ ] Test protected routes work
+- [ ] Note any errors or issues
+
+**✅ Success Criteria**: Frontend works with Better Auth backend, or issues are identified
+
+---
+
+### 3.2 Update Frontend Types (If Needed) (10 min)
+
+**Goal**: Fix any TypeScript errors from Better Auth changes
+
+**Check:** `frontend/src/lib/api.ts` and other files for type errors
+
+**Potential Updates:**
+```typescript
+// If user object structure changed, update interfaces
+interface User {
+    username: string; // May need to map from user.name or user.email
+}
+```
+
+**Action Items:**
+- [ ] Check for TypeScript errors in frontend
+- [ ] Update user interface if needed
+- [ ] Update API response handling if needed
+- [ ] Verify all types compile
+
+**✅ Success Criteria**: No TypeScript errors in frontend
+
+---
+
+### 3.3 Update Error Handling (If Needed) (10 min)
+
+**Goal**: Ensure error handling works with Better Auth responses
+
+**Action Items:**
+- [ ] Test signup with invalid data
+- [ ] Test login with wrong credentials
+- [ ] Verify error messages display correctly
+- [ ] Update error handling if Better Auth returns different error formats
+
+**✅ Success Criteria**: Error handling works correctly with Better Auth
+
+---
+
+## 🧹 Phase 4: Final Testing & Cleanup (Atomic Steps)
+
+### 4.1 Comprehensive Backend Testing (15 min)
+
+**Goal**: Verify all backend functionality works
+
+**Test Checklist:**
+- [ ] Server starts without errors: `bun run dev`
+- [ ] POST `/api/auth/signup` works (create new user)
+- [ ] POST `/api/auth/login` works (login with created user)
+- [ ] GET `/api/auth/user` works (returns user data)
+- [ ] GET `/api/auth/logout` works (clears session)
+- [ ] Protected routes work (posts, comments)
+- [ ] Database has correct data structure
+
+**Action Items:**
+- [ ] Test each endpoint manually or with curl/Postman
+- [ ] Check database for proper user/session data
+- [ ] Verify no console errors in server logs
+
+**✅ Success Criteria**: All backend endpoints work correctly
+
+---
+
+### 4.2 Comprehensive Frontend Testing (15 min)
+
+**Goal**: Verify all frontend functionality works
+
+**Test Checklist:**
+- [ ] Signup page creates users successfully
+- [ ] Login page authenticates users
+- [ ] Logout clears session and redirects
+- [ ] Protected pages require authentication
+- [ ] Session persists across browser refresh
+- [ ] Error messages display correctly
+- [ ] User data displays correctly
+
+**Action Items:**
+- [ ] Test complete user journey in browser
+- [ ] Test error scenarios (wrong password, etc.)
+- [ ] Check browser console for errors
+- [ ] Test session persistence
+
+**✅ Success Criteria**: All frontend flows work correctly
+
+---
+
+### 4.3 Integration Testing (10 min)
+
+**Goal**: Test complete end-to-end workflows
+
+**Test Scenarios:**
+- [ ] **New User Flow**: Signup → Login → Browse → Logout
+- [ ] **Returning User Flow**: Login → Browse → Logout
+- [ ] **Session Persistence**: Login → Refresh page → Still logged in
+- [ ] **Error Handling**: Wrong password → Error message → Correct password → Success
+
+**Action Items:**
+- [ ] Test each scenario completely
+- [ ] Verify data consistency in database
+- [ ] Check for any edge cases
+
+**✅ Success Criteria**: All user workflows work end-to-end
+
+---
+
+### 4.4 Final Cleanup (10 min)
+
+**Goal**: Remove any remaining Lucia references and clean up code
+
+**Action Items:**
+- [ ] Search for any remaining "lucia" references: `grep -r "lucia" server/ --exclude-dir=node_modules`
 - [ ] Remove any commented-out Lucia code
 - [ ] Clean up unused imports
-- [ ] Verify all TypeScript errors resolved
-- [ ] Check for any console errors
+- [ ] Verify no TypeScript errors: `bun run lint:server && cd frontend && bun run typecheck`
+- [ ] Check for console warnings
+
+**✅ Success Criteria**: Clean codebase with no Lucia references, no errors
+
+---
+
+### 4.5 Database Cleanup (Optional) (5 min)
+
+**Goal**: Clean up any test data or optimize schema
+
+**Action Items:**
+- [ ] Remove any test users created during migration
+- [ ] Verify database schema is optimal
+- [ ] Consider adding indexes if needed
+- [ ] Document any schema changes
+
+**✅ Success Criteria**: Clean, optimized database
 
 ---
 
@@ -553,6 +705,32 @@ Migration is complete when:
 - ✅ All tests pass
 - ✅ Lucia dependencies removed
 
-**Estimated Total Time: 2-4 hours**
-**Risk Level: Low** (due to simple auth requirements)
-**Rollback Time: 15 minutes** (if needed)
+**Estimated Total Time: 2-3 hours** (now with atomic steps)
+**Risk Level: Very Low** (each step is reversible and testable)
+**Rollback Time: 5 minutes per step** (if needed)
+
+---
+
+## 📊 **New Migration Summary**
+
+### **Key Improvements:**
+- ✅ **Atomic Steps**: Each step is 5-15 minutes and independently testable
+- ✅ **Non-Breaking**: Database changes are additive first, then migration happens
+- ✅ **Incremental**: Routes migrate one at a time, not all at once
+- ✅ **Testable**: Each step has clear success criteria
+- ✅ **Reversible**: Easy to rollback individual changes
+- ✅ **Safe**: Existing functionality preserved until final switch
+
+### **Step Count:**
+- **Phase 1**: 4 steps (20 min) - Preparation
+- **Phase 2**: 10 steps (120 min) - Backend Migration
+- **Phase 3**: 3 steps (25 min) - Frontend Updates
+- **Phase 4**: 5 steps (55 min) - Testing & Cleanup
+- **Total**: 22 atomic steps (220 min = 3.7 hours)
+
+### **Risk Mitigation:**
+- Each step can be tested independently
+- Database changes are non-breaking initially
+- Routes migrate incrementally (signup → login → logout → user)
+- Middleware switches last when everything else works
+- Clear rollback instructions for each step
