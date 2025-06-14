@@ -193,7 +193,7 @@ export const commentsRouter = new Hono<Context>()
                 .from(comments)
                 .where(eq(comments.parentCommentId, id));
 
-            const commentsData = await db.query.comments.findMany({
+            const commentData = await db.query.comments.findMany({
                 where: and(eq(comments.parentCommentId, id)),
                 orderBy: sortOrder,
                 limit: limit,
@@ -221,7 +221,7 @@ export const commentsRouter = new Hono<Context>()
             return c.json<PaginatedResponse<Comment[]>>({
                 success: true,
                 message: 'Comments fetched',
-                data: commentsData as Comment[],
+                data: commentData as Comment[],
                 pagination: {
                     page,
                     totalPages: Math.ceil(count.count / limit) as number,

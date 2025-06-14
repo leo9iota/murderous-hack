@@ -277,7 +277,7 @@ export const postRouter = new Hono<Context>()
                     ),
                 );
 
-            const commentsData = await db.query.comments.findMany({
+            const commentData = await db.query.comments.findMany({
                 where: and(
                     eq(comments.postId, id),
                     isNull(comments.parentCommentId),
@@ -331,7 +331,7 @@ export const postRouter = new Hono<Context>()
                 {
                     success: true,
                     message: 'Comments fetched',
-                    data: commentsData as Comment[],
+                    data: commentData as Comment[],
                     pagination: {
                         page,
                         totalPages: Math.ceil(count.count / limit) as number,
