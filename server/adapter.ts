@@ -3,7 +3,14 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import { z } from 'zod';
 
-import { sessionRelations, sessions, userRelations, users } from './db/schemas/auth';
+import {
+    accounts,
+    sessionRelations,
+    sessions,
+    userRelations,
+    users,
+    verifications,
+} from './db/schemas/auth';
 import { commentRelations, comments } from './db/schemas/comments';
 import { postRelations, posts } from './db/schemas/posts';
 import {
@@ -22,14 +29,14 @@ const processEnv = envSchema.parse(process.env);
 const queryClient = postgres(processEnv.DATABASE_URL);
 export const db = drizzle(queryClient, {
     schema: {
-        // Tables
         users: users,
         sessions: sessions,
+        accounts: accounts,
+        verifications: verifications,
         posts: posts,
         comments: comments,
         postUpvotes: postUpvotes,
         commentUpvotes: commentUpvotes,
-        // Relations
         userRelations,
         sessionRelations,
         postRelations,
