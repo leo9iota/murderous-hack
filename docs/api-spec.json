@@ -1,0 +1,687 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Murderous Hack API",
+    "description": "A Hacker News-style API built with Hono, featuring user authentication, posts, comments, and voting functionality.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Murderous Hack",
+      "url": "http://localhost:3001"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/user": {
+      "get": {
+        "summary": "Get current user",
+        "description": "Returns the currently authenticated user's information",
+        "tags": ["Authentication"],
+        "security": [{"cookieAuth": []}],
+        "responses": {
+          "200": {
+            "description": "User information retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {"type": "boolean", "example": true},
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "username": {"type": "string", "example": "johndoe"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "summary": "Create new user account",
+        "description": "Register a new user with username and password",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 31,
+                    "pattern": "^[a-zA-Z0-9_]+$",
+                    "example": "johndoe"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 255,
+                    "example": "securepassword123"
+                  }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/SuccessResponse"}
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or user already exists",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login user",
+        "description": "Authenticate user with username and password",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": {"type": "string", "example": "johndoe"},
+                  "password": {"type": "string", "example": "securepassword123"}
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/SuccessResponse"}
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "get": {
+        "summary": "Logout user",
+        "description": "End the current user session",
+        "tags": ["Authentication"],
+        "security": [{"cookieAuth": []}],
+        "responses": {
+          "302": {
+            "description": "Logout successful, redirected"
+          }
+        }
+      }
+    },
+    "/posts": {
+      "get": {
+        "summary": "Get posts",
+        "description": "Retrieve a paginated list of posts with optional filtering and sorting",
+        "tags": ["Posts"],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of posts per page",
+            "schema": {"type": "integer", "default": 10, "minimum": 1, "maximum": 100}
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": {"type": "integer", "default": 1, "minimum": 1}
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Sort posts by",
+            "schema": {"type": "string", "enum": ["points", "recent"], "default": "points"}
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Sort order",
+            "schema": {"type": "string", "enum": ["asc", "desc"], "default": "desc"}
+          },
+          {
+            "name": "author",
+            "in": "query",
+            "description": "Filter by author username",
+            "schema": {"type": "string"}
+          },
+          {
+            "name": "site",
+            "in": "query",
+            "description": "Filter by site domain",
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Posts retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/SuccessResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/Post"}
+                        },
+                        "pagination": {"$ref": "#/components/schemas/Pagination"}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create new post",
+        "description": "Create a new post (requires authentication)",
+        "tags": ["Posts"],
+        "security": [{"cookieAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {"type": "string", "example": "Interesting Article Title"},
+                  "url": {"type": "string", "format": "uri", "example": "https://example.com/article"},
+                  "content": {"type": "string", "example": "This is the content of the post..."}
+                },
+                "required": ["title"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Post created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/SuccessResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "postId": {"type": "integer", "example": 123}
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/{id}": {
+      "get": {
+        "summary": "Get single post",
+        "description": "Retrieve a specific post by ID",
+        "tags": ["Posts"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Post ID",
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/SuccessResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {"$ref": "#/components/schemas/Post"}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Post not found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/posts/{id}/upvote": {
+      "post": {
+        "summary": "Upvote/downvote post",
+        "description": "Toggle upvote on a post (requires authentication)",
+        "tags": ["Posts"],
+        "security": [{"cookieAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Post ID",
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vote updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/SuccessResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "points": {"type": "integer", "example": 42}
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "404": {
+            "description": "Post not found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/{id}": {
+      "post": {
+        "summary": "Create comment",
+        "description": "Create a new comment on a post (requires authentication)",
+        "tags": ["Comments"],
+        "security": [{"cookieAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Post ID",
+            "schema": {"type": "integer"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": {"type": "string", "example": "This is a great post!"}
+                },
+                "required": ["content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Comment created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/SuccessResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {"$ref": "#/components/schemas/Comment"}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "404": {
+            "description": "Post not found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/{id}/upvote": {
+      "post": {
+        "summary": "Upvote/downvote comment",
+        "description": "Toggle upvote on a comment (requires authentication)",
+        "tags": ["Comments"],
+        "security": [{"cookieAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Comment ID",
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vote updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/SuccessResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "object",
+                          "properties": {
+                            "points": {"type": "integer", "example": 15}
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          },
+          "404": {
+            "description": "Comment not found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/comments/{id}/comments": {
+      "get": {
+        "summary": "Get comment replies",
+        "description": "Retrieve replies to a specific comment with pagination",
+        "tags": ["Comments"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Comment ID",
+            "schema": {"type": "integer"}
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Number of comments per page",
+            "schema": {"type": "integer", "default": 10, "minimum": 1, "maximum": 100}
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number",
+            "schema": {"type": "integer", "default": 1, "minimum": 1}
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "Sort comments by",
+            "schema": {"type": "string", "enum": ["points", "recent"], "default": "points"}
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Sort order",
+            "schema": {"type": "string", "enum": ["asc", "desc"], "default": "desc"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comments retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {"$ref": "#/components/schemas/SuccessResponse"},
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {"$ref": "#/components/schemas/Comment"}
+                        },
+                        "pagination": {"$ref": "#/components/schemas/Pagination"}
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Comment not found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorResponse"}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "better-auth.session_token",
+        "description": "Session cookie for authentication"
+      }
+    },
+    "schemas": {
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean", "example": true},
+          "message": {"type": "string", "example": "Operation completed successfully"}
+        },
+        "required": ["success", "message"]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {"type": "boolean", "example": false},
+          "error": {"type": "string", "example": "An error occurred"},
+          "isFormError": {"type": "boolean", "example": false}
+        },
+        "required": ["success", "error"]
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": {"type": "integer", "example": 1},
+          "totalPages": {"type": "integer", "example": 10}
+        },
+        "required": ["page", "totalPages"]
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer", "example": 123},
+          "title": {"type": "string", "example": "Interesting Article Title"},
+          "url": {"type": "string", "format": "uri", "example": "https://example.com/article", "nullable": true},
+          "content": {"type": "string", "example": "This is the content of the post...", "nullable": true},
+          "points": {"type": "integer", "example": 42},
+          "createdAt": {"type": "string", "format": "date-time", "example": "2024-01-15T10:30:00Z"},
+          "commentCount": {"type": "integer", "example": 15},
+          "author": {
+            "type": "object",
+            "properties": {
+              "id": {"type": "string", "example": "user123"},
+              "username": {"type": "string", "example": "johndoe"}
+            },
+            "required": ["id", "username"]
+          },
+          "isUpvoted": {"type": "boolean", "example": false}
+        },
+        "required": ["id", "title", "points", "createdAt", "commentCount", "author", "isUpvoted"]
+      },
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "integer", "example": 456},
+          "userId": {"type": "string", "example": "user123"},
+          "content": {"type": "string", "example": "This is a great post!"},
+          "points": {"type": "integer", "example": 15},
+          "depth": {"type": "integer", "example": 0},
+          "commentCount": {"type": "integer", "example": 3},
+          "createdAt": {"type": "string", "format": "date-time", "example": "2024-01-15T11:00:00Z"},
+          "postId": {"type": "integer", "example": 123},
+          "parentCommentId": {"type": "integer", "example": null, "nullable": true},
+          "commentUpvotes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {"type": "string", "example": "user456"}
+              }
+            }
+          },
+          "author": {
+            "type": "object",
+            "properties": {
+              "username": {"type": "string", "example": "janedoe"},
+              "id": {"type": "string", "example": "user456"}
+            },
+            "required": ["username", "id"]
+          },
+          "childComments": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/Comment"}
+          }
+        },
+        "required": ["id", "userId", "content", "points", "depth", "commentCount", "createdAt", "postId", "commentUpvotes", "author"]
+      }
+    }
+  }
+}
