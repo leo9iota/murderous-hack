@@ -3,6 +3,8 @@ import { serveStatic } from 'hono/bun';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
 
+import { Scalar } from '@scalar/hono-api-reference';
+
 import { type ErrorResponse } from '@/shared/types';
 import { auth } from './auth';
 import type { Context } from './context';
@@ -35,6 +37,19 @@ app.get('/api/user', (c) => {
 app.on(['POST', 'GET'], '/api/auth/*', (c) => {
     return auth.handler(c.req.raw);
 });
+
+// API Documentation route
+app.get(
+    '/docs',
+    Scalar({
+        url: '/api-spec.json',
+        theme: 'purple',
+        pageTitle: 'Murderous Hack API Documentation',
+    }),
+);
+
+// Serve the OpenAPI spec file
+app.get('/api-spec.json', serveStatic({ path: './docs/api-spec.json' }));
 
 const routes = app
     .basePath('/api')
