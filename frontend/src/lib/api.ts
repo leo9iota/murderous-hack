@@ -20,18 +20,33 @@ const client = hc<ApiRoutes>('/', {
 
 export const postSignup = async (username: string, password: string) => {
     try {
-        const res = await client.auth.signup.$post({
-            form: {
-                username,
-                password,
+        const res = await fetch('/api/auth/sign-up/email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             },
+            credentials: 'include',
+            body: JSON.stringify({
+                email: `${username}@murderoushack.local`,
+                password: password,
+                name: username,
+            }),
         });
+
         if (res.ok) {
-            const data = (await res.json()) as SuccessResponse;
-            return data;
+            const result = await res.json();
+            return {
+                success: true,
+                data: { username: result.user.name },
+            } as SuccessResponse;
         }
-        const data = (await res.json()) as unknown as ErrorResponse;
-        return data;
+
+        const result = await res.json();
+        return {
+            success: false,
+            error: result.message || 'Signup failed',
+            isFormError: true,
+        } as ErrorResponse;
     } catch (e) {
         return {
             success: false,
@@ -43,18 +58,32 @@ export const postSignup = async (username: string, password: string) => {
 
 export const postLogin = async (username: string, password: string) => {
     try {
-        const res = await client.auth.login.$post({
-            form: {
-                username,
-                password,
+        const res = await fetch('/api/auth/sign-in/email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             },
+            credentials: 'include',
+            body: JSON.stringify({
+                email: `${username}@murderoushack.local`,
+                password: password,
+            }),
         });
+
         if (res.ok) {
-            const data = (await res.json()) as SuccessResponse;
-            return data;
+            const result = await res.json();
+            return {
+                success: true,
+                data: { username: result.user.name },
+            } as SuccessResponse;
         }
-        const data = (await res.json()) as unknown as ErrorResponse;
-        return data;
+
+        const result = await res.json();
+        return {
+            success: false,
+            error: result.message || 'Login failed',
+            isFormError: true,
+        } as ErrorResponse;
     } catch (e) {
         return {
             success: false,
@@ -95,12 +124,20 @@ export const getPosts = async ({
 };
 
 export const getUser = async () => {
-    const res = await client.auth.user.$get();
-    if (res.ok) {
-        const data = await res.json();
-        return data.data.username;
+    try {
+        const res = await fetch('/api/user', {
+            method: 'GET',
+            credentials: 'include',
+        });
+
+        if (res.ok) {
+            const result = await res.json();
+            return result.data?.username || null;
+        }
+        return null;
+    } catch (e) {
+        return null;
     }
-    return null;
 };
 export const userQueryOptions = () =>
     queryOptions({
