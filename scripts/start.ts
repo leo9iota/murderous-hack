@@ -20,8 +20,8 @@ async function openDocumentation() {
         }
         console.log('🆗 Opened documentation in your default browser');
     } catch (error) {
-        console.log('⚠️ Could not open browser automatically');
-        console.log(`⚠️ Please visit: ${DOCS_URL}`);
+        console.log('⚠️  Could not open browser automatically');
+        console.log(`⚠️  Please visit: ${DOCS_URL}`);
     }
 
     console.log('\n🎯 Features:');
@@ -95,6 +95,7 @@ async function openDocumentation() {
         console.log('✅ Development environment is up and running!');
         console.log('✨ Frontend:  http://localhost:3001');
         console.log('✨ Server:    http://localhost:3000');
+        console.log('✨ Docs:      http://localhost:3000/docs');
 
         if (openDocs) {
             console.log('⌛ Waiting for backend to be ready...');
