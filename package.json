@@ -5,6 +5,7 @@
         "setup": "bun run scripts/setup.ts",
         "start": "bun run scripts/start.ts",
         "stop": "bun run scripts/stop.ts",
+        "docs": "bun run scripts/docs.ts",
         "db:push": "bunx drizzle-kit push",
         "db:gen": "bunx drizzle-kit generate",
         "db:mig": "bunx drizzle-kit migrate",
