@@ -72,10 +72,14 @@ export const postRouter = new Hono<Context>()
                 points: posts.points,
                 createdAt: getISOFormatDateQuery(posts.createdAt),
                 commentCount: posts.commentCount,
-                author: {
-                    username: users.username,
-                    id: users.id,
-                },
+                author: sql<{username: string, id: string}>`
+                    CASE
+                        WHEN ${users.username} IS NULL OR ${users.username} = '' THEN
+                            json_build_object('username', '[deleted]', 'id', 'deleted')
+                        ELSE
+                            json_build_object('username', ${users.username}, 'id', ${users.id})
+                    END
+                `,
                 isUpvoted: user
                     ? sql<boolean>`CASE WHEN ${postUpvotes.userId} IS NOT NULL THEN true ELSE false END`
                     : sql<boolean>`false`,
@@ -353,10 +357,14 @@ export const postRouter = new Hono<Context>()
                     content: posts.content,
                     createdAt: getISOFormatDateQuery(posts.createdAt),
                     commentCount: posts.commentCount,
-                    author: {
-                        username: users.username,
-                        id: users.id,
-                    },
+                    author: sql<{username: string, id: string}>`
+                        CASE
+                            WHEN ${users.username} IS NULL OR ${users.username} = '' THEN
+                                json_build_object('username', '[deleted]', 'id', 'deleted')
+                            ELSE
+                                json_build_object('username', ${users.username}, 'id', ${users.id})
+                        END
+                    `,
                     isUpvoted: user
                         ? sql<boolean>`CASE WHEN ${postUpvotes.userId} IS NOT NULL THEN true ELSE false END`
                         : sql<boolean>`false`,
