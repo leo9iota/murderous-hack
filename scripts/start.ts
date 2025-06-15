@@ -47,8 +47,8 @@ import { $ } from 'bun';
         });
 
         console.log('✅ Development environment is up and running!');
-        console.log('✨ Frontend:     http://localhost:3001');
-        console.log('✨ Backend:      http://localhost:3000');
+        console.log('✨ Frontend: http://localhost:3001');
+        console.log('✨ Backend:  http://localhost:3000');
         console.log('💡 Press Ctrl+C to stop');
 
         await new Promise(() => {});
