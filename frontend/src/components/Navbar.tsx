@@ -59,7 +59,11 @@ export function Navbar() {
                 variant='secondary'
                 className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
               >
-                <a href='api/auth/logout'>Log out</a>
+                <form method="POST" action="api/auth/sign-out" style={{ display: 'inline' }}>
+                    <button type="submit" className="text-white hover:text-gray-300 bg-transparent border-none cursor-pointer">
+                        Log out
+                    </button>
+                </form>
               </Button>
             </>
           ) : (
@@ -124,7 +128,11 @@ export function Navbar() {
                     variant='secondary'
                     className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
                   >
-                    <a href='api/auth/logout'>Log out</a>
+                    <form method="POST" action="api/auth/sign-out" style={{ display: 'inline' }}>
+                        <button type="submit" className="text-white hover:text-gray-300 bg-transparent border-none cursor-pointer">
+                            Log out
+                        </button>
+                    </form>
                   </Button>
                 </>
               ) : (
