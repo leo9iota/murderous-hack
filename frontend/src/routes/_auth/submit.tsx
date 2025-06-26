@@ -55,7 +55,7 @@ function Submit() {
           toast.error('Failed to create post', { description: res.error });
         }
         form.setErrorMap({
-          onSubmit: res.isFormError ? res.error : 'Unexpeted error',
+          onSubmit: res.isFormError ? res.error : 'Unexpected error',
         });
       }
     },
