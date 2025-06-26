@@ -203,6 +203,7 @@ export const commentsRouter = new Hono<Context>()
                         columns: {
                             username: true,
                             id: true,
+                            name: true,
                         },
                     },
                     commentUpvotes: {
@@ -218,10 +219,29 @@ export const commentsRouter = new Hono<Context>()
                 },
             });
 
+            const processedComments = commentData.map((comment) => {
+                if (!comment.author) {
+                    return {
+                        ...comment,
+                        author: { id: 'deleted', username: '[deleted]' },
+                    };
+                }
+                return {
+                    ...comment,
+                    author: {
+                        ...comment.author,
+                        username:
+                            comment.author.name ||
+                            comment.author.username ||
+                            '[deleted]',
+                    },
+                };
+            });
+
             return c.json<PaginatedResponse<Comment[]>>({
                 success: true,
                 message: 'Comments fetched',
-                data: commentData as Comment[],
+                data: processedComments as Comment[],
                 pagination: {
                     page,
                     totalPages: Math.ceil(count.count / limit) as number,

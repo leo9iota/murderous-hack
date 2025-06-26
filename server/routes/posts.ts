@@ -72,12 +72,12 @@ export const postRouter = new Hono<Context>()
                 points: posts.points,
                 createdAt: getISOFormatDateQuery(posts.createdAt),
                 commentCount: posts.commentCount,
-                author: sql<{username: string, id: string}>`
+                author: sql<{ username: string; id: string }>`
                     CASE
-                        WHEN ${users.username} IS NULL OR ${users.username} = '' THEN
+                        WHEN COALESCE(${users.name}, ${users.username}) IS NULL OR COALESCE(${users.name}, ${users.username}) = '' THEN
                             json_build_object('username', '[deleted]', 'id', 'deleted')
                         ELSE
-                            json_build_object('username', ${users.username}, 'id', ${users.id})
+                            json_build_object('username', COALESCE(${users.name}, ${users.username}), 'id', ${users.id})
                     END
                 `,
                 isUpvoted: user
@@ -357,12 +357,12 @@ export const postRouter = new Hono<Context>()
                     content: posts.content,
                     createdAt: getISOFormatDateQuery(posts.createdAt),
                     commentCount: posts.commentCount,
-                    author: sql<{username: string, id: string}>`
+                    author: sql<{ username: string; id: string }>`
                         CASE
-                            WHEN ${users.username} IS NULL OR ${users.username} = '' THEN
+                            WHEN COALESCE(${users.name}, ${users.username}) IS NULL OR COALESCE(${users.name}, ${users.username}) = '' THEN
                                 json_build_object('username', '[deleted]', 'id', 'deleted')
                             ELSE
-                                json_build_object('username', ${users.username}, 'id', ${users.id})
+                                json_build_object('username', COALESCE(${users.name}, ${users.username}), 'id', ${users.id})
                         END
                     `,
                     isUpvoted: user
