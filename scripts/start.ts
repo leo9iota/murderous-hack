@@ -61,6 +61,9 @@ async function openDocumentation() {
             await new Promise((resolve) => setTimeout(resolve, 6969));
         }
 
+        console.log('🆗 Pushing database schema...');
+        await $`bun run db:push`;
+
         console.log('🆗 Killing any existing processes on ports 3000 and 3001...');
         try {
             await $`bunx kill-port 3000 3001`.quiet();
@@ -93,9 +96,9 @@ async function openDocumentation() {
         });
 
         console.log('✅ Development environment is up and running!');
-        console.log('✨ Frontend:  http://localhost:3001');
-        console.log('✨ Server:    http://localhost:3000');
-        console.log('✨ Docs:      http://localhost:3000/docs');
+        console.log('✨ Frontend: http://localhost:3001');
+        console.log('✨ Server:   http://localhost:3000');
+        console.log('✨ Docs:     http://localhost:3000/docs');
 
         if (openDocs) {
             console.log('⌛ Waiting for backend to be ready...');
