@@ -75,7 +75,8 @@ export const Post = ({
                   </a>
                 ) : (
                   <Link
-                    to={'/'}
+                    to={'/post'}
+                    search={{ id: post.id }}
                     className='text-foreground hover:text-primary hover:underline'
                   >
                     {post.title}
