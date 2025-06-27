@@ -53,7 +53,6 @@ function Login() {
       username: '',
       password: '',
     },
-
     validatorAdapter: zodValidator(),
     validators: {
       onChange: loginSchema,
@@ -105,7 +104,7 @@ function Login() {
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                     />
                     <FieldInfo field={field} />
                   </div>
@@ -122,7 +121,7 @@ function Login() {
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                     />
                     <FieldInfo field={field} />
                   </div>
