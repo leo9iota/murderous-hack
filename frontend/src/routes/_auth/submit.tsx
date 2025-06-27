@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-router';
 import { useForm } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
-import { zodValidator } from '@tanstack/zod-form-adapter';
+import { useStore } from '@tanstack/react-store';
 
 import { toast } from 'sonner';
 
@@ -39,7 +39,6 @@ function Submit() {
       content: '',
       url: '',
     },
-    validatorAdapter: zodValidator(),
     validators: {
       onChange: createPostSchema,
     },
@@ -55,13 +54,16 @@ function Submit() {
           toast.error('Failed to create post', { description: res.error });
         }
         form.setErrorMap({
-          onSubmit: res.isFormError ? res.error : 'Unexpected error',
+          onSubmit: (res.isFormError ? res.error : 'Unexpected error') as any,
         });
       }
     },
   });
 
-  const shouldBlock = form.useStore((state) => state.isDirty && !state.isSubmitting);
+  const shouldBlock = useStore(
+    form.store,
+    (state) => state.isDirty && !state.isSubmitting,
+  );
   useBlocker({
     condition: shouldBlock,
     blockerFn: () => window.confirm('Are you sure you want to leave?'),
@@ -73,15 +75,13 @@ function Submit() {
         <CardHeader>
           <CardTitle>Create New Post</CardTitle>
           <CardDescription>
-            Leave url blank to submit a question for discussion. If there is no url,
-            text will appear at the top of the thread. If there is a url, text is
-            optional.
+            Leave the URL field empty to submit a question.
           </CardDescription>
         </CardHeader>
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
             form.handleSubmit();
           }}
           className='grid gap-4'
@@ -98,7 +98,7 @@ function Submit() {
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                     />
                     <FieldInfo field={field} />
                   </div>
@@ -114,7 +114,7 @@ function Submit() {
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                     />
                     <FieldInfo field={field} />
                   </div>
@@ -130,7 +130,7 @@ function Submit() {
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                     />
                     <FieldInfo field={field} />
                   </div>
@@ -141,7 +141,7 @@ function Submit() {
                 children={([errorMap]) =>
                   errorMap.onSubmit ? (
                     <p className='text-[0.8rem] font-medium text-destructive'>
-                      {errorMap.onSubmit.toString()}
+                      {String(errorMap.onSubmit)}
                     </p>
                   ) : null
                 }
