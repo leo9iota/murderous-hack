@@ -1,12 +1,19 @@
 import path from 'path';
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
 
+// Tailwind CSS v4 dedicated Vite plugin — provides the PostCSS pipeline and fast incremental build support
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [TanStackRouterVite({}), react()],
+    plugins: [
+        // Order: Tailwind first so subsequent plugins can tweak its generated CSS if needed
+        tailwindcss(),
+        TanStackRouterVite({}),
+        react(),
+    ],
     resolve: {
         alias: {
             '@/shared': path.resolve(__dirname, '../shared'),
