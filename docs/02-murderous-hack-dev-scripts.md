@@ -18,6 +18,7 @@ bun run stop
 ## 📋 Scripts
 
 ### `setup.ts` - Complete Environment Setup
+
 - Creates `.env` file from `.env.example` (if needed)
 - Installs root dependencies (`bun install`)
 - Installs frontend dependencies (`cd frontend && bun install`)
@@ -26,6 +27,7 @@ bun run stop
 - **Run this once when setting up the project**
 
 ### `start.ts` - Start Development Environment
+
 - Checks and starts PostgreSQL database (if not running)
 - Kills any existing processes on ports 3000/3001
 - Starts backend server on `http://localhost:3000` (from root)
@@ -34,6 +36,7 @@ bun run stop
 - **Use this for daily development**
 
 ### `stop.ts` - Stop All Services
+
 - Stops frontend and backend servers (ports 3000/3001)
 - Stops Docker database container
 - **Clean shutdown of all services**
@@ -72,11 +75,13 @@ murderous-hack/
 ## 🐛 Troubleshooting
 
 ### Port Already in Use
+
 ```bash
 bun run stop  # Kills processes on ports 3000/3001
 ```
 
 ### Database Connection Issues
+
 ```bash
 # Check if PostgreSQL is running
 docker compose ps
@@ -89,6 +94,7 @@ bun run stop && bun run start
 ```
 
 ### Docker Issues
+
 - Make sure Docker is running
 - Try restarting Docker Desktop
 - Check logs: `docker compose logs postgres-db`

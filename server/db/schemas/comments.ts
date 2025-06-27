@@ -48,5 +48,7 @@ export const commentRelations = relations(comments, ({ one, many }) => ({
 }));
 
 export const insertCommentsSchema = createInsertSchema(comments, {
-    content: z.string().min(3, { message: 'Comment must be at least 3 characters long' }),
+    content: z
+        .string()
+        .min(3, { message: 'Comment must be at least 3 characters long' }),
 });
