@@ -30,6 +30,7 @@ import { FieldInfo } from '@/components/FieldInfo';
 const loginSearchSchema = z.object({
   redirect: fallback(z.string(), '/').default('/'),
 });
+
 export const Route = createFileRoute('/login')({
   component: () => <Login />,
   validateSearch: zodSearchValidator(loginSearchSchema),
@@ -52,21 +53,24 @@ function Login() {
       username: '',
       password: '',
     },
+
     validatorAdapter: zodValidator(),
     validators: {
       onChange: loginSchema,
     },
+
     onSubmit: async ({ value }) => {
       const res = await postLogin(value.username, value.password);
+
       if (res.success) {
         await queryClient.invalidateQueries({ queryKey: ['user'] });
         router.invalidate();
         await navigate({ to: search.redirect });
         return null;
       } else {
-        if (!res.isFormError) {
+        if (!res.isFormError)
           toast.error('Login failed', { description: res.error });
-        }
+
         form.setErrorMap({
           onSubmit: res.isFormError ? res.error : 'Unexpected error',
         });
@@ -77,15 +81,17 @@ function Login() {
     <div className='w-full'>
       <Card className='mx-auto mt-12 max-w-sm border-border/25'>
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
             form.handleSubmit();
           }}
         >
           <CardHeader>
             <CardTitle className='text-center text-2xl'>Login</CardTitle>
-            <CardDescription>Enter your details below to login</CardDescription>
+            <CardDescription>
+              Enter your username and password to login
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className='grid gap-4'>
