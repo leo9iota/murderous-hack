@@ -10,7 +10,6 @@ import { useStore } from '@tanstack/react-store';
 
 import { toast } from 'sonner';
 
-import { createPostSchema } from '@/shared/types';
 import { postSubmit } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,34 +33,25 @@ function Submit() {
   const router = useRouter();
   const navigate = useNavigate();
 
-  // Note: we purposefully avoid generic parameters for `useForm` because
-  // TanStack's generic list is extensive (10 params) and providing only the
-  // value-type causes a compiler error. If stricter typing is desired, extract
-  // a `FormOpts` via `formOptions()` helper and share between server/client –
-  // that's TanStack's recommended path. For now we rely on the validator for
-  // runtime safety.
-
   const form = useForm({
     defaultValues: {
       title: '',
       content: '',
       url: '',
     },
-    validators: {
-      onChange: createPostSchema as any,
-    },
-    
+
     onSubmit: async ({ value }) => {
       const res = await postSubmit(value.title, value.url, value.content);
+
       if (res.success) {
         await queryClient.invalidateQueries({ queryKey: ['posts'] });
         router.invalidate();
         await navigate({ to: '/post', search: { id: res.data.postId } });
         return;
       } else {
-        if (!res.isFormError) {
+        if (!res.isFormError)
           toast.error('Failed to create post', { description: res.error });
-        }
+
         form.setErrorMap({
           onSubmit: (res.isFormError ? res.error : 'Unexpected error') as any,
         });
