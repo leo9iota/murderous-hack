@@ -1,6 +1,9 @@
 # Drizzle metadata
 drizzle
 
+# TanStack temp files
+.tanstack
+
 # Logs
 logs
 *.log
