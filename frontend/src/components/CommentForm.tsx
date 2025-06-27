@@ -58,9 +58,9 @@ export function CommentForm({
 
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
         form.handleSubmit();
       }}
       className='grid gap-2'
@@ -75,7 +75,7 @@ export function CommentForm({
               name={field.name}
               value={field.state.value}
               onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.currentTarget.value)}
+              onChange={(event) => field.handleChange(event.currentTarget.value)}
               placeholder='What are your thoughts?'
               rows={4}
               className='w-full p-2 text-sm'
