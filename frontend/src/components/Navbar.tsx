@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { MenuIcon } from 'lucide-react';
 
 import { userQueryOptions } from '@/lib/api';
+import { useLogout } from '@/lib/api-hooks';
 import { Button } from './ui/button';
 import {
   Sheet,
@@ -18,16 +19,14 @@ import {
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useQuery(userQueryOptions());
+  const { mutate: logout } = useLogout();
+  
   return (
     <header className='bg-mh-primary/95 supports-[backdrop-filter]:bg-mh-primary/90 sticky top-0 z-50 w-full border-border/40 backdrop-blur'>
       <div className='container mx-auto flex items-center justify-between p-4'>
         <div className='flex items-center space-x-4'>
           <Link to='/' className='flex items-center'>
-            <img
-              src="/logo.svg"
-              alt="Murderous Hack"
-              className="size-10"
-            />
+            <img src='/logo.svg' alt='Murderous Hack' className='size-10' />
           </Link>
           <nav className='hidden items-center space-x-4 md:flex'>
             <Link
@@ -54,16 +53,12 @@ export function Navbar() {
             <>
               <span>{user}</span>
               <Button
-                asChild
                 size='sm'
                 variant='secondary'
+                onClick={() => logout()}
                 className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
               >
-                <form method="POST" action="api/auth/sign-out" style={{ display: 'inline' }}>
-                    <button type="submit" className="text-white hover:text-gray-300 bg-transparent border-none cursor-pointer">
-                        Log out
-                    </button>
-                </form>
+                Log out
               </Button>
             </>
           ) : (
@@ -85,12 +80,8 @@ export function Navbar() {
           </SheetTrigger>
           <SheetContent className='mb-2'>
             <SheetHeader>
-              <SheetTitle className="flex items-center gap-2">
-                <img
-                  src="/logo.svg"
-                  alt="Murderous Hack"
-                  className="size-6"
-                />
+              <SheetTitle className='flex items-center gap-2'>
+                <img src='/logo.svg' alt='Murderous Hack' className='size-6' />
                 Murderous Hack
               </SheetTitle>
               <SheetDescription className='sr-only'>Navigation</SheetDescription>
@@ -123,16 +114,12 @@ export function Navbar() {
                 <>
                   <span>user: {user}</span>
                   <Button
-                    asChild
                     size='sm'
                     variant='secondary'
+                    onClick={() => logout()}
                     className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
                   >
-                    <form method="POST" action="api/auth/sign-out" style={{ display: 'inline' }}>
-                        <button type="submit" className="text-white hover:text-gray-300 bg-transparent border-none cursor-pointer">
-                            Log out
-                        </button>
-                    </form>
+                    Log out
                   </Button>
                 </>
               ) : (

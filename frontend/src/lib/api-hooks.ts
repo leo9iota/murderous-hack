@@ -8,6 +8,7 @@ import {
     deletePost,
     GetPostsSuccess,
     postComment,
+    postLogout,
     upvoteComment,
     upvotePost,
 } from './api';
@@ -332,6 +333,25 @@ export const useDeletePost = () => {
             queryClient.invalidateQueries({ queryKey: ['post', postId] });
 
             toast.error('Failed to delete post');
+        },
+    });
+};
+
+export const useLogout = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: postLogout,
+        onSuccess: () => {
+            // Clear user in cache
+            queryClient.setQueryData(['user'], null);
+            queryClient.invalidateQueries({ queryKey: ['posts'] });
+            // Redirect to home page
+            window.location.href = '/';
+        },
+        onError: (err) => {
+            console.error(err);
+            toast.error('Failed to log out');
         },
     });
 };

@@ -326,3 +326,19 @@ export async function deletePost(id: number) {
         } as ErrorResponse;
     }
 }
+
+export const postLogout = async () => {
+    try {
+        await fetch('/api/auth/sign-out', {
+            method: 'POST',
+            credentials: 'include',
+        });
+        return { success: true } as SuccessResponse;
+    } catch (e) {
+        return {
+            success: false,
+            error: String(e),
+            isFormError: false,
+        } as ErrorResponse;
+    }
+};
