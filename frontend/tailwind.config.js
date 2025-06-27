@@ -13,7 +13,7 @@ export default {
     		},
     		colors: {
     			'mh-primary': '#FF6600',
-    			'mh-secondary': '#f5f5ed',
+    			'mh-secondary': '#fdf5e6',
     			background: 'hsl(var(--background))',
     			foreground: 'hsl(var(--foreground))',
     			card: {
