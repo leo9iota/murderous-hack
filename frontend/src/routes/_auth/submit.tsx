@@ -148,9 +148,9 @@ function Submit() {
               <form.Subscribe
                 selector={(state) => [state.errorMap]}
                 children={([errorMap]) =>
-                  errorMap.onSubmit ? (
+                  (errorMap as any).onSubmit ? (
                     <p className='text-[0.8rem] font-medium text-destructive'>
-                      {String(errorMap.onSubmit)}
+                      {String((errorMap as any).onSubmit)}
                     </p>
                   ) : null
                 }

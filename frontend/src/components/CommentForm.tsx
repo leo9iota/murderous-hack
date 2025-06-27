@@ -1,5 +1,4 @@
 import { useForm } from '@tanstack/react-form';
-import { zodValidator } from '@tanstack/zod-form-adapter';
 
 import { toast } from 'sonner';
 
@@ -23,7 +22,6 @@ export function CommentForm({
     defaultValues: {
       content: '',
     },
-    validatorAdapter: zodValidator(),
     validators: {
       onChange: createCommentSchema,
     },
@@ -43,7 +41,7 @@ export function CommentForm({
                 });
               }
               form.setErrorMap({
-                onSubmit: data.isFormError ? data.error : 'Unexpected error',
+                onSubmit: (data.isFormError ? data.error : 'Unexpected error') as any,
               });
               throw new Error(data.error);
             } else {
@@ -87,9 +85,9 @@ export function CommentForm({
       <form.Subscribe
         selector={(state) => [state.errorMap]}
         children={([errorMap]) =>
-          errorMap.onSubmit ? (
+          (errorMap as any).onSubmit ? (
             <p className='text-[0.8rem] font-medium text-destructive'>
-              {errorMap.onSubmit?.toString()}
+              {String((errorMap as any).onSubmit)}
             </p>
           ) : null
         }

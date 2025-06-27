@@ -8,7 +8,6 @@ import {
 import { useForm } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
-import { zodValidator } from '@tanstack/zod-form-adapter';
 
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -52,7 +51,6 @@ function Signup() {
       username: '',
       password: '',
     },
-    validatorAdapter: zodValidator(),
     validators: {
       onChange: loginSchema,
     },
@@ -68,7 +66,7 @@ function Signup() {
           toast.error('Signup failed', { description: res.error });
         }
         form.setErrorMap({
-          onSubmit: res.isFormError ? res.error : 'Unexpected error',
+          onSubmit: (res.isFormError ? res.error : 'Unexpected error') as any,
         });
       }
     },
@@ -127,9 +125,9 @@ function Signup() {
               <form.Subscribe
                 selector={(state) => [state.errorMap]}
                 children={([errorMap]) =>
-                  errorMap.onSubmit ? (
+                  (errorMap as any).onSubmit ? (
                     <p className='text-[0.8rem] font-medium text-destructive'>
-                      {errorMap.onSubmit?.toString()}
+                      {String((errorMap as any).onSubmit)}
                     </p>
                   ) : null
                 }
