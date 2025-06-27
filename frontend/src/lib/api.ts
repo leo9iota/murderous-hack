@@ -37,6 +37,7 @@ export const postSignup = async (username: string, password: string) => {
             const result = await res.json();
             return {
                 success: true,
+                message: 'Signup successful',
                 data: { username: result.user.name },
             } as SuccessResponse;
         }
@@ -74,6 +75,7 @@ export const postLogin = async (username: string, password: string) => {
             const result = await res.json();
             return {
                 success: true,
+                message: 'Login successful',
                 data: { username: result.user.name },
             } as SuccessResponse;
         }
