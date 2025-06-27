@@ -33,6 +33,14 @@ function Submit() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const navigate = useNavigate();
+
+  // Note: we purposefully avoid generic parameters for `useForm` because
+  // TanStack's generic list is extensive (10 params) and providing only the
+  // value-type causes a compiler error. If stricter typing is desired, extract
+  // a `FormOpts` via `formOptions()` helper and share between server/client –
+  // that's TanStack's recommended path. For now we rely on the validator for
+  // runtime safety.
+
   const form = useForm({
     defaultValues: {
       title: '',
@@ -40,8 +48,9 @@ function Submit() {
       url: '',
     },
     validators: {
-      onChange: createPostSchema,
+      onChange: createPostSchema as any,
     },
+    
     onSubmit: async ({ value }) => {
       const res = await postSubmit(value.title, value.url, value.content);
       if (res.success) {
