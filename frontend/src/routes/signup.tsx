@@ -77,9 +77,9 @@ function Signup() {
     <div className='w-full'>
       <Card className='mx-auto mt-12 max-w-sm border-border/25'>
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
             form.handleSubmit();
           }}
         >
@@ -101,7 +101,7 @@ function Signup() {
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                     />
                     <FieldInfo field={field} />
                   </div>
@@ -118,7 +118,7 @@ function Signup() {
                       name={field.name}
                       value={field.state.value}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(event) => field.handleChange(event.target.value)}
                     />
                     <FieldInfo field={field} />
                   </div>
