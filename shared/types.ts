@@ -31,15 +31,20 @@ export const loginSchema = z.object({
         .max(255, { message: 'Password is too long.' }),
 });
 
-export const createPostSchema = insertPostSchema
-    .pick({
-        title: true,
-        url: true,
-        content: true,
+export const createPostSchema = z
+    .object({
+        title: z
+            .string()
+            .min(3, { message: 'Title must be at least 3 characters long' }),
+        url: z.preprocess(
+            (val: unknown) => (val === '' ? undefined : val),
+            z.string().trim().url({ message: 'URL must be a valid URL' }).optional(),
+        ),
+        content: z.string().optional(),
     })
-    .refine((data) => data.url || data.content, {
+    .refine((data: { url?: string; content?: string }) => !!data.url || !!data.content, {
         message: 'Either URL or content must be provided',
-        path: ['url', 'content'],
+        path: ['url'],
     });
 
 export const sortBySchema = z.enum(['points', 'recent']);
