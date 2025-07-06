@@ -164,13 +164,23 @@ export async function upvotePost(id: string) {
 
 export const postSubmit = async (title: string, url: string, content: string) => {
     try {
-        const res = await client.posts.$post({
-            json: {
+        console.log('Submitting post with data:', { title, url, content });
+
+        // Temporary: Use manual fetch instead of Hono client
+        const res = await fetch('/api/posts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
                 title,
                 url,
                 content,
-            },
+            }),
         });
+
+        console.log('Response status:', res.status);
         if (res.ok) {
             const data = await res.json();
             return data;

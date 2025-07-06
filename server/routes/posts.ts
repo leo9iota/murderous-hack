@@ -25,7 +25,9 @@ import { getISOFormatDateQuery } from '@/lib/utils';
 
 export const postRouter = new Hono<Context>()
     .post('/', requireAuth, zValidator('json', createPostSchema), async (c) => {
+        console.log('Post creation endpoint hit');
         const { title, url, content } = c.req.valid('json');
+        console.log('Validated data:', { title, url, content });
         const user = c.get('user')!;
         const [post] = await db
             .insert(posts)
