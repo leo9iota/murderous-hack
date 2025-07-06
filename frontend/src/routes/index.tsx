@@ -75,7 +75,7 @@ function HomeComponent() {
   const upvoteMutation = useUpvotePost();
   return (
     <div className='mx-auto max-w-3xl p-4'>
-      <h1 className='mb-6 text-2xl font-bold text-foreground'>Submissions</h1>
+      <h1 className='mb-6 text-2xl font-bold text-foreground'>Posts</h1>
       <SortButton sortBy={sortBy} order={order} />
       <div className='space-y-4'>
         {data?.pages.map((page) =>
