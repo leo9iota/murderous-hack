@@ -49,7 +49,7 @@ app.get(
 );
 
 // Serve the OpenAPI spec file
-app.get('/api-spec.json', serveStatic({ path: './docs/api-spec.json' }));
+app.get('/api-spec.json', serveStatic({ path: './docs/api/api-spec.json' }));
 
 const routes = app
     .basePath('/api')
