@@ -165,7 +165,7 @@ export async function upvotePost(id: string) {
 export const postSubmit = async (title: string, url: string, content: string) => {
     try {
         const res = await client.posts.$post({
-            form: {
+            json: {
                 title,
                 url,
                 content,
@@ -275,7 +275,7 @@ export async function postComment(id: number, content: string, isNested?: boolea
     try {
         const res = isNested
             ? await client.comments[':id'].$post({
-                  form: {
+                  json: {
                       content,
                   },
                   param: {
@@ -283,7 +283,7 @@ export async function postComment(id: number, content: string, isNested?: boolea
                   },
               })
             : await client.posts[':id'].comment.$post({
-                  form: {
+                  json: {
                       content,
                   },
                   param: {

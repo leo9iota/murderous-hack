@@ -24,8 +24,8 @@ import {
 import { getISOFormatDateQuery } from '@/lib/utils';
 
 export const postRouter = new Hono<Context>()
-    .post('/', requireAuth, zValidator('form', createPostSchema), async (c) => {
-        const { title, url, content } = c.req.valid('form');
+    .post('/', requireAuth, zValidator('json', createPostSchema), async (c) => {
+        const { title, url, content } = c.req.valid('json');
         const user = c.get('user')!;
         const [post] = await db
             .insert(posts)
@@ -181,10 +181,10 @@ export const postRouter = new Hono<Context>()
         '/:id/comment',
         requireAuth,
         zValidator('param', z.object({ id: z.coerce.number() })),
-        zValidator('form', createCommentSchema),
+        zValidator('json', createCommentSchema),
         async (c) => {
             const { id } = c.req.valid('param');
-            const { content } = c.req.valid('form');
+            const { content } = c.req.valid('json');
             const user = c.get('user')!;
 
             const [comment] = await db.transaction(async (tx) => {

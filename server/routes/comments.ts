@@ -25,10 +25,10 @@ export const commentsRouter = new Hono<Context>()
         '/:id',
         requireAuth,
         zValidator('param', z.object({ id: z.coerce.number() })),
-        zValidator('form', createCommentSchema),
+        zValidator('json', createCommentSchema),
         async (c) => {
             const { id } = c.req.valid('param');
-            const { content } = c.req.valid('form');
+            const { content } = c.req.valid('json');
             const user = c.get('user')!;
 
             const [comment] = await db.transaction(async (tx) => {
