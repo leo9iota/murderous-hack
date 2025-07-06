@@ -29,12 +29,14 @@ export const insertPostSchema = createInsertSchema(posts, {
     title: z
         .string()
         .min(3, { message: 'Title must be at least 3 characters long' }),
-    url: z
-        .string()
-        .trim()
-        .url({ message: 'URL must be valid' })
-        .optional()
-        .or(z.literal('')),
+    url: z.preprocess(
+        (val: unknown) => (val === '' ? undefined : val),
+        z
+            .string()
+            .trim()
+            .url({ message: 'URL must be valid' })
+            .optional(),
+    ),
     content: z.string().optional(),
 });
 
