@@ -1,9 +1,6 @@
 import { relations } from 'drizzle-orm';
 import { integer, pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core';
 
-import { createInsertSchema } from 'drizzle-zod';
-import { z } from 'zod';
-
 import { users } from './auth';
 import { posts } from './posts';
 import { commentUpvotes } from './upvotes';
@@ -46,9 +43,3 @@ export const commentRelations = relations(comments, ({ one, many }) => ({
     }),
     commentUpvotes: many(commentUpvotes, { relationName: 'commentUpvotes' }),
 }));
-
-export const insertCommentsSchema = createInsertSchema(comments, {
-    content: z
-        .string()
-        .min(3, { message: 'Comment must be at least 3 characters long' }),
-});

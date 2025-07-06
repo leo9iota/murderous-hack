@@ -15,6 +15,7 @@ import { z } from 'zod';
 import {
     createCommentSchema,
     createPostSchema,
+    idParamSchema,
     paginationSchema,
     type Comment,
     type PaginatedResponse,
@@ -126,7 +127,7 @@ export const postRouter = new Hono<Context>()
     .post(
         '/:id/upvote',
         requireAuth,
-        zValidator('param', z.object({ id: z.coerce.number() })),
+        zValidator('param', idParamSchema),
         async (c) => {
             const { id } = c.req.valid('param');
             const user = c.get('user')!;
@@ -182,7 +183,7 @@ export const postRouter = new Hono<Context>()
     .post(
         '/:id/comment',
         requireAuth,
-        zValidator('param', z.object({ id: z.coerce.number() })),
+        zValidator('param', idParamSchema),
         zValidator('json', createCommentSchema),
         async (c) => {
             const { id } = c.req.valid('param');
@@ -240,7 +241,7 @@ export const postRouter = new Hono<Context>()
     )
     .get(
         '/:id/comments',
-        zValidator('param', z.object({ id: z.coerce.number() })),
+        zValidator('param', idParamSchema),
         zValidator(
             'query',
             paginationSchema.extend({
@@ -248,125 +249,160 @@ export const postRouter = new Hono<Context>()
             }),
         ),
         async (c) => {
-            const user = c.get('user');
             const { id } = c.req.valid('param');
-            const { limit, page, sortBy, order, includeChildren } =
-                c.req.valid('query');
+            const { limit, page, includeChildren } = c.req.valid('query');
+            const user = c.get('user');
+
             const offset = (page - 1) * limit;
-
-            const [postExists] = await db
-                .select({ exists: sql`1` })
-                .from(posts)
-                .where(eq(posts.id, id))
-                .limit(1);
-
-            if (!postExists) {
-                throw new HTTPException(404, { message: 'Post not found' });
-            }
-
-            const sortByColumn =
-                sortBy === 'points' ? comments.points : comments.createdAt;
-
-            const sortOrder =
-                order === 'desc' ? desc(sortByColumn) : asc(sortByColumn);
-
-            console.log(sortBy, order);
 
             const [count] = await db
                 .select({ count: countDistinct(comments.id) })
                 .from(comments)
-                .where(
-                    and(eq(comments.postId, id), isNull(comments.parentCommentId)),
-                );
+                .where(and(eq(comments.postId, id), isNull(comments.parentCommentId)));
 
-            const commentData = await db.query.comments.findMany({
-                where: and(
-                    eq(comments.postId, id),
-                    isNull(comments.parentCommentId),
-                ),
-                orderBy: sortOrder,
-                limit: limit,
-                offset: offset,
-                with: {
-                    author: {
-                        columns: {
-                            username: true,
-                            id: true,
-                        },
-                    },
-                    commentUpvotes: {
-                        columns: { userId: true },
-                        where: eq(commentUpvotes.userId, user?.id ?? ''),
-                        limit: 1,
-                    },
-                    childComments: {
-                        limit: includeChildren ? 2 : 0,
-                        with: {
-                            author: {
-                                columns: {
-                                    username: true,
-                                    id: true,
-                                },
-                            },
-                            commentUpvotes: {
-                                columns: { userId: true },
-                                where: eq(commentUpvotes.userId, user?.id ?? ''),
-                                limit: 1,
-                            },
-                        },
-                        orderBy: sortOrder,
-                        extras: {
-                            createdAt: getISOFormatDateQuery(comments.createdAt).as(
-                                'created_at',
-                            ),
-                        },
-                    },
-                },
-                extras: {
-                    createdAt: getISOFormatDateQuery(comments.createdAt).as(
-                        'created_at',
+            // Base query for top-level comments
+            const topLevelCommentsQuery = db
+                .select({
+                    id: comments.id,
+                    userId: comments.userId,
+                    postId: comments.postId,
+                    parentCommentId: comments.parentCommentId,
+                    content: comments.content,
+                    createdAt: getISOFormatDateQuery(comments.createdAt),
+                    depth: comments.depth,
+                    commentCount: comments.commentCount,
+                    points: comments.points,
+                    author: sql<{ username: string; id: string }>`
+                    CASE
+                        WHEN COALESCE(${users.name}, ${users.username}) IS NULL OR COALESCE(${users.name}, ${users.username}) = '' THEN
+                            json_build_object('username', '[deleted]', 'id', 'deleted')
+                        ELSE
+                            json_build_object('username', COALESCE(${users.name}, ${users.username}), 'id', ${users.id})
+                    END
+                `,
+                    isUpvoted: user
+                        ? sql<boolean>`CASE WHEN ${commentUpvotes.userId} IS NOT NULL THEN true ELSE false END`
+                        : sql<boolean>`false`,
+                })
+                .from(comments)
+                .leftJoin(users, eq(comments.userId, users.id))
+                .where(
+                    and(
+                        eq(comments.postId, id),
+                        isNull(comments.parentCommentId), // Only fetch top-level comments
                     ),
+                )
+                .orderBy(desc(comments.points))
+                .limit(limit)
+                .offset(offset);
+
+            if (user) {
+                topLevelCommentsQuery.leftJoin(
+                    commentUpvotes,
+                    and(
+                        eq(commentUpvotes.commentId, comments.id),
+                        eq(commentUpvotes.userId, user.id),
+                    ),
+                );
+            }
+
+            const topLevelComments = (await topLevelCommentsQuery) as Comment[];
+
+            if (includeChildren) {
+                const commentIds = topLevelComments.map((comment) => comment.id);
+                if (commentIds.length > 0) {
+                    const childCommentsQuery = db
+                        .select({
+                            id: comments.id,
+                            userId: comments.userId,
+                            postId: comments.postId,
+                            parentCommentId: comments.parentCommentId,
+                            content: comments.content,
+                            createdAt: getISOFormatDateQuery(comments.createdAt),
+                            depth: comments.depth,
+                            commentCount: comments.commentCount,
+                            points: comments.points,
+                            author: sql<{ username: string; id: string }>`
+                            CASE
+                                WHEN COALESCE(${users.name}, ${users.username}) IS NULL OR COALESCE(${users.name}, ${users.username}) = '' THEN
+                                    json_build_object('username', '[deleted]', 'id', 'deleted')
+                                ELSE
+                                    json_build_object('username', COALESCE(${users.name}, ${users.username}), 'id', ${users.id})
+                            END
+                        `,
+                            isUpvoted: user
+                                ? sql<boolean>`CASE WHEN ${commentUpvotes.userId} IS NOT NULL THEN true ELSE false END`
+                                : sql<boolean>`false`,
+                        })
+                        .from(comments)
+                        .leftJoin(users, eq(comments.userId, users.id))
+                        .where(sql`${comments.parentCommentId} IN ${commentIds}`);
+
+                    if (user) {
+                        childCommentsQuery.leftJoin(
+                            commentUpvotes,
+                            and(
+                                eq(commentUpvotes.commentId, comments.id),
+                                eq(commentUpvotes.userId, user.id),
+                            ),
+                        );
+                    }
+                    const childComments = (await childCommentsQuery) as Comment[];
+                    const childCommentMap = childComments.reduce(
+                        (acc, comment) => {
+                            const parentId = comment.parentCommentId;
+                            if (parentId) {
+                                if (!acc[parentId]) {
+                                    acc[parentId] = [];
+                                }
+                                acc[parentId].push(comment);
+                            }
+                            return acc;
+                        },
+                        {} as Record<number, Comment[]>,
+                    );
+
+                    topLevelComments.forEach((comment) => {
+                        comment.childComments = childCommentMap[comment.id] || [];
+                    });
+                }
+            }
+
+            return c.json<PaginatedResponse<Comment[]>>({
+                data: topLevelComments,
+                success: true,
+                message: 'Comments fetched',
+                pagination: {
+                    page,
+                    totalPages: Math.ceil(count.count / limit),
                 },
             });
-
-            return c.json<PaginatedResponse<Comment[]>>(
-                {
-                    success: true,
-                    message: 'Comments fetched',
-                    data: commentData as Comment[],
-                    pagination: {
-                        page,
-                        totalPages: Math.ceil(count.count / limit) as number,
-                    },
-                },
-                200,
-            );
         },
     )
     .get(
         '/:id',
-        zValidator('param', z.object({ id: z.coerce.number() })),
+        zValidator('param', idParamSchema),
         async (c) => {
+            const { id } = c.req.valid('param');
             const user = c.get('user');
 
-            const { id } = c.req.valid('param');
             const postsQuery = db
                 .select({
                     id: posts.id,
                     title: posts.title,
                     url: posts.url,
-                    points: posts.points,
                     content: posts.content,
+                    points: posts.points,
                     createdAt: getISOFormatDateQuery(posts.createdAt),
                     commentCount: posts.commentCount,
                     author: sql<{ username: string; id: string }>`
-                        CASE
-                            WHEN COALESCE(${users.name}, ${users.username}) IS NULL OR COALESCE(${users.name}, ${users.username}) = '' THEN
-                                json_build_object('username', '[deleted]', 'id', 'deleted')
-                            ELSE
-                                json_build_object('username', COALESCE(${users.name}, ${users.username}), 'id', ${users.id})
-                        END
-                    `,
+                    CASE
+                        WHEN COALESCE(${users.name}, ${users.username}) IS NULL OR COALESCE(${users.name}, ${users.username}) = '' THEN
+                            json_build_object('username', '[deleted]', 'id', 'deleted')
+                        ELSE
+                            json_build_object('username', COALESCE(${users.name}, ${users.username}), 'id', ${users.id})
+                    END
+                `,
                     isUpvoted: user
                         ? sql<boolean>`CASE WHEN ${postUpvotes.userId} IS NOT NULL THEN true ELSE false END`
                         : sql<boolean>`false`,
@@ -402,7 +438,7 @@ export const postRouter = new Hono<Context>()
     .delete(
         '/:id',
         requireAuth,
-        zValidator('param', z.object({ id: z.coerce.number() })),
+        zValidator('param', idParamSchema),
         async (c) => {
             const { id } = c.req.valid('param');
             const user = c.get('user')!;

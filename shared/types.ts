@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-import { insertCommentsSchema } from '../server/db/schemas/comments';
-import { insertPostSchema } from '../server/db/schemas/posts';
 import type { ApiRoutes } from '../server/index';
 
 export { type ApiRoutes };
@@ -50,6 +48,10 @@ export const createPostSchema = z
         },
     );
 
+export const idParamSchema = z.object({
+    id: z.coerce.number(),
+});
+
 export const sortBySchema = z.enum(['points', 'recent']);
 export const orderSchema = z.enum(['asc', 'desc']);
 
@@ -65,7 +67,11 @@ export const paginationSchema = z.object({
     site: z.string().optional(),
 });
 
-export const createCommentSchema = insertCommentsSchema.pick({ content: true });
+export const createCommentSchema = z.object({
+    content: z
+        .string()
+        .min(3, { message: 'Comment must be at least 3 characters long' }),
+});
 
 export type Post = {
     id: number;
