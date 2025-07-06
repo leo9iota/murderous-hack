@@ -42,10 +42,13 @@ export const createPostSchema = z
         ),
         content: z.string().optional(),
     })
-    .refine((data: { url?: string; content?: string }) => !!data.url || !!data.content, {
-        message: 'Either URL or content must be provided',
-        path: ['url'],
-    });
+    .refine(
+        (data: { url?: string; content?: string }) => !!data.url || !!data.content,
+        {
+            message: 'Either URL or content must be provided',
+            path: ['url'],
+        },
+    );
 
 export const sortBySchema = z.enum(['points', 'recent']);
 export const orderSchema = z.enum(['asc', 'desc']);

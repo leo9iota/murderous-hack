@@ -41,7 +41,9 @@ export function CommentForm({
                 });
               }
               form.setErrorMap({
-                onSubmit: (data.isFormError ? data.error : 'Unexpected error') as any,
+                onSubmit: (data.isFormError
+                  ? data.error
+                  : 'Unexpected error') as any,
               });
               throw new Error(data.error);
             } else {
