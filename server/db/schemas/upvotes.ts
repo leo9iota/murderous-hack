@@ -26,9 +26,7 @@ export const postUpvotes = pgTable(
             .defaultNow()
             .notNull(),
     },
-    (table) => ({
-        uniqueUserPost: unique().on(table.userId, table.postId),
-    }),
+    (table) => [unique().on(table.userId, table.postId)],
 );
 
 export const postUpvoteRelations = relations(postUpvotes, ({ one }) => ({
