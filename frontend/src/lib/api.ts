@@ -48,10 +48,10 @@ export const postSignup = async (username: string, password: string) => {
             error: result.message || 'Signup failed',
             isFormError: true,
         } as ErrorResponse;
-    } catch (e) {
+    } catch (err) {
         return {
             success: false,
-            error: String(e),
+            error: String(err),
             isFormError: false,
         } as ErrorResponse;
     }
@@ -86,10 +86,10 @@ export const postLogin = async (username: string, password: string) => {
             error: result.message || 'Login failed',
             isFormError: true,
         } as ErrorResponse;
-    } catch (e) {
+    } catch (err) {
         return {
             success: false,
-            error: String(e),
+            error: String(err),
             isFormError: false,
         } as ErrorResponse;
     }
@@ -137,7 +137,7 @@ export const getUser = async () => {
             return result.data?.username || null;
         }
         return null;
-    } catch (e) {
+    } catch (err) {
         return null;
     }
 };
@@ -187,10 +187,10 @@ export const postSubmit = async (title: string, url: string, content: string) =>
         }
         const data = (await res.json()) as unknown as ErrorResponse;
         return data;
-    } catch (e) {
+    } catch (err) {
         return {
             success: false,
-            error: String(e),
+            error: String(err),
             isFormError: false,
         } as ErrorResponse;
     }
@@ -306,10 +306,10 @@ export async function postComment(id: number, content: string, isNested?: boolea
         }
         const data = (await res.json()) as unknown as ErrorResponse;
         return data;
-    } catch (e) {
+    } catch (err) {
         return {
             success: false,
-            error: String(e),
+            error: String(err),
             isFormError: false,
         } as ErrorResponse;
     }
@@ -330,10 +330,10 @@ export async function deletePost(id: number) {
 
         const data = (await res.json()) as unknown as ErrorResponse;
         return data;
-    } catch (e) {
+    } catch (err) {
         return {
             success: false,
-            error: String(e),
+            error: String(err),
             isFormError: false,
         } as ErrorResponse;
     }
@@ -346,10 +346,10 @@ export const postLogout = async () => {
             credentials: 'include',
         });
         return { success: true } as SuccessResponse;
-    } catch (e) {
+    } catch (err) {
         return {
             success: false,
-            error: String(e),
+            error: String(err),
             isFormError: false,
         } as ErrorResponse;
     }
