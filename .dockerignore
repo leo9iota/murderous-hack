@@ -129,30 +129,3 @@
 **/.yarn/build-state.yml
 **/.yarn/install-state.gz
 **/.pnp.*
-
-# flyctl launch added from frontend/.gitignore
-# Local
-frontend/**/.DS_Store
-frontend/**/*.local
-frontend/**/*.log*
-
-# Dist
-frontend/**/node_modules
-frontend/**/dist
-frontend/**/.vinxi
-frontend/**/.output
-frontend/**/.vercel
-frontend/**/.netlify
-frontend/**/.wrangler
-
-# IDE
-frontend/**/.vscode/*
-!frontend/**/.vscode/extensions.json
-frontend/**/.idea
-
-# flyctl launch added from frontend/node_modules/tailwindcss/stubs/.gitignore
-!frontend/node_modules/tailwindcss/stubs/**/*
-
-# flyctl launch added from node_modules/tailwindcss/stubs/.gitignore
-!node_modules/tailwindcss/stubs/**/*
-fly.toml
