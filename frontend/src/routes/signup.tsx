@@ -142,7 +142,7 @@ function Signup() {
               />
             </div>
             <div className='mt-4 text-center text-sm'>
-              Alrerady have an account?{' '}
+              Already have an account?{' '}
               <Link to='/login' className='underline'>
                 Log in
               </Link>
