@@ -65,6 +65,7 @@ export type PaginatedResponse<T> = {
     data: T;
 } & Omit<SuccessResponse, 'data'>;
 
+
 /**
  * Schemas
  * Validation of user input
