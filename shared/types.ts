@@ -54,7 +54,7 @@ export type Comment = {
     childComments?: Comment[];
 };
 
-export type SortBy = z.infer<typeof sortSchema>;
+export type SortBy = z.infer<typeof sortBySchema>;
 export type Order = z.infer<typeof orderSchema>;
 
 export type PaginatedResponse<T> = {
@@ -109,13 +109,13 @@ export const commentSchema = z.object({
         .min(3, { message: 'Comment must be at least 3 characters long' }),
 });
 
-export const sortSchema = z.enum(['points', 'recent']);
+export const sortBySchema = z.enum(['points', 'recent']);
 export const orderSchema = z.enum(['asc', 'desc']);
 
 export const paginationSchema = z.object({
     limit: z.number({ coerce: true }).optional().default(10),
     page: z.number({ coerce: true }).optional().default(1),
-    sortBy: sortSchema.optional().default('points'),
+    sortBy: sortBySchema.optional().default('points'),
     order: orderSchema.optional().default('desc'),
     author: z.optional(z.string()),
     site: z.string().optional(),
