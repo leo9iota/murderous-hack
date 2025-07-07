@@ -12,8 +12,8 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 
 import {
-    createCommentSchema,
-    idParamSchema,
+    commentSchema,
+    paramSchema,
     paginationSchema,
     type Comment,
     type PaginatedResponse,
@@ -25,8 +25,8 @@ export const commentsRouter = new Hono<Context>()
     .post(
         '/:id',
         requireAuth,
-        zValidator('param', idParamSchema),
-        zValidator('json', createCommentSchema),
+        zValidator('param', paramSchema),
+        zValidator('json', commentSchema),
         async (c) => {
             const { id } = c.req.valid('param');
             const { content } = c.req.valid('json');
@@ -110,7 +110,7 @@ export const commentsRouter = new Hono<Context>()
     .post(
         '/:id/upvote',
         requireAuth,
-        zValidator('param', idParamSchema),
+        zValidator('param', paramSchema),
         async (c) => {
             const { id } = c.req.valid('param');
             const user = c.get('user')!;
@@ -174,7 +174,7 @@ export const commentsRouter = new Hono<Context>()
     )
     .get(
         '/:id/comments',
-        zValidator('param', idParamSchema),
+        zValidator('param', paramSchema),
         zValidator('query', paginationSchema),
         async (c) => {
             const user = c.get('user');

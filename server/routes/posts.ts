@@ -13,9 +13,9 @@ import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 
 import {
-    createCommentSchema,
-    createPostSchema,
-    idParamSchema,
+    commentSchema,
+    postSchema,
+    paramSchema,
     paginationSchema,
     type Comment,
     type PaginatedResponse,
@@ -25,7 +25,7 @@ import {
 import { getISOFormatDateQuery } from '@/lib/utils';
 
 export const postRouter = new Hono<Context>()
-    .post('/', requireAuth, zValidator('json', createPostSchema), async (c) => {
+    .post('/', requireAuth, zValidator('json', postSchema), async (c) => {
         console.log('Post creation endpoint hit');
         const { title, url, content } = c.req.valid('json');
         console.log('Validated data:', { title, url, content });
@@ -127,7 +127,7 @@ export const postRouter = new Hono<Context>()
     .post(
         '/:id/upvote',
         requireAuth,
-        zValidator('param', idParamSchema),
+        zValidator('param', paramSchema),
         async (c) => {
             const { id } = c.req.valid('param');
             const user = c.get('user')!;
@@ -183,8 +183,8 @@ export const postRouter = new Hono<Context>()
     .post(
         '/:id/comment',
         requireAuth,
-        zValidator('param', idParamSchema),
-        zValidator('json', createCommentSchema),
+        zValidator('param', paramSchema),
+        zValidator('json', commentSchema),
         async (c) => {
             const { id } = c.req.valid('param');
             const { content } = c.req.valid('json');
@@ -241,7 +241,7 @@ export const postRouter = new Hono<Context>()
     )
     .get(
         '/:id/comments',
-        zValidator('param', idParamSchema),
+        zValidator('param', paramSchema),
         zValidator(
             'query',
             paginationSchema.extend({
@@ -383,7 +383,7 @@ export const postRouter = new Hono<Context>()
             });
         },
     )
-    .get('/:id', zValidator('param', idParamSchema), async (c) => {
+    .get('/:id', zValidator('param', paramSchema), async (c) => {
         const { id } = c.req.valid('param');
         const user = c.get('user');
 
@@ -435,7 +435,7 @@ export const postRouter = new Hono<Context>()
             200,
         );
     })
-    .delete('/:id', requireAuth, zValidator('param', idParamSchema), async (c) => {
+    .delete('/:id', requireAuth, zValidator('param', paramSchema), async (c) => {
         const { id } = c.req.valid('param');
         const user = c.get('user')!;
 

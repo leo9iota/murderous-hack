@@ -4,6 +4,10 @@ import type { ApiRoutes } from '../server/index';
 
 export { type ApiRoutes };
 
+/**
+ * Type definitions
+ * Stuff that the API (server) returns to the user (client).
+ */
 export type SuccessResponse<T = void> = {
     success: true;
     message: string;
@@ -50,6 +54,9 @@ export type Comment = {
     childComments?: Comment[];
 };
 
+export type SortBy = z.infer<typeof sortSchema>;
+export type Order = z.infer<typeof orderSchema>;
+
 export type PaginatedResponse<T> = {
     pagination: {
         page: number;
@@ -58,6 +65,11 @@ export type PaginatedResponse<T> = {
     data: T;
 } & Omit<SuccessResponse, 'data'>;
 
+
+/**
+ * Schemas
+ * Validation of user input
+ */
 export const loginSchema = z.object({
     username: z
         .string()
@@ -72,7 +84,7 @@ export const loginSchema = z.object({
         .max(255, { message: 'Password is too long.' }),
 });
 
-export const createPostSchema = z
+export const postSchema = z
     .object({
         title: z
             .string()
@@ -91,27 +103,24 @@ export const createPostSchema = z
         },
     );
 
-export const idParamSchema = z.object({
-    id: z.coerce.number(),
+export const commentSchema = z.object({
+    content: z
+        .string()
+        .min(3, { message: 'Comment must be at least 3 characters long' }),
 });
 
-export const sortBySchema = z.enum(['points', 'recent']);
+export const sortSchema = z.enum(['points', 'recent']);
 export const orderSchema = z.enum(['asc', 'desc']);
-
-export type SortBy = z.infer<typeof sortBySchema>;
-export type Order = z.infer<typeof orderSchema>;
 
 export const paginationSchema = z.object({
     limit: z.number({ coerce: true }).optional().default(10),
     page: z.number({ coerce: true }).optional().default(1),
-    sortBy: sortBySchema.optional().default('points'),
+    sortBy: sortSchema.optional().default('points'),
     order: orderSchema.optional().default('desc'),
     author: z.optional(z.string()),
     site: z.string().optional(),
 });
 
-export const createCommentSchema = z.object({
-    content: z
-        .string()
-        .min(3, { message: 'Comment must be at least 3 characters long' }),
+export const paramSchema = z.object({
+    id: z.coerce.number(),
 });

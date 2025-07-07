@@ -12,7 +12,7 @@ import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { ChevronDownIcon } from 'lucide-react';
 import { z } from 'zod';
 
-import { orderSchema, sortBySchema } from '@/shared/types';
+import { orderSchema, sortSchema } from '@/shared/types';
 import { getComments, getPost, userQueryOptions } from '@/lib/api';
 import { useUpvoteComment, useUpvotePost } from '@/lib/api-hooks';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,7 +23,7 @@ import { SortButton } from '@/components/SortButton';
 
 const postSearchSchema = z.object({
   id: fallback(z.number(), 0).default(0),
-  sortBy: fallback(sortBySchema, 'points').default('points'),
+  sortBy: fallback(sortSchema, 'points').default('points'),
   order: fallback(orderSchema, 'desc').default('desc'),
 });
 

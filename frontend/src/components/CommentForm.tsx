@@ -2,7 +2,7 @@ import { useForm } from '@tanstack/react-form';
 
 import { toast } from 'sonner';
 
-import { createCommentSchema } from '@/shared/types';
+import { commentSchema } from '@/shared/types';
 import { useCreateComment } from '@/lib/api-hooks';
 import { FieldInfo } from './FieldInfo';
 import { Button } from './ui/button';
@@ -23,7 +23,7 @@ export function CommentForm({
       content: '',
     },
     validators: {
-      onChange: createCommentSchema,
+      onChange: commentSchema,
     },
     onSubmit: async ({ value }) => {
       await createComment.mutateAsync(

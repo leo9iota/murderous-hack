@@ -7,7 +7,7 @@ import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
 
 import { z } from 'zod';
 
-import { orderSchema, sortBySchema } from '@/shared/types';
+import { orderSchema, sortSchema } from '@/shared/types';
 import { getPosts } from '@/lib/api';
 import { useUpvotePost } from '@/lib/api-hooks';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import { Post } from '@/components/Post';
 import { SortButton } from '@/components/SortButton';
 
 const homeSearchSchema = z.object({
-  sortBy: fallback(sortBySchema, 'points').default('recent'),
+  sortBy: fallback(sortSchema, 'points').default('recent'),
   order: fallback(orderSchema, 'desc').default('desc'),
   author: z.optional(fallback(z.string(), '')),
   site: z.optional(fallback(z.string(), '')),
