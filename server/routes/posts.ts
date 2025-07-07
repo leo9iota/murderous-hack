@@ -258,7 +258,9 @@ export const postRouter = new Hono<Context>()
             const [count] = await db
                 .select({ count: countDistinct(comments.id) })
                 .from(comments)
-                .where(and(eq(comments.postId, id), isNull(comments.parentCommentId)));
+                .where(
+                    and(eq(comments.postId, id), isNull(comments.parentCommentId)),
+                );
 
             // Base query for top-level comments
             const topLevelCommentsQuery = db
@@ -306,7 +308,8 @@ export const postRouter = new Hono<Context>()
                 );
             }
 
-            const topLevelComments = (await topLevelCommentsQuery) as Comment[];
+            const topLevelComments =
+                (await topLevelCommentsQuery) as unknown as Comment[];
 
             if (includeChildren) {
                 const commentIds = topLevelComments.map((comment) => comment.id);
@@ -347,7 +350,8 @@ export const postRouter = new Hono<Context>()
                             ),
                         );
                     }
-                    const childComments = (await childCommentsQuery) as Comment[];
+                    const childComments =
+                        (await childCommentsQuery) as unknown as Comment[];
                     const childCommentMap = childComments.reduce(
                         (acc, comment) => {
                             const parentId = comment.parentCommentId;
@@ -379,23 +383,20 @@ export const postRouter = new Hono<Context>()
             });
         },
     )
-    .get(
-        '/:id',
-        zValidator('param', idParamSchema),
-        async (c) => {
-            const { id } = c.req.valid('param');
-            const user = c.get('user');
+    .get('/:id', zValidator('param', idParamSchema), async (c) => {
+        const { id } = c.req.valid('param');
+        const user = c.get('user');
 
-            const postsQuery = db
-                .select({
-                    id: posts.id,
-                    title: posts.title,
-                    url: posts.url,
-                    content: posts.content,
-                    points: posts.points,
-                    createdAt: getISOFormatDateQuery(posts.createdAt),
-                    commentCount: posts.commentCount,
-                    author: sql<{ username: string; id: string }>`
+        const postsQuery = db
+            .select({
+                id: posts.id,
+                title: posts.title,
+                url: posts.url,
+                content: posts.content,
+                points: posts.points,
+                createdAt: getISOFormatDateQuery(posts.createdAt),
+                commentCount: posts.commentCount,
+                author: sql<{ username: string; id: string }>`
                     CASE
                         WHEN COALESCE(${users.name}, ${users.username}) IS NULL OR COALESCE(${users.name}, ${users.username}) = '' THEN
                             json_build_object('username', '[deleted]', 'id', 'deleted')
@@ -403,73 +404,67 @@ export const postRouter = new Hono<Context>()
                             json_build_object('username', COALESCE(${users.name}, ${users.username}), 'id', ${users.id})
                     END
                 `,
-                    isUpvoted: user
-                        ? sql<boolean>`CASE WHEN ${postUpvotes.userId} IS NOT NULL THEN true ELSE false END`
-                        : sql<boolean>`false`,
-                })
-                .from(posts)
-                .leftJoin(users, eq(posts.userId, users.id))
-                .where(eq(posts.id, id));
+                isUpvoted: user
+                    ? sql<boolean>`CASE WHEN ${postUpvotes.userId} IS NOT NULL THEN true ELSE false END`
+                    : sql<boolean>`false`,
+            })
+            .from(posts)
+            .leftJoin(users, eq(posts.userId, users.id))
+            .where(eq(posts.id, id));
 
-            if (user) {
-                postsQuery.leftJoin(
-                    postUpvotes,
-                    and(
-                        eq(postUpvotes.postId, posts.id),
-                        eq(postUpvotes.userId, user.id),
-                    ),
-                );
-            }
-
-            const [post] = await postsQuery;
-            if (!post) {
-                throw new HTTPException(404, { message: 'Post not found' });
-            }
-            return c.json<SuccessResponse<Post>>(
-                {
-                    success: true,
-                    message: 'Post Fetched',
-                    data: post as Post,
-                },
-                200,
+        if (user) {
+            postsQuery.leftJoin(
+                postUpvotes,
+                and(
+                    eq(postUpvotes.postId, posts.id),
+                    eq(postUpvotes.userId, user.id),
+                ),
             );
-        },
-    )
-    .delete(
-        '/:id',
-        requireAuth,
-        zValidator('param', idParamSchema),
-        async (c) => {
-            const { id } = c.req.valid('param');
-            const user = c.get('user')!;
+        }
 
-            // First check if the post exists and belongs to the user
-            const [post] = await db
-                .select({ userId: posts.userId })
-                .from(posts)
-                .where(eq(posts.id, id))
-                .limit(1);
+        const [post] = await postsQuery;
+        if (!post) {
+            throw new HTTPException(404, { message: 'Post not found' });
+        }
+        return c.json<SuccessResponse<Post>>(
+            {
+                success: true,
+                message: 'Post Fetched',
+                data: post as Post,
+            },
+            200,
+        );
+    })
+    .delete('/:id', requireAuth, zValidator('param', idParamSchema), async (c) => {
+        const { id } = c.req.valid('param');
+        const user = c.get('user')!;
 
-            if (!post) {
-                throw new HTTPException(404, { message: 'Post not found' });
-            }
+        // First check if the post exists and belongs to the user
+        const [post] = await db
+            .select({ userId: posts.userId })
+            .from(posts)
+            .where(eq(posts.id, id))
+            .limit(1);
 
-            if (post.userId !== user.id) {
-                throw new HTTPException(403, {
-                    message: 'You can only delete your own posts',
-                });
-            }
+        if (!post) {
+            throw new HTTPException(404, { message: 'Post not found' });
+        }
 
-            // Delete the post (this will cascade delete comments and upvotes if foreign keys are set up)
-            await db.delete(posts).where(eq(posts.id, id));
+        if (post.userId !== user.id) {
+            throw new HTTPException(403, {
+                message: 'You can only delete your own posts',
+            });
+        }
 
-            return c.json<SuccessResponse<null>>(
-                {
-                    success: true,
-                    message: 'Post deleted',
-                    data: null,
-                },
-                200,
-            );
-        },
-    );
+        // Delete the post (this will cascade delete comments and upvotes if foreign keys are set up)
+        await db.delete(posts).where(eq(posts.id, id));
+
+        return c.json<SuccessResponse<null>>(
+            {
+                success: true,
+                message: 'Post deleted',
+                data: null,
+            },
+            200,
+        );
+    });
