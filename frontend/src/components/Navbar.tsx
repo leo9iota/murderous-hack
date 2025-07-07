@@ -7,7 +7,6 @@ import { MenuIcon } from 'lucide-react';
 import { userQueryOptions } from '@/lib/api';
 import { useLogout } from '@/lib/api-hooks';
 import { Button } from './ui/button';
-import AnimatedButton from './AnimatedButton';
 import {
   Sheet,
   SheetContent,
@@ -53,18 +52,24 @@ export function Navbar() {
           {user ? (
             <>
               <span>{user}</span>
-              <AnimatedButton
+              <Button
+                size='sm'
+                variant='secondary'
                 onClick={() => logout()}
+                className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
               >
                 Log out
-              </AnimatedButton>
+              </Button>
             </>
           ) : (
-            <Link to='/login'>
-              <AnimatedButton>
-                Log in
-              </AnimatedButton>
-            </Link>
+            <Button
+              asChild
+              size='sm'
+              variant='secondary'
+              className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
+            >
+              <Link to='/login'>Log in</Link>
+            </Button>
           )}
         </div>
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -108,18 +113,26 @@ export function Navbar() {
               {user ? (
                 <>
                   <span>user: {user}</span>
-                  <AnimatedButton
+                  <Button
+                    size='sm'
+                    variant='secondary'
                     onClick={() => logout()}
+                    className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
                   >
                     Log out
-                  </AnimatedButton>
+                  </Button>
                 </>
               ) : (
-                <Link onClick={() => setIsOpen(false)} to='/login'>
-                  <AnimatedButton>
+                <Button
+                  asChild
+                  size='sm'
+                  variant='secondary'
+                  className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
+                >
+                  <Link onClick={() => setIsOpen(false)} to='/login'>
                     Log in
-                  </AnimatedButton>
-                </Link>
+                  </Link>
+                </Button>
               )}
             </nav>
           </SheetContent>
