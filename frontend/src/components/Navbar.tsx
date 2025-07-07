@@ -68,7 +68,7 @@ export function Navbar() {
               variant='secondary'
               className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
             >
-              <Link to='/login'>Log in</Link>
+              <Link to='/login'>Login</Link>
             </Button>
           )}
         </div>
@@ -130,7 +130,7 @@ export function Navbar() {
                   className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
                 >
                   <Link onClick={() => setIsOpen(false)} to='/login'>
-                    Log in
+                    Login
                   </Link>
                 </Button>
               )}
