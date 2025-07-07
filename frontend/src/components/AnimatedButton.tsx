@@ -1,5 +1,4 @@
 import React, { ButtonHTMLAttributes, ReactNode } from 'react';
-
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -8,17 +7,12 @@ type Props = {
   className?: string;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
-const AnimatedButton = ({
-  children,
-  showArrow = false,
-  className,
-  ...props
-}: Props) => {
+const AnimatedButton = ({ children, showArrow = false, className, ...props }: Props) => {
   return (
     <button
       className={cn(
         'bg-slate-800 no-underline group cursor-pointer relative shadow-2xl shadow-zinc-900 rounded-full p-px text-xs font-semibold leading-6 text-white inline-block',
-        className,
+        className
       )}
       {...props}
     >
