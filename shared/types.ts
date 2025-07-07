@@ -121,6 +121,7 @@ export const paginationSchema = z.object({
     site: z.string().optional(),
 });
 
+// Schema for validating URL params
 export const paramSchema = z.object({
     id: z.coerce.number(),
 });
