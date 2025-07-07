@@ -1,11 +1,15 @@
-import React from 'react'
+import { ButtonHTMLAttributes, ReactNode } from 'react';
 
-type Props = {}
+type Props = {
+  children: ReactNode;
+} & ButtonHTMLAttributes<HTMLButtonElement>;
 
 const AnimatedButton = (props: Props) => {
   return (
-    <div>AnimatedButton</div>
-  )
-}
+    <div>
+      <button {...props}>Click Me!</button>
+    </div>
+  );
+};
 
-export default AnimatedButton
+export default AnimatedButton;
