@@ -14,9 +14,9 @@ import { z } from 'zod';
 
 import {
     commentSchema,
-    postSchema,
-    paramSchema,
     paginationSchema,
+    paramSchema,
+    postSchema,
     type Comment,
     type PaginatedResponse,
     type Post,

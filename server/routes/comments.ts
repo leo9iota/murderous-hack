@@ -13,8 +13,8 @@ import { z } from 'zod';
 
 import {
     commentSchema,
-    paramSchema,
     paginationSchema,
+    paramSchema,
     type Comment,
     type PaginatedResponse,
     type SuccessResponse,
