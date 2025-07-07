@@ -22,7 +22,7 @@ export function Navbar() {
   const { mutate: logout } = useLogout();
 
   return (
-    <header className='bg-mh-primary/95 supports-backdrop-filter:bg-mh-primary/90 sticky top-0 z-50 w-full border-border/40 backdrop-blur-sm'>
+    <header className='bg-mh-primary sticky top-0 z-50 w-full border-border/40 backdrop-blur-sm'>
       <div className='container mx-auto flex items-center justify-between p-4'>
         <div className='flex items-center space-x-4'>
           <Link to='/' className='flex items-center'>
