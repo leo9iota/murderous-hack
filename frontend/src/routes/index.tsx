@@ -90,6 +90,7 @@ function HomeComponent() {
       </div>
       <div className='mt-6'>
         <Button
+          size='sm'
           onClick={() => fetchNextPage()}
           disabled={!hasNextPage || isFetchingNextPage}
         >
