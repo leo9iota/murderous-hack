@@ -84,7 +84,7 @@ function Signup() {
           <CardHeader>
             <CardTitle className='text-center text-2xl'>Signup</CardTitle>
             <CardDescription>
-              Enter your details below to create an account
+              Enter your username and password to sign up
             </CardDescription>
           </CardHeader>
           <CardContent>

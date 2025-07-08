@@ -87,7 +87,7 @@ function Login() {
           <CardHeader>
             <CardTitle className='text-center text-2xl'>Login</CardTitle>
             <CardDescription>
-              Enter your username and password to login
+              Enter your username and password to log in
             </CardDescription>
           </CardHeader>
           <CardContent>
