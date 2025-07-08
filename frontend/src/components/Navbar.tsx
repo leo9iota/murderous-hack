@@ -28,6 +28,11 @@ export function Navbar() {
           <Link to='/' className='flex items-center'>
             <img src='/logo.svg' alt='Murderous Hack' className='size-10' />
           </Link>
+          <div>
+            <h1>
+              Murderous Hack
+            </h1>
+          </div>
           <nav className='hidden items-center space-x-4 md:flex'>
             <Link
               to={'/'}
@@ -58,7 +63,7 @@ export function Navbar() {
                 onClick={() => logout()}
                 className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
               >
-                Log out
+                Logout
               </Button>
             </>
           ) : (
@@ -119,7 +124,7 @@ export function Navbar() {
                     onClick={() => logout()}
                     className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
                   >
-                    Log out
+                    Logout
                   </Button>
                 </>
               ) : (
