@@ -2,7 +2,7 @@
 
 **Murderous Hack** is a forum for discussing tech related topics.
 
-> **Quote**: A teacher once said: "Das ist ein mörderischer Häck"
+>**Quote**: A teacher once said: "Das ist ein mörderischer Häck"
 
 ## Tech Stack
 
@@ -10,8 +10,7 @@
 
 ## Quick Start
 
->[!info]+
->You must have [Bun](https://bun.com/docs/installation) installed before being able to run the following commands.
+>**Prerequisites**: You must have [Bun](https://bun.com/docs/installation) installed.
 
 1. Setup development environment on new machine.
 
