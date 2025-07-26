@@ -10,11 +10,11 @@
 
 ## Architecture
 
-![Architecture](./assets/images/murderous-hack-architecture.png)
+![Architecture](./docs/images/murderous-hack-architecture.png)
 
 ## Auth
 
-![Auth](./assets/images/murderous-hack-auth.png)
+![Auth](./docs/images/murderous-hack-auth.png)
 
 ## Key Features
 
