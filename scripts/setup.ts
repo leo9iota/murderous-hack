@@ -1,21 +1,50 @@
-import { $ } from 'bun';
+// Setup script that can run without dependencies installed
+// Uses Bun's built-in APIs first, then imports typed shell after dependencies are installed
+
+async function runCommand(cmd: string, cwd?: string): Promise<void> {
+    const proc = Bun.spawn(cmd.split(' '), {
+        cwd: cwd || process.cwd(),
+        stdout: 'inherit',
+        stderr: 'inherit',
+    });
+    const exitCode = await proc.exited;
+    if (exitCode !== 0) {
+        throw new Error(`Command failed with exit code ${exitCode}: ${cmd}`);
+    }
+}
+
+async function fileExists(path: string): Promise<boolean> {
+    try {
+        return await Bun.file(path).exists();
+    } catch {
+        return false;
+    }
+}
 
 (async () => {
     try {
+        console.log('🚀 Setting up Murderous Hack development environment...');
+
         console.log('🆗 Creating .env file...');
-        try {
-            await $`test -f .env`;
+        if (await fileExists('.env')) {
             console.log('⚠️ .env already exists');
-        } catch {
-            await $`cp .env.example .env`;
+        } else if (await fileExists('.env.example')) {
+            await runCommand('cp .env.example .env');
             console.log('🆗 .env created from .env.example');
+        } else {
+            console.log(
+                '⚠️ No .env.example found, you may need to create .env manually',
+            );
         }
 
         console.log('🆗 Installing root dependencies...');
-        await $`bun install`;
+        await runCommand('bun install');
 
         console.log('🆗 Installing frontend dependencies...');
-        await $`cd frontend && bun install`;
+        await runCommand('bun install', 'frontend');
+
+        // Now we can import the typed shell API since dependencies are installed
+        const { $ } = await import('bun');
 
         console.log('🆗 Stopping existing containers...');
         await $`docker compose down`;
@@ -34,14 +63,13 @@ import { $ } from 'bun';
             throw error;
         }
 
-        console.log('✅ Setup complete!');
-        console.log('');
-        console.log('💡 Next steps:');
-        console.log('$ bun run dev');
-        console.log('$ cd frontend && bun run dev');
-        console.log('');
-        console.log('💡 Or use the start script:');
-        console.log('$ bun run start');
+        console.log('✅ Setup complete!\n');
+        console.log('🌐 Development URLs:');
+        console.log('✨ Frontend:   http://localhost:3001');
+        console.log('✨ Backend:    http://localhost:3000');
+        console.log('✨ API Docs:   http://localhost:3000/docs\n');
+        console.log('💡 Start development with the following command:');
+        console.log('$ bun start');
     } catch (error) {
         console.error('❌ Setup failed:', error);
         process.exit(1);
