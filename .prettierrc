@@ -8,28 +8,28 @@
             "files": "*.js",
             "options": {
                 "tabWidth": 4,
-                "printWidth": 85
+                "printWidth": 100
             }
         },
         {
             "files": "*.ts",
             "options": {
                 "tabWidth": 4,
-                "printWidth": 85
+                "printWidth": 100
             }
         },
         {
             "files": "*.jsx",
             "options": {
                 "tabWidth": 2,
-                "printWidth": 85
+                "printWidth": 100
             }
         },
         {
             "files": "*.tsx",
             "options": {
                 "tabWidth": 2,
-                "printWidth": 85
+                "printWidth": 100
             }
         },
         {
