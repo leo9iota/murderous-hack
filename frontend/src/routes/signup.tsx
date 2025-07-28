@@ -26,11 +26,13 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import { FieldInfo } from '@/components/FieldInfo';
 
 const signupSearchSchema = z.object({
   redirect: fallback(z.string(), '/').default('/'),
 });
+
 export const Route = createFileRoute('/signup')({
   component: () => <Signup />,
   validateSearch: zodSearchValidator(signupSearchSchema),
@@ -77,13 +79,14 @@ function Signup() {
         const errorMessage = err?.message || 'Signup failed';
         toast.error('Signup failed', { description: errorMessage });
         form.setErrorMap({
-          onSubmit: errorMessage,
+          onSubmit: errorMessage as any,
         });
       } finally {
         setIsPending(false);
       }
     },
   });
+
   return (
     <div className='w-full'>
       <Card className='mx-auto mt-12 max-w-sm border-border/25'>
@@ -113,6 +116,9 @@ function Signup() {
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(event) => field.handleChange(event.target.value)}
+                      autoFocus
+                      autoComplete="username"
+                      disabled={isPending}
                     />
                     <FieldInfo field={field} />
                   </div>
@@ -130,6 +136,8 @@ function Signup() {
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChange={(event) => field.handleChange(event.target.value)}
+                      autoComplete="new-password"
+                      disabled={isPending}
                     />
                     <FieldInfo field={field} />
                   </div>
@@ -137,19 +145,31 @@ function Signup() {
               />
               <form.Subscribe
                 selector={(state) => [state.errorMap]}
-                children={([errorMap]) =>
-                  (errorMap as any).onSubmit ? (
+                children={([errorMap]) => {
+                  const submitError = errorMap?.onSubmit;
+                  return submitError ? (
                     <p className='text-[0.8rem] font-medium text-destructive'>
-                      {String((errorMap as any).onSubmit)}
+                      {String(submitError)}
                     </p>
-                  ) : null
-                }
+                  ) : null;
+                }}
               />
               <form.Subscribe
                 selector={(state) => [state.canSubmit]}
                 children={([canSubmit]) => (
-                  <Button type='submit' disabled={!canSubmit || isPending} className='w-full'>
-                    {isPending ? '...' : 'Signup'}
+                  <Button 
+                    type='submit' 
+                    disabled={!canSubmit || isPending} 
+                    className='w-full'
+                  >
+                    {isPending ? (
+                      <div className="flex items-center gap-2">
+                        <Spinner size="sm" />
+                        Creating account...
+                      </div>
+                    ) : (
+                      'Signup'
+                    )}
                   </Button>
                 )}
               />
