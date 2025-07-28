@@ -11,8 +11,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { Check, X } from 'lucide-react';
 
-import { loginSchema } from '@/shared/types';
+import { signupSchema } from '@/shared/types';
 import { postSignup, userQueryOptions } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import {
@@ -54,9 +55,10 @@ function Signup() {
     defaultValues: {
       username: '',
       password: '',
+      confirmPassword: '',
     },
     validators: {
-      onChange: loginSchema,
+      onChange: signupSchema,
     },
     onSubmit: async ({ value }) => {
       setIsPending(true);
@@ -123,7 +125,9 @@ function Signup() {
                       autoComplete="username"
                       disabled={isPending}
                     />
-                    <FieldInfo field={field} />
+                    <div className="min-h-[0.75rem]">
+                      <FieldInfo field={field} />
+                    </div>
                   </div>
                 )}
               />
@@ -142,19 +146,80 @@ function Signup() {
                       autoComplete="new-password"
                       disabled={isPending}
                     />
-                    <FieldInfo field={field} />
+                    <div className="min-h-[0.75rem]">
+                      <FieldInfo field={field} />
+                    </div>
                   </div>
                 )}
+              />
+              <form.Field
+                name='confirmPassword'
+                children={(field) => {
+                  const passwordValue = form.getFieldValue('password');
+                  const confirmValue = field.state.value;
+                  const showIcon = passwordValue && confirmValue;
+                  const isMatch = passwordValue === confirmValue;
+                  const shouldShowField = passwordValue && passwordValue.length >= 3;
+                  
+                  return (
+                    <div 
+                      className={`overflow-hidden transition-all duration-500 ease-out ${
+                        shouldShowField 
+                          ? 'max-h-96 opacity-100' 
+                          : 'max-h-0 opacity-0'
+                      }`}
+                    >
+                      <div className='grid gap-2'>
+                        <Label htmlFor={field.name}>Confirm Password</Label>
+                        <div className='relative'>
+                          <Input
+                            type='password'
+                            id={field.name}
+                            name={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(event) => field.handleChange(event.target.value)}
+                            autoComplete="new-password"
+                            disabled={isPending || !shouldShowField}
+                            className={showIcon ? 'pr-10' : ''}
+                          />
+                          {showIcon && (
+                            <div 
+                              className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ease-in-out animate-in fade-in zoom-in-50 ${
+                                isMatch 
+                                  ? 'text-green-500' 
+                                  : 'text-red-500'
+                              }`}
+                            >
+                              {isMatch ? (
+                                <Check className="h-4 w-4" />
+                              ) : (
+                                <X className="h-4 w-4" />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-h-[0.75rem]">
+                          {shouldShowField && <FieldInfo field={field} />}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }}
               />
               <form.Subscribe
                 selector={(state) => [state.errorMap]}
                 children={([errorMap]) => {
                   const submitError = errorMap?.onSubmit;
-                  return submitError ? (
-                    <p className='text-[0.8rem] font-medium text-destructive'>
-                      {String(submitError)}
-                    </p>
-                  ) : null;
+                  return (
+                    <div className="min-h-[0.75rem]">
+                      {submitError ? (
+                        <p className='text-[0.8rem] font-medium text-destructive'>
+                          {typeof submitError === 'string' ? submitError : 'An error occurred'}
+                        </p>
+                      ) : null}
+                    </div>
+                  );
                 }}
               />
               <form.Subscribe
@@ -186,6 +251,7 @@ function Signup() {
           </CardContent>
         </form>
       </Card>
+
     </div>
   );
 }

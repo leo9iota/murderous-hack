@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { MenuIcon } from 'lucide-react';
 
-import { signOut } from '@/lib/auth-client';
 import { userQueryOptions } from '@/lib/api';
+import { useLogout } from '@/lib/api-hooks';
 import { Button } from './ui/button';
 import {
   Sheet,
@@ -19,13 +19,10 @@ import {
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useQuery(userQueryOptions());
-  const queryClient = useQueryClient();
+  const logout = useLogout();
 
-  const handleLogout = async () => {
-    await signOut();
-    queryClient.setQueryData(['user'], null);
-    queryClient.invalidateQueries({ queryKey: ['posts'] });
-    window.location.href = '/';
+  const handleLogout = () => {
+    logout.mutate();
   };
 
   return (
