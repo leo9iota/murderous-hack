@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { loginSchema } from '@/shared/types';
+import { signIn } from '@/lib/auth-client';
 import { postLogin, userQueryOptions } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import {

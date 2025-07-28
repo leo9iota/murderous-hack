@@ -13,8 +13,9 @@ import { ChevronDownIcon } from 'lucide-react';
 import { z } from 'zod';
 
 import { orderSchema, sortBySchema } from '@/shared/types';
-import { getComments, getPost, userQueryOptions } from '@/lib/api';
+import { getComments, getPost } from '@/lib/api';
 import { useUpvoteComment, useUpvotePost } from '@/lib/api-hooks';
+import { userQueryOptions } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Comment } from '@/components/Comment';
 import { CommentForm } from '@/components/CommentForm';
@@ -36,11 +37,7 @@ const postQueryOptions = (id: number) =>
     throwOnError: true,
   });
 
-const commentsInfiniteQueryOptions = ({
-  id,
-  sortBy,
-  order,
-}: z.infer<typeof postSearchSchema>) =>
+const commentsInfiniteQueryOptions = ({ id, sortBy, order }: z.infer<typeof postSearchSchema>) =>
   infiniteQueryOptions({
     queryKey: ['comments', 'post', id, sortBy, order],
     queryFn: ({ pageParam }) =>
@@ -90,12 +87,7 @@ function Post() {
 
   return (
     <div className='mx-auto max-w-3xl'>
-      {data && (
-        <PostComponent
-          post={data.data}
-          onUpvote={() => upvotePost.mutate(id.toString())}
-        />
-      )}
+      {data && <PostComponent post={data.data} onUpvote={() => upvotePost.mutate(id.toString())} />}
       <div className='mb-4 mt-8'>
         {comments && comments.pages[0].data.length > 0 && (
           <h2 className='mb-2 text-lg font-semibold text-foreground'>Comments</h2>

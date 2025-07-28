@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 
 import { Comment as CommentType } from '@/shared/types';
-import { getCommentComments, userQueryOptions } from '@/lib/api';
+import { getCommentComments } from '@/lib/api';
+import { userQueryOptions } from '@/lib/api';
 import { useUpvoteComment } from '@/lib/api-hooks';
 import { cn, relativeTime } from '@/lib/utils';
 import { CommentForm } from './CommentForm';
@@ -123,7 +124,7 @@ export function Comment({
           <>
             <p className='mb-2 text-sm text-foreground'>{comment.content}</p>
             <div className='flex items-center space-x-1 text-xs text-muted-foreground'>
-              {user && (
+                             {user && (
                 <button
                   className='flex items-center space-x-1 hover:text-foreground'
                   onClick={() => setActiveReplyId(isReplying ? null : comment.id)}

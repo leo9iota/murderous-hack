@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { MenuIcon } from 'lucide-react';
 
+import { signOut } from '@/lib/auth-client';
 import { userQueryOptions } from '@/lib/api';
-import { useLogout } from '@/lib/api-hooks';
 import { Button } from './ui/button';
 import {
   Sheet,
@@ -19,7 +19,14 @@ import {
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { data: user } = useQuery(userQueryOptions());
-  const { mutate: logout } = useLogout();
+  const queryClient = useQueryClient();
+
+  const handleLogout = async () => {
+    await signOut();
+    queryClient.setQueryData(['user'], null);
+    queryClient.invalidateQueries({ queryKey: ['posts'] });
+    window.location.href = '/';
+  };
 
   return (
     <header className='bg-mh-primary sticky top-0 z-50 w-full border-border/40 backdrop-blur-sm'>
@@ -60,7 +67,7 @@ export function Navbar() {
               <Button
                 size='sm'
                 variant='secondary'
-                onClick={() => logout()}
+                onClick={handleLogout}
                 className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
               >
                 Logout
@@ -121,7 +128,7 @@ export function Navbar() {
                   <Button
                     size='sm'
                     variant='secondary'
-                    onClick={() => logout()}
+                    onClick={handleLogout}
                     className='bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70'
                   >
                     Logout

@@ -1,5 +1,6 @@
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createAuthClient } from 'better-auth/react';
 
 import ReactDOM from 'react-dom/client';
 
@@ -13,6 +14,12 @@ import { ErrorInfo } from './components/ErrorInfo';
 import { NotFound } from './components/NotFound';
 
 const queryClient = new QueryClient();
+
+// Create Better Auth client
+const authClient = createAuthClient({
+  baseURL: 'http://localhost:3000/api/auth',
+});
+
 // Set up a Router instance
 const router = createRouter({
   routeTree,
@@ -29,7 +36,7 @@ const router = createRouter({
   defaultErrorComponent: ({ error }) => <ErrorInfo error={error} />,
 });
 
-// Register things for typesafety
+// Register things for type safety
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router;

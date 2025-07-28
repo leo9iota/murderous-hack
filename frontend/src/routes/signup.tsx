@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   createFileRoute,
   Link,
@@ -8,12 +9,13 @@ import {
 import { useForm } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { signUp } from '@/lib/auth-client';
 
 import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { loginSchema } from '@/shared/types';
-import { postSignup, userQueryOptions } from '@/lib/api';
+import { userQueryOptions } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -45,6 +47,8 @@ function Signup() {
   const navigate = useNavigate();
   const router = useRouter();
   const queryClient = useQueryClient();
+  
+  const [isPending, setIsPending] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -55,19 +59,28 @@ function Signup() {
       onChange: loginSchema,
     },
     onSubmit: async ({ value }) => {
-      const res = await postSignup(value.username, value.password);
-      if (res.success) {
-        await queryClient.invalidateQueries({ queryKey: ['user'] });
+      setIsPending(true);
+      try {
+        const result = await signUp.email({
+          email: `${value.username}@murderoushack.local`,
+          password: value.password,
+          name: value.username,
+        });
+        
+        if (result.error) {
+          throw new Error(result.error.message);
+        }
+        
         router.invalidate();
         await navigate({ to: search.redirect });
-        return null;
-      } else {
-        if (!res.isFormError) {
-          toast.error('Signup failed', { description: res.error });
-        }
+      } catch (err: any) {
+        const errorMessage = err?.message || 'Signup failed';
+        toast.error('Signup failed', { description: errorMessage });
         form.setErrorMap({
-          onSubmit: (res.isFormError ? res.error : 'Unexpected error') as any,
+          onSubmit: errorMessage,
         });
+      } finally {
+        setIsPending(false);
       }
     },
   });
@@ -133,10 +146,10 @@ function Signup() {
                 }
               />
               <form.Subscribe
-                selector={(state) => [state.canSubmit, state.isSubmitting]}
-                children={([canSubmit, isSubmitting]) => (
-                  <Button type='submit' disabled={!canSubmit} className='w-full'>
-                    {isSubmitting ? '...' : 'Signup'}
+                selector={(state) => [state.canSubmit]}
+                children={([canSubmit]) => (
+                  <Button type='submit' disabled={!canSubmit || isPending} className='w-full'>
+                    {isPending ? '...' : 'Signup'}
                   </Button>
                 )}
               />
