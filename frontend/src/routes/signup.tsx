@@ -9,13 +9,11 @@ import {
 import { useForm } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { fallback, zodSearchValidator } from '@tanstack/router-zod-adapter';
-import { signUp } from '@/lib/auth-client';
-
 import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { loginSchema } from '@/shared/types';
-import { userQueryOptions } from '@/lib/api';
+import { postSignup, userQueryOptions } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -63,23 +61,28 @@ function Signup() {
     onSubmit: async ({ value }) => {
       setIsPending(true);
       try {
-        const result = await signUp.email({
-          email: `${value.username}@murderoushack.local`,
-          password: value.password,
-          name: value.username,
-        });
+        const res = await postSignup(value.username, value.password);
         
-        if (result.error) {
-          throw new Error(result.error.message);
+        if (res.success) {
+          await queryClient.invalidateQueries({ queryKey: ['user'] });
+          router.invalidate();
+          await navigate({ to: search.redirect });
+          return null;
+        } else {
+          if (!res.isFormError) {
+            toast.error('Signup failed', { description: res.error });
+          }
+
+          form.setErrorMap({
+            onSubmit: (res.isFormError ? res.error : 'Unexpected error') as any,
+          });
         }
-        
-        router.invalidate();
-        await navigate({ to: search.redirect });
-      } catch (err: any) {
-        const errorMessage = err?.message || 'Signup failed';
-        toast.error('Signup failed', { description: errorMessage });
+      } catch (error) {
+        toast.error('Signup failed', { 
+          description: 'An unexpected error occurred. Please try again.' 
+        });
         form.setErrorMap({
-          onSubmit: errorMessage as any,
+          onSubmit: 'An unexpected error occurred. Please try again.' as any,
         });
       } finally {
         setIsPending(false);
