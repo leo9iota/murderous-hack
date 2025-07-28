@@ -83,6 +83,26 @@ export const loginSchema = z.object({
         .max(255, { message: 'Password is too long.' }),
 });
 
+export const signupSchema = z.object({
+    username: z
+        .string()
+        .min(3, { message: 'Username must be at least 3 characters long.' })
+        .max(31, { message: 'Username must be no longer than 31 characters.' })
+        .regex(/^[a-zA-Z0-9_]+$/, {
+            message: 'Username can contain only letters, numbers and underscores.',
+        }),
+    password: z
+        .string()
+        .min(8, { message: 'Password must be at least 8 characters long.' })
+        .max(255, { message: 'Password is too long.' }),
+    confirmPassword: z
+        .string()
+        .min(1, { message: 'Please confirm your password.' }),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+});
+
 export const postSchema = z
     .object({
         title: z
